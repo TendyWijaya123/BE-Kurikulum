@@ -47,6 +47,7 @@ Route::middleware(['auth:api'])->group(function () {
     /* --------------------------------------Jurusan API--------------------------------------------------- */
     Route::get('jurusans', [JurusanController::class, 'index']);
     Route::get('jurusans/dropdown', [JurusanController::class, 'dropdown']);
+    Route::get('jurusans/dropdown', [JurusanController::class, 'dropdown']);
     Route::post('jurusans', [JurusanController::class, 'store']);
     Route::get('jurusans/{id}', [JurusanController::class, 'show']);
     Route::put('jurusans/{id}', [JurusanController::class, 'update']);
@@ -63,7 +64,6 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/bench-kurikulums', [BenchKurikulumsController::class, 'store']);
     Route::delete('/bench-kurikulums/{id}', [BenchKurikulumsController::class, 'destroy']);
     Route::delete('/bench-kurikulums', [BenchKurikulumsController::class, 'destroyBenchKurikulums']);
-
 
     /* --------------------------------------Vmt Jurusan API--------------------------------------------------- */
     Route::post('/vmt-jurusans', [VmtJurusanController::class, 'firstOrCreate']);
