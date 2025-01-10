@@ -37,6 +37,11 @@ class Kurikulum extends Model
         'is_active' => 'boolean',
     ];
 
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
     /**
      * Get the Prodi associated with the Kurikulum.
      */
@@ -55,6 +60,15 @@ class Kurikulum extends Model
         return $this->hasMany(BenchKurikulum::class);
     }
 
+    public function vmtJurusans()
+    {
+        return $this->hasMany(VmtJurusan::class);
+    }
+
+    public function vmtPolbans()
+    {
+        return $this->hasMany(VmtPolban::class);
+    }
 
     protected static function boot()
     {
@@ -64,6 +78,7 @@ class Kurikulum extends Model
             if ($model->is_active) {
                 static::where('prodi_id', $model->prodi_id)
                     ->where('id', '!=', $model->id)
+                    ->where('is_active', true)
                     ->update(['is_active' => false]);
             }
         });

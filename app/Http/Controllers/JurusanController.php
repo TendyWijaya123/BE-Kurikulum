@@ -93,4 +93,15 @@ class JurusanController extends Controller
             'message' => 'Jurusan deleted successfully.',
         ], 200);
     }
+
+    public function dropdown()
+    {
+        $dropdownData = Jurusan::query()
+            ->select('id', 'nama')
+            ->get();
+
+        return response()->json([
+            'data' => $dropdownData,
+        ], 200);
+    }
 }
