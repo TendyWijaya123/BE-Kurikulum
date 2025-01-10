@@ -33,6 +33,7 @@ class AuthController extends Controller
 
         $customClaims = [
             'permissions' => $permissions,
+            'prodiId' => $user->prodi_id,
         ];
 
         $token = JWTAuth::customClaims($customClaims)->attempt($request->only('email', 'password'));

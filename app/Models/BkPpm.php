@@ -22,6 +22,6 @@ class BkPpm extends Model
      */
     public function benchKurikulum()
     {
-        return $this->belongsTo(BenchKurikulum::class, 'bk_id');
+        return $this->belongsTo(BenchKurikulum::class);
     }
 }
