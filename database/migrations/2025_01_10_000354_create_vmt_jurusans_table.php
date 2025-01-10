@@ -11,13 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('prodis', function (Blueprint $table) {
+        Schema::create('vmt_jurusans', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->enum('jenjang', ['D3', 'D4', 'S1', 'S2', 'S3']);
-            $table->string('kode')->unique();
-            $table->foreignId('jurusan_id')->constrained('jurusans')->onDelete('cascade');
+            $table->text('visi_jurusan');
+            $table->text('visi_keilmuan_prodi');
+            $table->foreignId('kurikulum_id')
+                ->constrained('kurikulums')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
             $table->timestamps();
+
+            $table->unique('kurikulum_id');
         });
     }
 
@@ -26,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('prodis');
+        Schema::dropIfExists('vmt_jurusans');
     }
 };

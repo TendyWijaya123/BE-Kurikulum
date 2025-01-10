@@ -11,7 +11,7 @@ class KurikulumController extends Controller
 
     public function index()
     {
-        $kurikulums = Kurikulum::with('prodi')->get();
+        $kurikulums = Kurikulum::query()->with('prodi')->paginate(10);
 
         return response()->json([
             'message' => 'Daftar kurikulum berhasil diambil.',

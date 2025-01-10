@@ -60,6 +60,7 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
+
     public function prodi()
     {
         return $this->belongsTo(Prodi::class);
@@ -75,12 +76,19 @@ class User extends Authenticatable implements JWTSubject
         return $this->role->permissions();
     }
 
+    public function activeKurikulum()
+    {
+        return $this->prodi->kurikulums()
+            ->where('is_active', true)
+            ->orderBy('tahun_awal', 'desc')
+            ->first();
+    }
+
+
     public function hasPermission($permissionName)
     {
-        // Mengambil nama-nama permission dari role terkait user
         $permissions = $this->role->permissions->pluck('name')->toArray();
 
-        // Mengecek apakah permission yang diberikan ada dalam daftar permissions user
         return in_array($permissionName, $permissions);
     }
 }

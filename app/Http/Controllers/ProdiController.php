@@ -23,7 +23,7 @@ class ProdiController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'jenjang' => 'required|in:D3,D4,S1,S2,S3',
-            'kode' => 'required|string|max:50',
+            'kode' => 'required|string|max:50|unique:prodis',
             'jurusan_id' => 'required|exists:jurusans,id',
         ]);
 
@@ -67,7 +67,7 @@ class ProdiController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'jenjang' => 'required|in:D3,D4,S1,S2,S3',
-            'kode' => 'required|string|max:50',
+            'kode' => 'required|string|max:50|unique:prodis',
             'jurusan_id' => 'required|exists:jurusans,id',
         ]);
 

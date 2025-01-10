@@ -18,8 +18,6 @@ return new class extends Migration
             $table->boolean('is_active')->default(false);
             $table->foreignId('prodi_id')->constrained('prodis')->onDelete('cascade');
             $table->timestamps();
-
-            $table->unique(['prodi_id', 'is_active'], 'unique_active_per_prodi');
         });
     }
 
