@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BenchKurikulumsController;
 use App\Http\Controllers\JurusanController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\KurikulumController;
 use App\Http\Controllers\ProdiController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SksuController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
@@ -46,6 +48,19 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('jurusans/{id}', [JurusanController::class, 'show']);
     Route::put('jurusans/{id}', [JurusanController::class, 'update']);
     Route::delete('jurusans/{id}', [JurusanController::class, 'destroy']);
+
+    /* ---------------------------------------SKSU API --------------------------------------------------*/
+    Route::get('sksu', [SksuController::class, 'index']);
+    Route::post('sksu', [SksuController::class, 'store']);
+    Route::delete('sksu/{id}', [SksuController::class, 'destroy']);
+    Route::delete('sksu', [SksuController::class, 'destroySksus']);
+
+    /* ---------------------------------------Bench Kurikulums API --------------------------------------------------*/
+    Route::get('/bench-kurikulums', [BenchKurikulumsController::class, 'index']);
+    Route::post('/bench-kurikulums', [BenchKurikulumsController::class, 'store']);
+    Route::delete('/bench-kurikulums/{id}', [BenchKurikulumsController::class, 'destroy']);
+    Route::delete('/bench-kurikulums', [BenchKurikulumsController::class, 'destroyBenchKurikulums']);
+
 
 
     Route::get('me', [AuthController::class, 'me'])->middleware(['permission:view-dashboard']);

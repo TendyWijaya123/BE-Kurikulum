@@ -22,7 +22,7 @@ class Sksu extends Model
         return $this->belongsTo(Kurikulum::class);
     }
 
-    public function kompetensiKerjas()
+    public function kompetensiKerja()
     {
         return $this->hasMany(KompetensiKerja::class);
     }
