@@ -31,4 +31,6 @@ class Prodi extends Model
     {
         return $this->hasMany(Kurikulum::class);
     }
+
+
 }

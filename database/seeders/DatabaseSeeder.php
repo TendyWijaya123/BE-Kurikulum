@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             JurusanSeeder::class,
             ProdiSeeder::class,
             UserSeeder::class,
+            KurikulumSeeder::class,
             IpteksSeeder::class
         ]);
     }

@@ -28,11 +28,11 @@ class BenchKurikulum extends Model
 
     public function bkCpls()
     {
-        return $this->hasMany(BkCpl::class);
+        return $this->hasMany(BkCpl::class, 'bk_id', 'id');
     }
 
     public function bkPpms()
     {
-        return $this->hasMany(BkPpm::class);
+        return $this->hasMany(BkPpm::class, 'bk_id', 'id');
     }
 }
