@@ -40,81 +40,81 @@ class IpteksController extends Controller
      */
     public function create(Request $request, $type)
     {
-        $prodiId = $request->query('prodiId');
+        $user = JWTAuth::parseToken()->authenticate();
+        $activeKurikulum = $user->activeKurikulum();
 
-
-        // Validate kurikulum belongs to the correct prodi
-        $data = $request->validate([
-            'kurikulum_id' => [
-                'required',
-                'exists:kurikulums,id',
-                function ($attribute, $value, $fail) use ($prodiId) {
-                    $exists = \App\Models\Kurikulum::where('id', $value)
-                        ->where('prodi_id', $prodiId)
-                        ->exists();
-                    if (!$exists) {
-                        $fail('Kurikulum tidak ditemukan untuk program studi ini.');
-                    }
-                },
-            ],
-        ]);
-
-        if ($type === 'pengetahuan') {
-            $data['ilmu_pengetahuan'] = $request->validate(['ilmu_pengetahuan' => 'required|string|max:255'])['ilmu_pengetahuan'];
-            $item = IpteksPengetahuan::create($data);
-        } elseif ($type === 'teknologi') {
-            $data['teknologi'] = $request->validate(['teknologi' => 'required|string|max:255'])['teknologi'];
-            $item = IpteksTeknologi::create($data);
-        } elseif ($type === 'seni') {
-            $data['seni'] = $request->validate(['seni' => 'required|string|max:255'])['seni'];
-            $item = IpteksSeni::create($data);
-        } else {
-            return response()->json(['message' => 'Tipe tidak valid.'], 400);
+        // Validasi keberadaan kurikulum aktif
+        if (!$activeKurikulum) {
+            return response()->json([
+                'error' => 'Kurikulum aktif tidak ditemukan untuk prodi pengguna.'
+            ], 404);
         }
 
+        // Validasi input tambahan berdasarkan tipe
+        switch ($type) {
+            case 'pengetahuan':
+                $validatedData = $request->validate([
+                    'ilmu_pengetahuan' => 'required|string|max:255',
+                ]);
+                $validatedData['kurikulum_id'] = $activeKurikulum->id;
+                $item = IpteksPengetahuan::create($validatedData);
+                break;
+
+            case 'teknologi':
+                $validatedData = $request->validate([
+                    'teknologi' => 'required|string|max:255',
+                ]);
+                $validatedData['kurikulum_id'] = $activeKurikulum->id;
+                $item = IpteksTeknologi::create($validatedData);
+                break;
+
+            case 'seni':
+                $validatedData = $request->validate([
+                    'seni' => 'required|string|max:255',
+                ]);
+                $validatedData['kurikulum_id'] = $activeKurikulum->id;
+                $item = IpteksSeni::create($validatedData);
+                break;
+
+            default:
+                return response()->json([
+                    'error' => 'Tipe tidak valid. Harus berupa "pengetahuan", "teknologi", atau "seni".'
+                ], 400);
+        }
+
+        // Mengembalikan respon JSON sukses
         return response()->json([
             'message' => ucfirst($type) . ' berhasil dibuat.',
             'data' => $item,
         ], 201);
     }
 
+
     /**
      * Mengupdate data berdasarkan tipe dan ID.
      */
     public function update(Request $request, $type, $id)
     {
-        $prodiId = $request->query('prodiId');
+        $user = JWTAuth::parseToken()->authenticate();
+        $activeKurikulum = $user->activeKurikulum();
 
-        // Validate kurikulum belongs to the correct prodi
-        $data = $request->validate([
-            'kurikulum_id' => [
-                'required',
-                'exists:kurikulums,id',
-                function ($attribute, $value, $fail) use ($prodiId) {
-                    $exists = \App\Models\Kurikulum::where('id', $value)
-                        ->where('prodi_id', $prodiId)
-                        ->exists();
-                    if (!$exists) {
-                        $fail('Kurikulum tidak ditemukan untuk program studi ini.');
-                    }
-                },
-            ],
-        ]);
+        if (!$activeKurikulum) {
+            return response()->json(['error' => 'Kurikulum aktif tidak ditemukan untuk prodi user'], 404);
+        }
+
+        $data = [];
 
         if ($type === 'pengetahuan') {
-            $item = IpteksPengetahuan::whereHas('kurikulum', function ($query) use ($prodiId) {
-                $query->where('prodi_id', $prodiId);
-            })->findOrFail($id);
+            $item = IpteksPengetahuan::where('kurikulum_id', $activeKurikulum->id)
+                ->findOrFail($id);
             $data['ilmu_pengetahuan'] = $request->validate(['ilmu_pengetahuan' => 'required|string|max:255'])['ilmu_pengetahuan'];
         } elseif ($type === 'teknologi') {
-            $item = IpteksTeknologi::whereHas('kurikulum', function ($query) use ($prodiId) {
-                $query->where('prodi_id', $prodiId);
-            })->findOrFail($id);
+            $item = IpteksTeknologi::where('kurikulum_id', $activeKurikulum->id)
+                ->findOrFail($id);
             $data['teknologi'] = $request->validate(['teknologi' => 'required|string|max:255'])['teknologi'];
         } elseif ($type === 'seni') {
-            $item = IpteksSeni::whereHas('kurikulum', function ($query) use ($prodiId) {
-                $query->where('prodi_id', $prodiId);
-            })->findOrFail($id);
+            $item = IpteksSeni::where('kurikulum_id', $activeKurikulum->id)
+                ->findOrFail($id);
             $data['seni'] = $request->validate(['seni' => 'required|string|max:255'])['seni'];
         } else {
             return response()->json(['message' => 'Tipe tidak valid.'], 400);
@@ -133,20 +133,22 @@ class IpteksController extends Controller
      */
     public function destroy(Request $request, $type, $id)
     {
-        $prodiId = $request->query('prodiId');
+        $user = JWTAuth::parseToken()->authenticate();
+        $activeKurikulum = $user->activeKurikulum();
+
+        if (!$activeKurikulum) {
+            return response()->json(['error' => 'Kurikulum aktif tidak ditemukan untuk prodi user'], 404);
+        }
 
         if ($type === 'pengetahuan') {
-            $item = IpteksPengetahuan::whereHas('kurikulum', function ($query) use ($prodiId) {
-                $query->where('prodi_id', $prodiId);
-            })->findOrFail($id);
+            $item = IpteksPengetahuan::where('kurikulum_id', $activeKurikulum->id)
+                ->findOrFail($id);
         } elseif ($type === 'teknologi') {
-            $item = IpteksTeknologi::whereHas('kurikulum', function ($query) use ($prodiId) {
-                $query->where('prodi_id', $prodiId);
-            })->findOrFail($id);
+            $item = IpteksTeknologi::where('kurikulum_id', $activeKurikulum->id)
+                ->findOrFail($id);
         } elseif ($type === 'seni') {
-            $item = IpteksSeni::whereHas('kurikulum', function ($query) use ($prodiId) {
-                $query->where('prodi_id', $prodiId);
-            })->findOrFail($id);
+            $item = IpteksSeni::where('kurikulum_id', $activeKurikulum->id)
+                ->findOrFail($id);
         } else {
             return response()->json(['message' => 'Tipe tidak valid.'], 400);
         }
