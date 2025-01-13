@@ -2,14 +2,20 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BenchKurikulumsController;
+use App\Http\Controllers\CplController;
 use App\Http\Controllers\JurusanController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\KurikulumController;
 use App\Http\Controllers\MisiJurusanController;
+use App\Http\Controllers\MisiPolbanController;
+use App\Http\Controllers\PeranIndustriController;
+use App\Http\Controllers\PpmController;
 use App\Http\Controllers\ProdiController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SksuController;
+use App\Http\Controllers\TujuanPolbanController;
 use App\Http\Controllers\VmtJurusanController;
+use App\Http\Controllers\VmtPolbanController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
@@ -73,7 +79,37 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/misi-jurusan/upsert', [MisiJurusanController::class, 'upsert']);
     Route::delete('/misi-jurusan/delete/{id}', [MisiJurusanController::class, 'delete']);
 
+    /* --------------------------------------Vmt Polban API--------------------------------------------------- */
+    Route::post('/vmt-polban', [VmtPolbanController::class, 'firstOrCreate']);
+    Route::put('/vmt-polban/{id}', [VmtPolbanController::class, 'update']);
 
+
+    /* --------------------------------------Tujuan Polban API--------------------------------------------------- */
+    Route::post('/tujuan-polban/upsert', [TujuanPolbanController::class, 'upsert']);
+    Route::delete('/tujuan-polban/delete/{id}', [TujuanPolbanController::class, 'delete']);
+
+    /* --------------------------------------Misi Polban API--------------------------------------------------- */
+    Route::post('/misi-polban/upsert', [MisiPolbanController::class, 'upsert']);
+    Route::delete('/misi-polban/delete/{id}', [MisiPolbanController::class, 'delete']);
+
+
+    /* --------------------------------------CPL API--------------------------------------------------- */
+    Route::get('cpls', [CplController::class, 'index']);
+    Route::post('cpls/upsert', [CplController::class, 'upsert']);
+    Route::delete('cpls/{id}', [CplController::class, 'delete']);
+
+    /* --------------------------------------PPM API--------------------------------------------------- */
+    Route::get('ppms', [PpmController::class, 'index']);
+    Route::post('ppms/upsert', [PpmController::class, 'upsert']);
+    Route::delete('ppms/{id}', [PpmController::class, 'delete']);
+
+
+    /* --------------------------------------Peran Industri API--------------------------------------------------- */
+
+    Route::get('peran-industri', [PeranIndustriController::class, 'index']);
+    Route::post('peran-industri', [PeranIndustriController::class, 'store']);
+    Route::put('peran-industri/{id}', [PeranIndustriController::class, 'update']);
+    Route::delete('peran-industri/{id}', [PeranIndustriController::class, 'destroy']);
 
     Route::get('me', [AuthController::class, 'me'])->middleware(['permission:view-dashboard']);
 });
