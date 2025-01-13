@@ -16,6 +16,7 @@ use App\Http\Controllers\SksuController;
 use App\Http\Controllers\TujuanPolbanController;
 use App\Http\Controllers\VmtJurusanController;
 use App\Http\Controllers\VmtPolbanController;
+use App\Http\Controllers\IpteksController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
@@ -110,6 +111,11 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('peran-industri', [PeranIndustriController::class, 'store']);
     Route::put('peran-industri/{id}', [PeranIndustriController::class, 'update']);
     Route::delete('peran-industri/{id}', [PeranIndustriController::class, 'destroy']);
+    /* ------------------------------------ Ipteks API ------------------------------------------------------- */
+    Route::get('ipteks', [IpteksController::class, 'index']);
+    Route::post('ipteks/{type}', [IpteksController::class, 'create']);
+    Route::put('ipteks/{type}/{id}', [IpteksController::class, 'update']);
+    Route::delete('ipteks/{type}/{id}', [IpteksController::class, 'destroy']);
 
     Route::get('me', [AuthController::class, 'me'])->middleware(['permission:view-dashboard']);
 });
