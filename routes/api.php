@@ -4,7 +4,10 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BenchKurikulumsController;
 use App\Http\Controllers\JurusanController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\KkniController;
 use App\Http\Controllers\KurikulumController;
+use App\Http\Controllers\MateriPembelajaran;
+use App\Http\Controllers\MateriPembelajaranController;
 use App\Http\Controllers\MisiJurusanController;
 use App\Http\Controllers\ProdiController;
 use App\Http\Controllers\RoleController;
@@ -64,6 +67,18 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/bench-kurikulums', [BenchKurikulumsController::class, 'store']);
     Route::delete('/bench-kurikulums/{id}', [BenchKurikulumsController::class, 'destroy']);
     Route::delete('/bench-kurikulums', [BenchKurikulumsController::class, 'destroyBenchKurikulums']);
+
+    /* ---------------------------------------CPL KKNI API --------------------------------------------------*/
+    Route::get('/kkni', [KkniController::class, 'index']);
+    Route::post('/kkni', [KkniController::class, 'store']);
+    Route::delete('/kkni/{id}', [KkniController::class, 'destroy']);
+    Route::delete('/kkni', [KkniController::class, 'destroyCpkKknis']);
+
+    /* ---------------------------------------Materi Pembelajaran API --------------------------------------------------*/
+    Route::get('/materi-pembelajaran', [MateriPembelajaranController::class, 'index']);
+    Route::post('/materi-pembelajaran', [MateriPembelajaranController::class, 'store']);
+    Route::delete('/materi-pembelajaran/{id}', [MateriPembelajaranController::class, 'destroy']);
+    Route::delete('/materi-pembelajaran', [MateriPembelajaranController::class, 'destroyMateriPembelajarans']);
 
     /* --------------------------------------Vmt Jurusan API--------------------------------------------------- */
     Route::post('/vmt-jurusans', [VmtJurusanController::class, 'firstOrCreate']);
