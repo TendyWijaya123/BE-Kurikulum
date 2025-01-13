@@ -70,6 +70,22 @@ class Kurikulum extends Model
         return $this->hasMany(VmtPolban::class);
     }
 
+    public function cpls()
+    {
+        return $this->hasMany(Cpl::class);
+    }
+
+    public function ppms()
+    {
+        return $this->hasMany(Ppm::class);
+    }
+
+    public function peranIndustris()
+    {
+        return $this->hasMany(PeranIndustri::class);
+    }
+
+
     protected static function boot()
     {
         parent::boot();
