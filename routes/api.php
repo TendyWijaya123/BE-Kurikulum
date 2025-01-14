@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BenchKurikulumsController;
 use App\Http\Controllers\CplController;
+use App\Http\Controllers\IeaController;
 use App\Http\Controllers\JurusanController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\KkniController;
@@ -130,6 +131,9 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('ipteks/{type}', [IpteksController::class, 'create']);
     Route::put('ipteks/{type}/{id}', [IpteksController::class, 'update']);
     Route::delete('ipteks/{type}/{id}', [IpteksController::class, 'destroy']);
+
+    /* ------------------------------------ IEA API ------------------------------------------------------- */
+    Route::get('iea', [IeaController::class, 'index']);
 
     Route::get('me', [AuthController::class, 'me'])->middleware(['permission:view-dashboard']);
 });
