@@ -17,6 +17,7 @@ use App\Http\Controllers\TujuanPolbanController;
 use App\Http\Controllers\VmtJurusanController;
 use App\Http\Controllers\VmtPolbanController;
 use App\Http\Controllers\IpteksController;
+use App\Http\Controllers\MatrixCplPpmController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
@@ -116,6 +117,10 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('ipteks/{type}', [IpteksController::class, 'create']);
     Route::put('ipteks/{type}/{id}', [IpteksController::class, 'update']);
     Route::delete('ipteks/{type}/{id}', [IpteksController::class, 'destroy']);
+
+    /* ------------------------------------ Matrix Cpl Ppm API ------------------------------------------------------- */
+    Route::get('matrix-cpl-ppm', [MatrixCplPpmController::class, 'index']);
+    Route::put('matrix-cpl-ppm', [MatrixCplPpmController::class, 'update']);
 
     Route::get('me', [AuthController::class, 'me'])->middleware(['permission:view-dashboard']);
 });
