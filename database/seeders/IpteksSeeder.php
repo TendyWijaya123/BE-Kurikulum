@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Kurikulum;
-use App\Models\Prodi;
 use App\Models\IpteksPengetahuan;
 use App\Models\IpteksTeknologi;
 use App\Models\IpteksSeni;
@@ -16,21 +15,17 @@ class IpteksSeeder extends Seeder
      */
     public function run()
     {
-        // Pastikan prodi ada
-        $prodi = Prodi::where('name', 'D-3 Teknik Kimia')->first();
+        // Menggunakan kurikulum yang sudah ada dari KurikulumSeeder
+        $kurikulum = Kurikulum::where('tahun_awal', 2020)
+            ->where('tahun_akhir', 2024)
+            ->where('prodi_id', 1)
+            ->first();
 
-        if (!$prodi) {
-            $this->command->info('Prodi D-3 Teknik Kimia tidak ditemukan. Pastikan menjalankan ProdiSeeder terlebih dahulu.');
+        if (!$kurikulum) {
+            $this->command->info('Kurikulum tidak ditemukan. Pastikan menjalankan KurikulumSeeder terlebih dahulu.');
             return;
         }
-
-        // Pastikan kurikulum belum ada untuk prodi ini
-        $kurikulum = Kurikulum::firstOrCreate([
-            'tahun_awal' => 2022,
-            'tahun_akhir' => 2026,
-            'is_active' => true,
-            'prodi_id' => $prodi->id,
-        ]);
+        ;
 
         // Seeder untuk ipteks_pengetahuan
         $pengetahuan = [
@@ -72,3 +67,4 @@ class IpteksSeeder extends Seeder
         }
     }
 }
+;
