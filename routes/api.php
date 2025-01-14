@@ -11,6 +11,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SksuController;
 use App\Http\Controllers\VmtJurusanController;
 use App\Http\Controllers\IpteksController;
+use App\Http\Controllers\PengetahuanController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
@@ -74,12 +75,17 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/misi-jurusan/upsert', [MisiJurusanController::class, 'upsert']);
     Route::delete('/misi-jurusan/delete/{id}', [MisiJurusanController::class, 'delete']);
 
-
     /* ------------------------------------ Ipteks API ------------------------------------------------------- */
     Route::get('ipteks', [IpteksController::class, 'index']);
     Route::post('ipteks/{type}', [IpteksController::class, 'create']);
     Route::put('ipteks/{type}/{id}', [IpteksController::class, 'update']);
     Route::delete('ipteks/{type}/{id}', [IpteksController::class, 'destroy']);
+
+    /* -------------------------------------Pengetahuan API -------------------------------------------------- */
+    Route::get('pengetahuan', [PengetahuanController::class, 'index']);
+    Route::post('pengetahuan', [PengetahuanController::class, 'create']);
+    Route::put('pengetahuan/{id}', [PengetahuanController::class, 'update']);
+    Route::delete('pengetahuan/{id}', [PengetahuanController::class, 'destroy']);
 
     Route::get('me', [AuthController::class, 'me'])->middleware(['permission:view-dashboard']);
 });
