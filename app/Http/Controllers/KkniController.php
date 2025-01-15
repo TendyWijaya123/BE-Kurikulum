@@ -13,7 +13,7 @@ class KkniController extends Controller
         $prodiId = $request->query('prodiId');
         $kkni = ModelKkni::
         whereHas('kurikulum', function ($query) use ($prodiId) {
-            $query->where('prodi_id', $prodiId);
+            $query->where('prodi_id', $prodiId)->where('is_active', true);
         })
         ->get();
 

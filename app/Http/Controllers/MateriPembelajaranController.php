@@ -11,9 +11,9 @@ class MateriPembelajaranController extends Controller
 {
     public function index(Request $request){
         $prodiId = $request->query('prodiId');
-        $mp = ModelMP::
-        whereHas('kurikulum', function ($query) use ($prodiId) {
-            $query->where('prodi_id', $prodiId);
+        $mp = ModelMP::whereHas('kurikulum', function ($query) use ($prodiId) {
+            $query->where('prodi_id', $prodiId)
+                  ->where('is_active', true);
         })
         ->get();
 

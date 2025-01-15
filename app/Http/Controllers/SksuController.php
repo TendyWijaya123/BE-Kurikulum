@@ -14,7 +14,7 @@ class SksuController extends Controller
         $prodiId = $request->query('prodiId');
         $sksus = sksuModel::with('kompetensiKerja')
         ->whereHas('kurikulum', function ($query) use ($prodiId) {
-            $query->where('prodi_id', $prodiId);
+            $query->where('prodi_id', $prodiId)->where('is_active', true);
         })
         ->get();
 
