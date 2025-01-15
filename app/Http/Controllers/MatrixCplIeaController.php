@@ -27,7 +27,7 @@ class MatrixCplIeaController extends Controller
         $ieas = ModelIea::where('jenjang', $jenjangFilter)->get();
         $cpls = ModelCpl::
         whereHas('kurikulum', function ($query) use ($prodiId) {
-            $query->where('prodi_id', $prodiId);
+            $query->where('prodi_id', $prodiId)->where('is_active', true);
         })
         ->get();
 

@@ -13,7 +13,7 @@ class BenchKurikulumsController extends Controller
         $prodiId = $request->query('prodiId');
         $benchKurikulums = BenchKurikulumModel::with('bkCpls')->with('bkPpms')
         ->whereHas('kurikulum', function ($query) use ($prodiId) {
-            $query->where('prodi_id', $prodiId);
+            $query->where('prodi_id', $prodiId)->where('is_active', true);
         })
         ->get();
 
