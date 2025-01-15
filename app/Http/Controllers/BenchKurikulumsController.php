@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\BenchKurikulum as BenchKurikulumModel;
 use App\Models\Kurikulum;
+use Illuminate\Support\Facades\DB;
 
 class BenchKurikulumsController extends Controller
 {
@@ -21,6 +22,8 @@ class BenchKurikulumsController extends Controller
 
     public function store(Request $request){
         try{
+            DB::beginTransaction();
+
             $dataList = $request->all();
             $kurikulumId = Kurikulum::where('prodi_id', $dataList[0]['prodiId'])
                 ->where('is_active', true)
@@ -61,11 +64,16 @@ class BenchKurikulumsController extends Controller
                     ]);
                 }
             }
+
+            DB::commit();
+            
             return response()->json([
                 'success' => 'Data berhasil disimpan',
             ], 200);
         }catch(\Exception $e)
         {
+            DB::rollBack();
+
             return response()->json([
                 'message' => 'Terjadi kesalahan saat menyimpan data',
                 'error' => $e->getMessage(),
@@ -93,6 +101,7 @@ class BenchKurikulumsController extends Controller
     public function destroyBenchKurikulums(Request $request)
     {
         try {
+            DB::beginTransaction();
             // Ambil daftar ID dari request
             $data = $request->all();
 
@@ -125,10 +134,14 @@ class BenchKurikulumsController extends Controller
                 $bk->delete();
             }
 
+            DB::commit();
+
             return response()->json([
                 'message' => 'Data berhasil dihapus',
             ], 200);
         } catch (\Exception $e) {
+            DB::rollBack();
+            
             return response()->json([
                 'data' => $ids,
                 'message' => 'Terjadi kesalahan saat menghapus data',

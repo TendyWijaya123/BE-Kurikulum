@@ -20,6 +20,9 @@ use App\Http\Controllers\TujuanPolbanController;
 use App\Http\Controllers\VmtJurusanController;
 use App\Http\Controllers\VmtPolbanController;
 use App\Http\Controllers\IpteksController;
+use App\Http\Controllers\MatrixCplPpmController;
+use App\Http\Controllers\MatrixCplIeaController;
+use App\Http\Controllers\PengetahuanController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
@@ -94,7 +97,6 @@ Route::middleware(['auth:api'])->group(function () {
     /* --------------------------------------Misi Jurusan API--------------------------------------------------- */
     Route::post('/misi-jurusan/upsert', [MisiJurusanController::class, 'upsert']);
     Route::delete('/misi-jurusan/delete/{id}', [MisiJurusanController::class, 'delete']);
-
     /* --------------------------------------Vmt Polban API--------------------------------------------------- */
     Route::post('/vmt-polban', [VmtPolbanController::class, 'firstOrCreate']);
     Route::put('/vmt-polban/{id}', [VmtPolbanController::class, 'update']);
@@ -134,6 +136,20 @@ Route::middleware(['auth:api'])->group(function () {
 
     /* ------------------------------------ IEA API ------------------------------------------------------- */
     Route::get('iea', [IeaController::class, 'index']);
+
+    /* ------------------------------------ Matrix Cpl Ppm API ------------------------------------------------------- */
+    Route::get('matrix-cpl-ppm', [MatrixCplPpmController::class, 'index']);
+    Route::put('matrix-cpl-ppm', [MatrixCplPpmController::class, 'update']);
+
+    /* ------------------------------------ Matrix Cpl Iea API ------------------------------------------------------- */
+    Route::get('matrix-cpl-iea', [MatrixCplIeaController::class, 'index']);
+    Route::put('matrix-cpl-iea', [MatrixCplIeaController::class, 'update']);
+
+    /* -------------------------------------Pengetahuan API -------------------------------------------------- */
+    Route::get('pengetahuan', [PengetahuanController::class, 'index']);
+    Route::post('pengetahuan', [PengetahuanController::class, 'create']);
+    Route::put('pengetahuan/{id}', [PengetahuanController::class, 'update']);
+    Route::delete('pengetahuan/{id}', [PengetahuanController::class, 'destroy']);
 
     Route::get('me', [AuthController::class, 'me'])->middleware(['permission:view-dashboard']);
 });

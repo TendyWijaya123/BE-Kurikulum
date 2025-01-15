@@ -20,4 +20,11 @@ class Iea extends Model
     {
         return $this->belongsTo(Kurikulum::class);
     }
+
+    public function cpls()
+
+    {
+        return $this->belongsToMany(Cpl::class, 'cpl_iea', 'iea_id', 'cpl_id')
+            ->withTimestamps();
+    }
 }

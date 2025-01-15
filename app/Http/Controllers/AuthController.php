@@ -32,6 +32,7 @@ class AuthController extends Controller
         $permissions = $user->permissions()->pluck('name')->toArray();
 
         $customClaims = [
+            'name' => $user->name,
             'permissions' => $permissions,
             'prodiId' => $user->prodi_id,
         ];

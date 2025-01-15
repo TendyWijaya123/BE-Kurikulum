@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Kurikulum;
 use Illuminate\Http\Request;
 use App\Models\MateriPembelajaran as ModelMP;
+use Illuminate\Support\Facades\DB;
 
 class MateriPembelajaranController extends Controller
 {
@@ -21,6 +22,9 @@ class MateriPembelajaranController extends Controller
 
     public function store(Request $request){
         try{
+
+            DB::beginTransaction();
+
             $dataList = $request->all();
             $kurikulumId = Kurikulum::where('prodi_id', $dataList[0]['prodiId'])
                 ->where('is_active', true)
@@ -42,6 +46,9 @@ class MateriPembelajaranController extends Controller
                     ]
                 );
             }
+
+            DB::commit();
+
             return response()->json([
                 'success' => 'Data berhasil disimpan',
             ], 200);
@@ -72,6 +79,9 @@ class MateriPembelajaranController extends Controller
     public function destroyMateriPembelajarans(Request $request)
     {
         try {
+
+            DB::beginTransaction();
+
             // Ambil daftar ID dari request
             $data = $request->all();
 
@@ -100,10 +110,15 @@ class MateriPembelajaranController extends Controller
                 $materiPembelajaran->delete();
             }
 
+            DB::commit();
+
             return response()->json([
                 'message' => 'Data berhasil dihapus',
             ], 200);
         } catch (\Exception $e) {
+
+            DB::rollBack();
+            
             return response()->json([
                 'data' => $ids,
                 'message' => 'Terjadi kesalahan saat menghapus data',

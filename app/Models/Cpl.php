@@ -64,6 +64,12 @@ class Cpl extends Model
             ->withTimestamps();
     }
 
+    public function iea()
+    {
+        return $this->belongsToMany(Iea::class, 'cpl_iea', 'cpl_id', 'iea_id')
+            ->withTimestamps();
+    }
+
     public static function reindexKode(int $kurikulumId)
     {
         DB::beginTransaction();

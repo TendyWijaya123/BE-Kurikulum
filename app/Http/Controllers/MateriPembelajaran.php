@@ -3,28 +3,25 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\CplKkni as ModelKkni;
-use App\Models\Kurikulum;
-use Illuminate\Support\Facades\DB;
+use App\Models\MateriPembelajaran as ModelMP;
 
-class KkniController extends Controller
+class MateriPembelajaran extends Controller
 {
     public function index(Request $request){
         $prodiId = $request->query('prodiId');
-        $kkni = ModelKkni::
+        $mp = ModelMP::
         whereHas('kurikulum', function ($query) use ($prodiId) {
             $query->where('prodi_id', $prodiId);
         })
         ->get();
 
-        return response()->json($kkni);
+        return response()->json(data: $mp);
     }
 
     public function store(Request $request){
         try{
-            DB::beginTransaction();
             $dataList = $request->all();
-            $kurikulumId = Kurikulum::where('prodi_id', $dataList[0]['prodiId'])
+            $kurikulumId = ModelMP::where('prodi_id', $dataList[0]['prodiId'])
                 ->where('is_active', true)
                 ->value('id');
             
@@ -35,7 +32,7 @@ class KkniController extends Controller
             }
 
             foreach ($dataList as $data) {
-                ModelKkni::updateOrCreate(
+                ModelMP::updateOrCreate(
                     ['id' => $data['_id'] ?? null],
                     [
                         'code' => $data['code'],
@@ -44,16 +41,11 @@ class KkniController extends Controller
                     ]
                 );
             }
-
-            DB::commit();
-
             return response()->json([
                 'success' => 'Data berhasil disimpan',
             ], 200);
         }catch(\Exception $e)
         {
-            DB::rollBack();
-
             return response()->json([
                 'message' => 'Terjadi kesalahan saat menyimpan data',
                 'error' => $e->getMessage(),
@@ -62,26 +54,23 @@ class KkniController extends Controller
     }
 
     public function destroy($id){
-        $sksu = ModelKkni::find($id);
-        if (!$sksu) {
+        $mp = ModelMP::find($id);
+        if (!$mp) {
             return response()->json([
-                'message' => 'sksu not found.',
+                'message' => 'materi pembelajaran not found.',
             ], 404);
         }
         // Hapus data SKSU
-        $sksu->delete();
+        $mp->delete();
 
         return response()->json([
-            'message' => `sksu berhasil dihapus`
+            'message' => `materi pembelajaran berhasil dihapus`
         ], 200);
     }
 
     public function destroyCpkKknis(Request $request)
     {
         try {
-
-            DB::beginTransaction();
-
             // Ambil daftar ID dari request
             $data = $request->all();
 
@@ -95,9 +84,9 @@ class KkniController extends Controller
             $ids = array_column($data, '_id');
 
             // Cari SKSU berdasarkan ID
-            $kkni = ModelKkni::whereIn('id', $ids)->get();
+            $mp = ModelMP::whereIn('id', $ids)->get();
 
-            if ($kkni->isEmpty()) {
+            if ($mp->isEmpty()) {
                 return response()->json([
                     'data' => $ids,
                     'message' => 'Data tidak ditemukan untuk ID yang diberikan',
@@ -105,20 +94,15 @@ class KkniController extends Controller
             }
 
             // Loop untuk menghapus data terkait, jika ada
-            foreach ($kkni as $cpl) {
+            foreach ($mp as $materiPembelajaran) {
                 // Hapus data SKSU
-                $cpl->delete();
+                $materiPembelajaran->delete();
             }
-
-            DB::commit();
 
             return response()->json([
                 'message' => 'Data berhasil dihapus',
             ], 200);
         } catch (\Exception $e) {
-
-            DB::rollBack();
-            
             return response()->json([
                 'data' => $ids,
                 'message' => 'Terjadi kesalahan saat menghapus data',
