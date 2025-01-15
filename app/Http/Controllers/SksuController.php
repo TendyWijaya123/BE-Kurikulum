@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Kurikulum;
 use Illuminate\Http\Request;
 use App\Models\Sksu as sksuModel;
+use Illuminate\Support\Facades\DB;
 
-use function Laravel\Prompts\error;
 
 class SksuController extends Controller
 {
@@ -23,6 +23,9 @@ class SksuController extends Controller
 
     public function store(Request $request){
         try{
+
+            DB::beginTransaction();
+
             $dataList = $request->all();
             $kurikulumId = Kurikulum::where('prodi_id', $dataList[0]['prodiId'])
                 ->where('is_active', true)
@@ -56,11 +59,16 @@ class SksuController extends Controller
                     ]);
                 }
             }
+
+            DB::commit();
+
             return response()->json([
                 'success' => 'Data berhasil disimpan',
             ], 200);
         }catch(\Exception $e)
         {
+            DB::rollBack();
+            
             return response()->json([
                 'message' => 'Terjadi kesalahan saat menyimpan data',
                 'error' => $e->getMessage(),

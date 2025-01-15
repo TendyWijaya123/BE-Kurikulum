@@ -3,29 +3,25 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\BenchKurikulum as BenchKurikulumModel;
-use App\Models\Kurikulum;
-use Illuminate\Support\Facades\DB;
+use App\Models\MateriPembelajaran as ModelMP;
 
-class BenchKurikulumsController extends Controller
+class MateriPembelajaran extends Controller
 {
     public function index(Request $request){
         $prodiId = $request->query('prodiId');
-        $benchKurikulums = BenchKurikulumModel::with('bkCpls')->with('bkPpms')
-        ->whereHas('kurikulum', function ($query) use ($prodiId) {
+        $mp = ModelMP::
+        whereHas('kurikulum', function ($query) use ($prodiId) {
             $query->where('prodi_id', $prodiId);
         })
         ->get();
 
-        return response()->json($benchKurikulums);
+        return response()->json(data: $mp);
     }
 
     public function store(Request $request){
         try{
-            DB::beginTransaction();
-
             $dataList = $request->all();
-            $kurikulumId = Kurikulum::where('prodi_id', $dataList[0]['prodiId'])
+            $kurikulumId = ModelMP::where('prodi_id', $dataList[0]['prodiId'])
                 ->where('is_active', true)
                 ->value('id');
             
@@ -36,44 +32,20 @@ class BenchKurikulumsController extends Controller
             }
 
             foreach ($dataList as $data) {
-                $benchKurikulums = BenchKurikulumModel::updateOrCreate(
+                ModelMP::updateOrCreate(
                     ['id' => $data['_id'] ?? null],
                     [
-                        'program_studi' => $data['programStudi'],
-                        'kategori' => $data['kategori'],
+                        'code' => $data['code'],
+                        'description' => $data['description'],
                         'kurikulum_id' => $kurikulumId,
                     ]
                 );
-
-                // Menyimpan cpl dan ppm terkait
-                if (!empty($data['cpl'])) {
-                    $benchKurikulums->bkCpls()->delete();
-                }
-                foreach ($data['cpl'] as $cpl) {
-                    $benchKurikulums->bkCpls()->create([
-                        'cpl' => $cpl,
-                    ]);
-                }
-
-                if (!empty($data['ppm'])) {
-                    $benchKurikulums->bkPpms()->delete();
-                }
-                foreach ($data['ppm'] as $ppm) {
-                    $benchKurikulums->bkPpms()->create([
-                        'ppm' => $ppm,
-                    ]);
-                }
             }
-
-            DB::commit();
-            
             return response()->json([
                 'success' => 'Data berhasil disimpan',
             ], 200);
         }catch(\Exception $e)
         {
-            DB::rollBack();
-
             return response()->json([
                 'message' => 'Terjadi kesalahan saat menyimpan data',
                 'error' => $e->getMessage(),
@@ -82,26 +54,23 @@ class BenchKurikulumsController extends Controller
     }
 
     public function destroy($id){
-        $benchKurikulums = BenchKurikulumModel::find($id);
-        if (!$benchKurikulums) {
+        $mp = ModelMP::find($id);
+        if (!$mp) {
             return response()->json([
-                'message' => 'bench kurikulum not found.',
+                'message' => 'materi pembelajaran not found.',
             ], 404);
         }
-        $benchKurikulums->bkCpls()->delete();
-        $benchKurikulums->bkPpms()->delete();
-        // Hapus data Bench kurikulum
-        $benchKurikulums->delete();
+        // Hapus data SKSU
+        $mp->delete();
 
         return response()->json([
-            'message' => `bench kurikulum berhasil dihapus`
+            'message' => `materi pembelajaran berhasil dihapus`
         ], 200);
     }
 
-    public function destroyBenchKurikulums(Request $request)
+    public function destroyCpkKknis(Request $request)
     {
         try {
-            DB::beginTransaction();
             // Ambil daftar ID dari request
             $data = $request->all();
 
@@ -115,9 +84,9 @@ class BenchKurikulumsController extends Controller
             $ids = array_column($data, '_id');
 
             // Cari SKSU berdasarkan ID
-            $benchKurikulums = BenchKurikulumModel::whereIn('id', $ids)->get();
+            $mp = ModelMP::whereIn('id', $ids)->get();
 
-            if ($benchKurikulums->isEmpty()) {
+            if ($mp->isEmpty()) {
                 return response()->json([
                     'data' => $ids,
                     'message' => 'Data tidak ditemukan untuk ID yang diberikan',
@@ -125,23 +94,15 @@ class BenchKurikulumsController extends Controller
             }
 
             // Loop untuk menghapus data terkait, jika ada
-            foreach ($benchKurikulums as $bk) {
-                // Hapus data di tabel kompetensi kerja terkait
-                $bk->bkCpls()->delete();
-                $bk->bkPpms()->delete();
-
+            foreach ($mp as $materiPembelajaran) {
                 // Hapus data SKSU
-                $bk->delete();
+                $materiPembelajaran->delete();
             }
-
-            DB::commit();
 
             return response()->json([
                 'message' => 'Data berhasil dihapus',
             ], 200);
         } catch (\Exception $e) {
-            DB::rollBack();
-            
             return response()->json([
                 'data' => $ids,
                 'message' => 'Terjadi kesalahan saat menghapus data',

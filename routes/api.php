@@ -3,9 +3,12 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BenchKurikulumsController;
 use App\Http\Controllers\CplController;
+use App\Http\Controllers\IeaController;
 use App\Http\Controllers\JurusanController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\KkniController;
 use App\Http\Controllers\KurikulumController;
+use App\Http\Controllers\MateriPembelajaranController;
 use App\Http\Controllers\MisiJurusanController;
 use App\Http\Controllers\MisiPolbanController;
 use App\Http\Controllers\PeranIndustriController;
@@ -18,6 +21,7 @@ use App\Http\Controllers\VmtJurusanController;
 use App\Http\Controllers\VmtPolbanController;
 use App\Http\Controllers\IpteksController;
 use App\Http\Controllers\MatrixCplPpmController;
+use App\Http\Controllers\MatrixCplIeaController;
 use App\Http\Controllers\PengetahuanController;
 use Illuminate\Support\Facades\Route;
 
@@ -74,6 +78,18 @@ Route::middleware(['auth:api'])->group(function () {
     Route::delete('/bench-kurikulums/{id}', [BenchKurikulumsController::class, 'destroy']);
     Route::delete('/bench-kurikulums', [BenchKurikulumsController::class, 'destroyBenchKurikulums']);
 
+    /* ---------------------------------------CPL KKNI API --------------------------------------------------*/
+    Route::get('/kkni', [KkniController::class, 'index']);
+    Route::post('/kkni', [KkniController::class, 'store']);
+    Route::delete('/kkni/{id}', [KkniController::class, 'destroy']);
+    Route::delete('/kkni', [KkniController::class, 'destroyCpkKknis']);
+
+    /* ---------------------------------------Materi Pembelajaran API --------------------------------------------------*/
+    Route::get('/materi-pembelajaran', [MateriPembelajaranController::class, 'index']);
+    Route::post('/materi-pembelajaran', [MateriPembelajaranController::class, 'store']);
+    Route::delete('/materi-pembelajaran/{id}', [MateriPembelajaranController::class, 'destroy']);
+    Route::delete('/materi-pembelajaran', [MateriPembelajaranController::class, 'destroyMateriPembelajarans']);
+
     /* --------------------------------------Vmt Jurusan API--------------------------------------------------- */
     Route::post('/vmt-jurusans', [VmtJurusanController::class, 'firstOrCreate']);
     Route::put('/vmt-jurusan/{id}', [VmtJurusanController::class, 'update']);
@@ -118,9 +134,16 @@ Route::middleware(['auth:api'])->group(function () {
     Route::put('ipteks/{type}/{id}', [IpteksController::class, 'update']);
     Route::delete('ipteks/{type}/{id}', [IpteksController::class, 'destroy']);
 
+    /* ------------------------------------ IEA API ------------------------------------------------------- */
+    Route::get('iea', [IeaController::class, 'index']);
+
     /* ------------------------------------ Matrix Cpl Ppm API ------------------------------------------------------- */
     Route::get('matrix-cpl-ppm', [MatrixCplPpmController::class, 'index']);
     Route::put('matrix-cpl-ppm', [MatrixCplPpmController::class, 'update']);
+
+    /* ------------------------------------ Matrix Cpl Iea API ------------------------------------------------------- */
+    Route::get('matrix-cpl-iea', [MatrixCplIeaController::class, 'index']);
+    Route::put('matrix-cpl-iea', [MatrixCplIeaController::class, 'update']);
 
     /* -------------------------------------Pengetahuan API -------------------------------------------------- */
     Route::get('pengetahuan', [PengetahuanController::class, 'index']);

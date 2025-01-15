@@ -2,22 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class Cpl extends Model
+class CplKkni extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+    protected $table = 'cpl_kkni';
     protected $fillable = [
-        'keterangan',
+        'code',
+        'description',
         'kurikulum_id',
     ];
 
@@ -26,17 +23,17 @@ class Cpl extends Model
         parent::boot();
 
         static::saving(function ($model) {
-            if (!$model->kode) {
+            if (!$model->code) {
                 // Get the highest kode for the given kurikulum_id
                 $lastCpl = self::where('kurikulum_id', $model->kurikulum_id)
                     ->orderBy('id', 'desc')
                     ->first();
 
                 // Determine the next number
-                $nextNumber = $lastCpl ? ((int) str_replace('CPL-', '', $lastCpl->kode) + 1) : 1;
+                $nextNumber = $lastCpl ? ((int) str_replace('CPL-', '', $lastCpl->code) + 1) : 1;
 
                 // Set the kode
-                $model->kode = 'CPL-' . $nextNumber;
+                $model->code = 'CPL-' . $nextNumber;
             }
         });
 
@@ -48,26 +45,13 @@ class Cpl extends Model
     }
 
     /**
-     * Get the kurikulum associated with the CPL.
+     * Relasi ke BenchKurikulum
+     * 
+     * BkCpl milik satu BenchKurikulum
      */
     public function kurikulum()
     {
-        return $this->belongsTo(Kurikulum::class, 'kurikulum_id');
-    }
-
-    /**
-     * The ppms associated with the CPL.
-     */
-    public function ppms()
-    {
-        return $this->belongsToMany(Ppm::class, 'cpl_ppm', 'cpl_id', 'ppm_id')
-            ->withTimestamps();
-    }
-
-    public function iea()
-    {
-        return $this->belongsToMany(Iea::class, 'cpl_iea', 'cpl_id', 'iea_id')
-            ->withTimestamps();
+        return $this->belongsTo(Kurikulum::class);
     }
 
     public static function reindexKode(int $kurikulumId)
@@ -80,7 +64,7 @@ class Cpl extends Model
 
             // Iterasi setiap CPL dan perbarui kode-nya
             foreach ($cpls as $index => $cpl) {
-                $cpl->kode = 'CPL-' . ($index + 1);
+                $cpl->code = 'CPL-' . ($index + 1);
                 $cpl->save(); // Gunakan save() untuk menyimpan perubahan
             }
 
