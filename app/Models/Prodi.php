@@ -10,7 +10,7 @@ class Prodi extends Model
     use HasFactory;
 
     // Kolom yang bisa diisi
-    protected $fillable = ['name', 'jenjang', 'kode', 'jurusan_id'];
+    protected $fillable = ['name', 'jenjang', 'kode', 'jurusan_id', 'is_active'];
 
     /**
      * Relasi Many to One dengan Jurusan.
@@ -31,6 +31,4 @@ class Prodi extends Model
     {
         return $this->hasMany(Kurikulum::class);
     }
-
-
 }

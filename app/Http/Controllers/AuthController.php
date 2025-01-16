@@ -29,13 +29,18 @@ class AuthController extends Controller
 
         $user = JWTAuth::user();
 
+
         $permissions = $user->permissions()->pluck('name')->toArray();
 
         $customClaims = [
             'name' => $user->name,
             'permissions' => $permissions,
-            'prodiId' => $user->prodi_id,
         ];
+
+        if ($user->prodi) {
+            $customClaims['prodiId'] = $user->prodi_id;
+            $customClaims['isActiveProdi'] = $user->prodi->is_active;
+        }
 
         $token = JWTAuth::customClaims($customClaims)->attempt($request->only('email', 'password'));
 

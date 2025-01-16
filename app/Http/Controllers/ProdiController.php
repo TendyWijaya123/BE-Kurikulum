@@ -51,9 +51,6 @@ class ProdiController extends Controller
         return response()->json(['data' => $prodi], 200);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, $id)
     {
         $prodi = Prodi::find($id);
@@ -64,11 +61,13 @@ class ProdiController extends Controller
             ], 404);
         }
 
+        // Menambahkan pengecualian pada validasi unique untuk kode
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'jenjang' => 'required|in:D3,D4,S1,S2,S3',
-            'kode' => 'required|string|max:50|unique:prodis',
+            'kode' => 'required|string|max:50|unique:prodis,kode,' . $prodi->id, // Menambahkan pengecualian untuk kode
             'jurusan_id' => 'required|exists:jurusans,id',
+            'is_active' => 'nullable|boolean',
         ]);
 
         $prodi->update($validated);
@@ -78,6 +77,7 @@ class ProdiController extends Controller
             'data' => $prodi,
         ], 200);
     }
+
 
     /**
      * Remove the specified resource from storage.
