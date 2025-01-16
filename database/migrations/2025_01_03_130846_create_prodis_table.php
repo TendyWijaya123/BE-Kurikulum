@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->enum('jenjang', ['D3', 'D4', 'S1', 'S2', 'S3']);
             $table->string('kode')->unique();
+            $table->boolean('is_active')->default(true);
             $table->foreignId('jurusan_id')->constrained('jurusans')->onDelete('cascade');
             $table->timestamps();
         });
