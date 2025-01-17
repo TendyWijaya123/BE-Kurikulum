@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BenchKurikulumsController;
+use App\Http\Controllers\BentukPembelajaranController;
 use App\Http\Controllers\CplController;
+use App\Http\Controllers\FormulasiCpaController;
 use App\Http\Controllers\IeaController;
 use App\Http\Controllers\JurusanController;
 use App\Http\Controllers\MatrixPengetahuanMateriPembelajaranController;
@@ -21,8 +23,10 @@ use App\Http\Controllers\TujuanPolbanController;
 use App\Http\Controllers\VmtJurusanController;
 use App\Http\Controllers\VmtPolbanController;
 use App\Http\Controllers\IpteksController;
+use App\Http\Controllers\MataKuliahController;
 use App\Http\Controllers\MatrixCplPpmController;
 use App\Http\Controllers\MatrixCplIeaController;
+use App\Http\Controllers\MetodePembelajaranController;
 use App\Http\Controllers\PengetahuanController;
 use Illuminate\Support\Facades\Route;
 
@@ -155,6 +159,22 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('pengetahuan', [PengetahuanController::class, 'create']);
     Route::put('pengetahuan/{id}', [PengetahuanController::class, 'update']);
     Route::delete('pengetahuan/{id}', [PengetahuanController::class, 'destroy']);
+
+    /* -------------------------------------Mata Kuliah API -------------------------------------------------- */
+    Route::get('/mata-kuliah', [MataKuliahController::class, 'index']);
+    Route::post('/mata-kuliah', [MataKuliahController::class, 'store']);
+    Route::put('/mata-kuliah/{id}', [MataKuliahController::class, 'update']);
+    Route::delete('/mata-kuliah/{id}', [MataKuliahController::class, 'destroy']);
+
+
+    /* -------------------------------------Bentuk Pembelajaran API -------------------------------------------------- */
+    Route::get('bentuk-pembelajaran/dropdown', [BentukPembelajaranController::class, 'dropdown']);
+
+    /* -------------------------------------Metode Pembelajaran API -------------------------------------------------- */
+    Route::get('metode-pembelajaran/dropdown', [MetodePembelajaranController::class, 'dropdown']);
+
+    /* -------------------------------------Formulasi CPA API -------------------------------------------------- */
+    Route::get('formulasi-cpa/dropdown', [FormulasiCpaController::class, 'dropdown']);
 
     Route::get('me', [AuthController::class, 'me'])->middleware(['permission:view-dashboard']);
 });
