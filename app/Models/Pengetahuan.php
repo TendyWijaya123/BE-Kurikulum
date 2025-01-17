@@ -21,6 +21,12 @@ class Pengetahuan extends Model
         return $this->belongsTo(Kurikulum::class);
     }
 
+    public function mp() 
+    {
+        return $this->belongsToMany(MateriPembelajaran::class, 'p_mp', 'p_id', 'mp_id')
+            ->withTimestamps();
+    }
+
     protected static function boot()
     {
         parent::boot();

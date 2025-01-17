@@ -5,6 +5,7 @@ use App\Http\Controllers\BenchKurikulumsController;
 use App\Http\Controllers\CplController;
 use App\Http\Controllers\IeaController;
 use App\Http\Controllers\JurusanController;
+use App\Http\Controllers\MatrixPengetahuanMateriPembelajaranController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\KkniController;
 use App\Http\Controllers\KurikulumController;
@@ -144,6 +145,10 @@ Route::middleware(['auth:api'])->group(function () {
     /* ------------------------------------ Matrix Cpl Iea API ------------------------------------------------------- */
     Route::get('matrix-cpl-iea', [MatrixCplIeaController::class, 'index']);
     Route::put('matrix-cpl-iea', [MatrixCplIeaController::class, 'update']);
+
+    /* ------------------------------------ Matrix P MP API ------------------------------------------------------- */
+    Route::get('matrix-p-mp', [MatrixPengetahuanMateriPembelajaranController::class, 'index']);
+    Route::put('matrix-p-mp', [MatrixPengetahuanMateriPembelajaranController::class, 'update']);
 
     /* -------------------------------------Pengetahuan API -------------------------------------------------- */
     Route::get('pengetahuan', [PengetahuanController::class, 'index']);
