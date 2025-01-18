@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
             ProdiSeeder::class,
             UserSeeder::class,
             KurikulumSeeder::class,
-            ieaSeeder::class,
+            IeaSeeder::class,
             IpteksSeeder::class,
             PengetahuanSeeder::class,
             BentukPembelajaranSeeder::class,
