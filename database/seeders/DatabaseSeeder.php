@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\BentukPembelajaran;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -21,9 +22,12 @@ class DatabaseSeeder extends Seeder
             ProdiSeeder::class,
             UserSeeder::class,
             KurikulumSeeder::class,
-            ieaSeeder::class,
+            IeaSeeder::class,
             IpteksSeeder::class,
-            PengetahuanSeeder::class
+            PengetahuanSeeder::class,
+            BentukPembelajaranSeeder::class,
+            MetodePembelajaranSeeder::class,
+            FormulasiCpaSeeder::class,
         ]);
     }
 }

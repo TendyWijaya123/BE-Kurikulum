@@ -49,6 +49,11 @@ class MateriPembelajaran extends Model
         return $this->belongsTo(Kurikulum::class);
     }
 
+    public function pengetahuan()
+    {
+        return $this->belongsToMany(Pengetahuan::class, 'p_mp', 'p_id', 'mp_id');
+    }
+
     public static function reindexKode(int $kurikulumId)
     {
         DB::beginTransaction();

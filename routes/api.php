@@ -2,9 +2,12 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BenchKurikulumsController;
+use App\Http\Controllers\BentukPembelajaranController;
 use App\Http\Controllers\CplController;
+use App\Http\Controllers\FormulasiCpaController;
 use App\Http\Controllers\IeaController;
 use App\Http\Controllers\JurusanController;
+use App\Http\Controllers\MatrixPengetahuanMateriPembelajaranController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\KkniController;
 use App\Http\Controllers\KurikulumController;
@@ -20,8 +23,10 @@ use App\Http\Controllers\TujuanPolbanController;
 use App\Http\Controllers\VmtJurusanController;
 use App\Http\Controllers\VmtPolbanController;
 use App\Http\Controllers\IpteksController;
+use App\Http\Controllers\MataKuliahController;
 use App\Http\Controllers\MatrixCplPpmController;
 use App\Http\Controllers\MatrixCplIeaController;
+use App\Http\Controllers\MetodePembelajaranController;
 use App\Http\Controllers\PengetahuanController;
 use App\Http\Controllers\MatrixCplPController;
 use Illuminate\Support\Facades\Route;
@@ -146,11 +151,31 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('matrix-cpl-iea', [MatrixCplIeaController::class, 'index']);
     Route::put('matrix-cpl-iea', [MatrixCplIeaController::class, 'update']);
 
+    /* ------------------------------------ Matrix P MP API ------------------------------------------------------- */
+    Route::get('matrix-p-mp', [MatrixPengetahuanMateriPembelajaranController::class, 'index']);
+    Route::put('matrix-p-mp', [MatrixPengetahuanMateriPembelajaranController::class, 'update']);
+
     /* -------------------------------------Pengetahuan API -------------------------------------------------- */
     Route::get('pengetahuan', [PengetahuanController::class, 'index']);
     Route::post('pengetahuan', [PengetahuanController::class, 'create']);
     Route::put('pengetahuan/{id}', [PengetahuanController::class, 'update']);
     Route::delete('pengetahuan/{id}', [PengetahuanController::class, 'destroy']);
+
+    /* -------------------------------------Mata Kuliah API -------------------------------------------------- */
+    Route::get('/mata-kuliah', [MataKuliahController::class, 'index']);
+    Route::post('/mata-kuliah', [MataKuliahController::class, 'store']);
+    Route::put('/mata-kuliah/{id}', [MataKuliahController::class, 'update']);
+    Route::delete('/mata-kuliah/{id}', [MataKuliahController::class, 'destroy']);
+
+
+    /* -------------------------------------Bentuk Pembelajaran API -------------------------------------------------- */
+    Route::get('bentuk-pembelajaran/dropdown', [BentukPembelajaranController::class, 'dropdown']);
+
+    /* -------------------------------------Metode Pembelajaran API -------------------------------------------------- */
+    Route::get('metode-pembelajaran/dropdown', [MetodePembelajaranController::class, 'dropdown']);
+
+    /* -------------------------------------Formulasi CPA API -------------------------------------------------- */
+    Route::get('formulasi-cpa/dropdown', [FormulasiCpaController::class, 'dropdown']);
 
     /* -------------------------------------Matrix Cpl P API -------------------------------------------------- */
     Route::get('matrix-cpl-p', [MatrixCplPController::class, 'index']);
