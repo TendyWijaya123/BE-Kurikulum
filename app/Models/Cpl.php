@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -67,6 +68,12 @@ class Cpl extends Model
     public function iea()
     {
         return $this->belongsToMany(Iea::class, 'cpl_iea', 'cpl_id', 'iea_id')
+            ->withTimestamps();
+    }
+
+    public function pengetahuans(): BelongsToMany
+    {
+        return $this->belongsToMany(Pengetahuan::class, 'cpl_p', 'cpl_id', 'p_id')
             ->withTimestamps();
     }
 

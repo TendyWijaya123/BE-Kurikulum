@@ -28,6 +28,7 @@ use App\Http\Controllers\MatrixCplPpmController;
 use App\Http\Controllers\MatrixCplIeaController;
 use App\Http\Controllers\MetodePembelajaranController;
 use App\Http\Controllers\PengetahuanController;
+use App\Http\Controllers\MatrixCplPController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
@@ -175,6 +176,10 @@ Route::middleware(['auth:api'])->group(function () {
 
     /* -------------------------------------Formulasi CPA API -------------------------------------------------- */
     Route::get('formulasi-cpa/dropdown', [FormulasiCpaController::class, 'dropdown']);
+
+    /* -------------------------------------Matrix Cpl P API -------------------------------------------------- */
+    Route::get('matrix-cpl-p', [MatrixCplPController::class, 'index']);
+    Route::put('matrix-cpl-p', [MatrixCplPController::class, 'update']);
 
     Route::get('me', [AuthController::class, 'me'])->middleware(['permission:view-dashboard']);
 });
