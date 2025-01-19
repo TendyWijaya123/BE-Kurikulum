@@ -23,6 +23,7 @@ use App\Http\Controllers\IpteksController;
 use App\Http\Controllers\MatrixCplPpmController;
 use App\Http\Controllers\MatrixCplIeaController;
 use App\Http\Controllers\PengetahuanController;
+use App\Http\Controllers\MatrixCplPController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
@@ -150,6 +151,10 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('pengetahuan', [PengetahuanController::class, 'create']);
     Route::put('pengetahuan/{id}', [PengetahuanController::class, 'update']);
     Route::delete('pengetahuan/{id}', [PengetahuanController::class, 'destroy']);
+
+    /* -------------------------------------Matrix Cpl P API -------------------------------------------------- */
+    Route::get('matrix-cpl-p', [MatrixCplPController::class, 'index']);
+    Route::put('matrix-cpl-p', [MatrixCplPController::class, 'update']);
 
     Route::get('me', [AuthController::class, 'me'])->middleware(['permission:view-dashboard']);
 });

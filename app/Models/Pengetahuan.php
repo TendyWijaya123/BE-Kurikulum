@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\DB;
 
 class Pengetahuan extends Model
@@ -19,6 +20,12 @@ class Pengetahuan extends Model
     public function kurikulum()
     {
         return $this->belongsTo(Kurikulum::class);
+    }
+
+    public function cpls(): BelongsToMany
+    {
+        return $this->belongsToMany(Cpl::class, 'cpl_p', 'p_id', 'cpl_id')
+            ->withTimestamps();
     }
 
     protected static function boot()
