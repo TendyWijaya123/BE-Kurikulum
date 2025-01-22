@@ -35,4 +35,11 @@ class MataKuliah extends Model
     {
         return  $this->hasMany(KemampuanAkhir::class);
     }
+
+    public function cpls()
+    {
+        return $this->belongsToMany(Cpl::class, 'mk_cpl', 'mk_id', 'cpl_id')
+            ->withPivot('kategori')
+            ->withTimestamps();
+    }
 }

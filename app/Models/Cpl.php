@@ -77,6 +77,13 @@ class Cpl extends Model
             ->withTimestamps();
     }
 
+    public function mataKuliahs()
+    {
+        return $this->belongsToMany(MataKuliah::class, 'mk_cpl', 'cpl_id', 'mk_id')
+            ->withPivot('kategori')
+            ->withTimestamps();
+    }
+
     public static function reindexKode(int $kurikulumId)
     {
         DB::beginTransaction();
