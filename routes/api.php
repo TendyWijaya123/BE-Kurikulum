@@ -7,6 +7,7 @@ use App\Http\Controllers\CplController;
 use App\Http\Controllers\FormulasiCpaController;
 use App\Http\Controllers\IeaController;
 use App\Http\Controllers\JurusanController;
+use App\Http\Controllers\matriksMpPMkController;
 use App\Http\Controllers\MatrixPengetahuanMateriPembelajaranController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\KkniController;
@@ -28,6 +29,7 @@ use App\Http\Controllers\MatrixCplPpmController;
 use App\Http\Controllers\MatrixCplIeaController;
 use App\Http\Controllers\MetodePembelajaranController;
 use App\Http\Controllers\PengetahuanController;
+use App\Models\MatriksPMp;
 use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
@@ -153,6 +155,10 @@ Route::middleware(['auth:api'])->group(function () {
     /* ------------------------------------ Matrix P MP API ------------------------------------------------------- */
     Route::get('matrix-p-mp', [MatrixPengetahuanMateriPembelajaranController::class, 'index']);
     Route::put('matrix-p-mp', [MatrixPengetahuanMateriPembelajaranController::class, 'update']);
+
+    /* ------------------------------------ Matrix MP P MK API ------------------------------------------------------- */
+    Route::get('matrix-mp-p-mk', [matriksMpPMkController::class, 'index']);
+    Route::put('matrix-mp-p-mk', [matriksMpPMkController::class, 'update']);
 
     /* -------------------------------------Pengetahuan API -------------------------------------------------- */
     Route::get('pengetahuan', [PengetahuanController::class, 'index']);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\KnowledgeDimension;
 use App\Models\Kurikulum;
 use Illuminate\Http\Request;
 use App\Models\MateriPembelajaran as ModelMP;
@@ -11,13 +12,15 @@ class MateriPembelajaranController extends Controller
 {
     public function index(Request $request){
         $prodiId = $request->query('prodiId');
+        $knowledgeDimensions = KnowledgeDimension::all();
         $mp = ModelMP::whereHas('kurikulum', function ($query) use ($prodiId) {
             $query->where('prodi_id', $prodiId)
                   ->where('is_active', true);
         })
+        ->with('knowledgeDimension')
         ->get();
 
-        return response()->json(data: $mp);
+        return response()->json(['data'=> $mp, 'knowledge' => $knowledgeDimensions]);
     }
 
     public function store(Request $request){
@@ -37,14 +40,21 @@ class MateriPembelajaranController extends Controller
             }
 
             foreach ($dataList as $data) {
-                ModelMP::updateOrCreate(
+                $mp = ModelMP::updateOrCreate(
                     ['id' => $data['_id'] ?? null],
                     [
                         'code' => $data['code'],
                         'description' => $data['description'],
+                        'cognitif_proses' => $data['cognitifProses'],
                         'kurikulum_id' => $kurikulumId,
                     ]
                 );
+
+                if (!empty($data['knowledgeDimension'])) {
+                    $knowledgeCodes = array_map('trim', $data['knowledgeDimension']);
+                    $knowledgeDimensions = KnowledgeDimension::whereIn('code', $knowledgeCodes)->pluck('code');
+                    $mp->knowledgeDimension()->sync($knowledgeDimensions);
+                }
             }
 
             DB::commit();
@@ -54,6 +64,7 @@ class MateriPembelajaranController extends Controller
             ], 200);
         }catch(\Exception $e)
         {
+            DB::rollBack();
             return response()->json([
                 'message' => 'Terjadi kesalahan saat menyimpan data',
                 'error' => $e->getMessage(),
@@ -69,6 +80,7 @@ class MateriPembelajaranController extends Controller
             ], 404);
         }
         // Hapus data SKSU
+        $mp->knowledgeDimension()->detach();
         $mp->delete();
 
         return response()->json([
@@ -106,6 +118,7 @@ class MateriPembelajaranController extends Controller
 
             // Loop untuk menghapus data terkait, jika ada
             foreach ($mp as $materiPembelajaran) {
+                $materiPembelajaran->knowledgeDimension()->detach();
                 // Hapus data SKSU
                 $materiPembelajaran->delete();
             }

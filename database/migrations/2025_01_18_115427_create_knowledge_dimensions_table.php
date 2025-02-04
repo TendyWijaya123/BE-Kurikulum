@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('materi_pembelajaran', function (Blueprint $table) {
-            $table->id();
-            $table->string('code');
+        Schema::create('knowledge_dimensions', function (Blueprint $table) {
+            $table->string('code')->primary();
+            $table->string('name');
             $table->string('description');
-            $table->string('cognitif_proses');
-            $table->foreignId('kurikulum_id')->constrained('kurikulums')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('materi_pembelajaran');
+        Schema::dropIfExists('knowledge_dimensions');
     }
 };
