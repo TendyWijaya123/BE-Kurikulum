@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('bk_cpls', function (Blueprint $table) {
             $table->id();
-            $table->string('cpl');
+            $table->text('cpl');
             $table->foreignId('bk_id')->constrained('bench_kurikulums')->onDelete('cascade');
 
             $table->timestamps();

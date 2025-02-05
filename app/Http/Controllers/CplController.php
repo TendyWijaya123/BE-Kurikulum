@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\CplTemplateExport;
+use App\Imports\CplImport;
 use App\Models\Cpl;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class CplController extends Controller
@@ -123,5 +126,26 @@ class CplController extends Controller
             // Menangani error umum
             return response()->json(['error' => 'Terjadi kesalahan', 'message' => $e->getMessage()], 500);
         }
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv'
+        ]);
+
+        try {
+            Excel::import(new CplImport, $request->file('file'));
+            return response()->json(['message' => 'Data berhasil diimport.'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        $fileName = 'cpl_template.xlsx';
+
+        return Excel::download(new CplTemplateExport, $fileName);
     }
 }

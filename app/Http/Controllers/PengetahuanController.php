@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\PengetahuanTemplateExport;
+use App\Imports\PengetahuanImport;
 use Illuminate\Http\Request;
 use App\Models\Pengetahuan;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PengetahuanController extends Controller
 {
@@ -133,5 +136,27 @@ class PengetahuanController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv'
+        ]);
+
+        try {
+            Excel::import(new PengetahuanImport, $request->file('file'));
+            return response()->json(['message' => 'Data berhasil diimport.'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        $fileName = 'pengetahuan_template.xlsx';
+
+        return Excel::download(new PengetahuanTemplateExport, $fileName);
     }
 }

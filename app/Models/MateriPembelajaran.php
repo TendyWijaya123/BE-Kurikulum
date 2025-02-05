@@ -30,7 +30,7 @@ class MateriPembelajaran extends Model
                     ->first();
 
                 // Determine the next number
-                $nextNumber = $lastMp ? ((int) str_replace('CPL-', '', $lastMp->code) + 1) : 1;
+                $nextNumber = $lastMp ? ((int) str_replace('MP-', '', $lastMp->code) + 1) : 1;
 
                 // Set the kode
                 $model->code = 'MP-' . $nextNumber;

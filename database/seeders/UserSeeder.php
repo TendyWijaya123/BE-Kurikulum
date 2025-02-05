@@ -15,16 +15,16 @@ class UserSeeder extends Seeder
     {
         $roleAdmin = Role::where('name', 'admin')->first();
 
-        $prodiD3TeknikKimia = Prodi::where('name', 'D-3 Teknik Kimia')->first();
+        $prodis = Prodi::all();
 
-        if ($roleAdmin && $prodiD3TeknikKimia) {
-            for ($i = 1; $i <= 15; $i++) {
+        if ($roleAdmin && $prodis->count() > 0) {
+            foreach ($prodis as $prodi) {
                 User::create([
-                    'name' => 'Admin Prodi ' . $i,
-                    'email' => 'adminprodi' . $i . '@example.com',
+                    'name' => 'Admin ' . $prodi->name,
+                    'email' => strtolower(str_replace(' ', '', $prodi->name)) . '@example.com',
                     'password' => Hash::make('password123'),
                     'role_id' => $roleAdmin->id,
-                    'prodi_id' => $prodiD3TeknikKimia->id,
+                    'prodi_id' => $prodi->id,
                 ]);
             }
         }

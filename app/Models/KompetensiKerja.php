@@ -9,7 +9,7 @@ class KompetensiKerja extends Model
 {
     use HasFactory;
 
-    protected $table = 'kompetensi_kerjas'; // Menentukan nama tabel jika berbeda dengan nama model
+    protected $table = 'kompetensi_kerjas';
     protected $fillable = [
         'kompetensi_kerja',
         'sksu_id',
