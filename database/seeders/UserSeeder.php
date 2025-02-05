@@ -15,13 +15,13 @@ class UserSeeder extends Seeder
     {
         $roleAdmin = Role::where('name', 'admin')->first();
 
-        if ($roleAdmin) {
-            // Membuat user untuk setiap prodi
-            $prodis = Prodi::all();
+        $prodis = Prodi::all();
+
+        if ($roleAdmin && $prodis->count() > 0) {
             foreach ($prodis as $prodi) {
                 User::create([
-                    'name' => $prodi->name,
-                    'email' => Str::slug($prodi->name, '.') . '@polban.ac.id',
+                    'name' => 'Admin ' . $prodi->name,
+                    'email' => strtolower(str_replace(' ', '', $prodi->name)) . '@polban.ac.id',
                     'password' => Hash::make('password123'),
                     'role_id' => $roleAdmin->id,
                     'prodi_id' => $prodi->id,

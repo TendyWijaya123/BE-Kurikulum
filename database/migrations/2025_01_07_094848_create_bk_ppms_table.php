@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('bk_ppms', function (Blueprint $table) {
             $table->id();
-            $table->string('ppm');
+            $table->text('ppm');
             $table->foreignId('bk_id')->constrained('bench_kurikulums')->onDelete('cascade');
             $table->timestamps();
         });

@@ -3,28 +3,33 @@
 namespace App\Http\Controllers;
 
 use App\Models\KnowledgeDimension;
+use App\Exports\MateriPembelajaranTemplateExport;
+use App\Imports\MateriPembelajaranImport;
 use App\Models\Kurikulum;
 use Illuminate\Http\Request;
 use App\Models\MateriPembelajaran as ModelMP;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MateriPembelajaranController extends Controller
 {
-    public function index(Request $request){
+    public function index(Request $request)
+    {
         $prodiId = $request->query('prodiId');
         $knowledgeDimensions = KnowledgeDimension::all();
         $mp = ModelMP::whereHas('kurikulum', function ($query) use ($prodiId) {
             $query->where('prodi_id', $prodiId)
-                  ->where('is_active', true);
+                ->where('is_active', true);
         })
         ->with('knowledgeDimension')
-        ->get();
+            ->get();
 
         return response()->json(['data'=> $mp, 'knowledge' => $knowledgeDimensions]);
     }
 
-    public function store(Request $request){
-        try{
+    public function store(Request $request)
+    {
+        try {
 
             DB::beginTransaction();
 
@@ -32,7 +37,7 @@ class MateriPembelajaranController extends Controller
             $kurikulumId = Kurikulum::where('prodi_id', $dataList[0]['prodiId'])
                 ->where('is_active', true)
                 ->value('id');
-            
+
             if (!$kurikulumId) {
                 return response()->json([
                     'message' => "Kurikulum aktif tidak ditemukan untuk prodi_id: {$request[0]['prodiId']}",
@@ -62,8 +67,7 @@ class MateriPembelajaranController extends Controller
             return response()->json([
                 'success' => 'Data berhasil disimpan',
             ], 200);
-        }catch(\Exception $e)
-        {
+        } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'message' => 'Terjadi kesalahan saat menyimpan data',
@@ -72,7 +76,8 @@ class MateriPembelajaranController extends Controller
         }
     }
 
-    public function destroy($id){
+    public function destroy($id)
+    {
         $mp = ModelMP::find($id);
         if (!$mp) {
             return response()->json([
@@ -131,12 +136,33 @@ class MateriPembelajaranController extends Controller
         } catch (\Exception $e) {
 
             DB::rollBack();
-            
+
             return response()->json([
                 'data' => $ids,
                 'message' => 'Terjadi kesalahan saat menghapus data',
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv'
+        ]);
+
+        try {
+            Excel::import(new MateriPembelajaranImport, $request->file('file'));
+            return response()->json(['message' => 'Data berhasil diimport.'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        $fileName = 'materipembelajaran_template.xlsx';
+
+        return Excel::download(new MateriPembelajaranTemplateExport, $fileName);
     }
 }

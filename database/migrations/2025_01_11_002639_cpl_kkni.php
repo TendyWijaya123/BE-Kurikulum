@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('cpl_kkni', function (Blueprint $table) {
             $table->id();
             $table->string('code');
-            $table->string('description');
+            $table->text('description');
             $table->foreignId('kurikulum_id')->constrained('kurikulums')->onDelete('cascade');
 
             $table->timestamps();

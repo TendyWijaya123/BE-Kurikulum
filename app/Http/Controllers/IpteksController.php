@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\IpteksTemplateExport;
+use App\Imports\IpteksImport;
 use Illuminate\Http\Request;
 use App\Models\IpteksPengetahuan;
 use App\Models\IpteksTeknologi;
 use App\Models\IpteksSeni;
+use Maatwebsite\Excel\Facades\Excel;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class IpteksController extends Controller
@@ -158,5 +161,26 @@ class IpteksController extends Controller
         return response()->json([
             'message' => ucfirst($type) . ' berhasil dihapus.',
         ], 200);
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv'
+        ]);
+
+        try {
+            Excel::import(new IpteksImport, $request->file('file'));
+            return response()->json(['message' => 'Data berhasil diimport.'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        $fileName = 'ipteks_template.xlsx';
+
+        return Excel::download(new IpteksTemplateExport, $fileName);
     }
 }

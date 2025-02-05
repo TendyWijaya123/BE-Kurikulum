@@ -33,6 +33,8 @@ use App\Http\Controllers\MetodePembelajaranController;
 use App\Http\Controllers\PengetahuanController;
 use App\Models\MatriksPMp;
 use App\Http\Controllers\MatrixCplPController;
+use App\Imports\PeranIndustriImport;
+use App\Models\BenchKurikulum;
 use App\Http\Controllers\permissionController;
 use Illuminate\Support\Facades\Route;
 
@@ -45,6 +47,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('users/{id}', [UserController::class, 'show']);
     Route::post('users', [UserController::class, 'store']);
     Route::put('users/{id}', [UserController::class, 'update']);
+    Route::delete('users/{id}', [UserController::class, 'destroy']);
 
 
     /* ------------------------------------ Kurikulum API --------------------------------------------------- */
@@ -98,24 +101,32 @@ Route::middleware(['auth:api'])->group(function () {
     /* ---------------------------------------SKSU API --------------------------------------------------*/
     Route::get('sksu', [SksuController::class, 'index']);
     Route::post('sksu', [SksuController::class, 'store']);
+    Route::get('sksu/template', [SksuController::class, 'downloadTemplate']);
+    Route::post('sksu/import', [SksuController::class, 'import']);
     Route::delete('sksu/{id}', [SksuController::class, 'destroy']);
     Route::delete('sksu', [SksuController::class, 'destroySksus']);
 
     /* ---------------------------------------Bench Kurikulums API --------------------------------------------------*/
     Route::get('/bench-kurikulums', [BenchKurikulumsController::class, 'index']);
     Route::post('/bench-kurikulums', [BenchKurikulumsController::class, 'store']);
+    Route::get('bench-kurikulums/template', [BenchKurikulumsController::class, 'downloadTemplate']);
+    Route::post('bench-kurikulums/import', [BenchKurikulumsController::class, 'import']);
     Route::delete('/bench-kurikulums/{id}', [BenchKurikulumsController::class, 'destroy']);
     Route::delete('/bench-kurikulums', [BenchKurikulumsController::class, 'destroyBenchKurikulums']);
 
     /* ---------------------------------------CPL KKNI API --------------------------------------------------*/
     Route::get('/kkni', [KkniController::class, 'index']);
     Route::post('/kkni', [KkniController::class, 'store']);
+    Route::get('kkni/template', [KkniController::class, 'downloadTemplate']);
+    Route::post('kkni/import', [KkniController::class, 'import']);
     Route::delete('/kkni/{id}', [KkniController::class, 'destroy']);
     Route::delete('/kkni', [KkniController::class, 'destroyCpkKknis']);
 
     /* ---------------------------------------Materi Pembelajaran API --------------------------------------------------*/
     Route::get('/materi-pembelajaran', [MateriPembelajaranController::class, 'index']);
     Route::post('/materi-pembelajaran', [MateriPembelajaranController::class, 'store']);
+    Route::get('materi-pembelajaran/template', [MateriPembelajaranController::class, 'downloadTemplate']);
+    Route::post('materi-pembelajaran/import', [MateriPembelajaranController::class, 'import']);
     Route::delete('/materi-pembelajaran/{id}', [MateriPembelajaranController::class, 'destroy']);
     Route::delete('/materi-pembelajaran', [MateriPembelajaranController::class, 'destroyMateriPembelajarans']);
 
@@ -143,11 +154,16 @@ Route::middleware(['auth:api'])->group(function () {
     /* --------------------------------------CPL API--------------------------------------------------- */
     Route::get('cpls', [CplController::class, 'index']);
     Route::post('cpls/upsert', [CplController::class, 'upsert']);
+    Route::get('cpls/template', [CplController::class, 'downloadTemplate']);
+    Route::post('cpls/import', [CplController::class, 'import']);
     Route::delete('cpls/{id}', [CplController::class, 'delete']);
+
 
     /* --------------------------------------PPM API--------------------------------------------------- */
     Route::get('ppms', [PpmController::class, 'index']);
     Route::post('ppms/upsert', [PpmController::class, 'upsert']);
+    Route::get('ppms/template', [PpmController::class, 'downloadTemplate']);
+    Route::post('ppms/import', [PpmController::class, 'import']);
     Route::delete('ppms/{id}', [PpmController::class, 'delete']);
 
 
@@ -155,10 +171,14 @@ Route::middleware(['auth:api'])->group(function () {
 
     Route::get('peran-industri', [PeranIndustriController::class, 'index']);
     Route::post('peran-industri', [PeranIndustriController::class, 'store']);
+    Route::get('peran-industri/template', [PeranIndustriController::class, 'downloadTemplate']);
+    Route::post('peran-industri/import', [PeranIndustriController::class, 'import']);
     Route::put('peran-industri/{id}', [PeranIndustriController::class, 'update']);
     Route::delete('peran-industri/{id}', [PeranIndustriController::class, 'destroy']);
     /* ------------------------------------ Ipteks API ------------------------------------------------------- */
     Route::get('ipteks', [IpteksController::class, 'index']);
+    Route::get('ipteks/template', [IpteksController::class, 'downloadTemplate']);
+    Route::post('ipteks/import', [IpteksController::class, 'import']);
     Route::post('ipteks/{type}', [IpteksController::class, 'create']);
     Route::put('ipteks/{type}/{id}', [IpteksController::class, 'update']);
     Route::delete('ipteks/{type}/{id}', [IpteksController::class, 'destroy']);
@@ -185,6 +205,8 @@ Route::middleware(['auth:api'])->group(function () {
     /* -------------------------------------Pengetahuan API -------------------------------------------------- */
     Route::get('pengetahuan', [PengetahuanController::class, 'index']);
     Route::post('pengetahuan', [PengetahuanController::class, 'create']);
+    Route::get('pengetahuan/template', [PengetahuanController::class, 'downloadTemplate']);
+    Route::post('pengetahuan/import', [PengetahuanController::class, 'import']);
     Route::put('pengetahuan/{id}', [PengetahuanController::class, 'update']);
     Route::delete('pengetahuan/{id}', [PengetahuanController::class, 'destroy']);
 
