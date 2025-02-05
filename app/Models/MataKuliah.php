@@ -36,6 +36,10 @@ class MataKuliah extends Model
         return  $this->hasMany(KemampuanAkhir::class);
     }
 
+    public function matriksPMp(){
+        return $this->belongsToMany(MatriksPMp::class, 'mp_p_mk', 'mp_p_id', 'mk_id');
+    }
+
     public function cpls()
     {
         return $this->belongsToMany(Cpl::class, 'mk_cpl', 'mk_id', 'cpl_id')

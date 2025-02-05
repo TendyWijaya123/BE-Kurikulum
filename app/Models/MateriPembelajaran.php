@@ -15,6 +15,7 @@ class MateriPembelajaran extends Model
     protected $fillable = [
         'code',
         'description',
+        'cognitif_proses',
         'kurikulum_id',
     ];
 
@@ -24,7 +25,6 @@ class MateriPembelajaran extends Model
 
         static::saving(function ($model) {
             if (!$model->code) {
-                // Get the highest kode for the given kurikulum_id
                 $lastMp = self::where('kurikulum_id', $model->kurikulum_id)
                     ->orderBy('id', 'desc')
                     ->first();
@@ -38,8 +38,6 @@ class MateriPembelajaran extends Model
         });
 
         static::deleted(function ($model) {
-
-
             self::reindexKode($model->kurikulum_id);
         });
     }
@@ -54,9 +52,15 @@ class MateriPembelajaran extends Model
         return $this->belongsToMany(Pengetahuan::class, 'p_mp', 'p_id', 'mp_id');
     }
 
-    public static function reindexKode(int $kurikulumId)
+    public function knowledgeDimension()
+    {
+        return $this->belongsToMany(KnowledgeDimension::class, 'knowledge_mp', 'mp_id', 'code_knowledge_dimension', 'id', 'code');
+    }
+
+    public static function reindexKode(int $kurikulumId) 
     {
         DB::beginTransaction();
+
         try {
             $mps = self::where('kurikulum_id', $kurikulumId)
                 ->orderBy('id', 'asc')

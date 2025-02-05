@@ -18,7 +18,7 @@ class RoleHasPermissionSeeder extends Seeder
             $adminRole->permissions()->sync($permissions);
         }
 
-        $p2mppRole = Role::firstOrCreate(['name' => 'p2mpp']);
+        $p2mppRole = Role::firstOrCreate(['name' => 'prodi']);
         if ($p2mppRole) {
             $p2mppRole->permissions()->sync($permissions);
         }

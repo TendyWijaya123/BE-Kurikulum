@@ -2,73 +2,63 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Permission;
 use Illuminate\Http\Request;
-use App\Models\MateriPembelajaran as ModelMP;
 
-class MateriPembelajaran extends Controller
+class permissionController extends Controller
 {
-    public function index(Request $request){
-        $prodiId = $request->query('prodiId');
-        $mp = ModelMP::
-        whereHas('kurikulum', function ($query) use ($prodiId) {
-            $query->where('prodi_id', $prodiId);
-        })
-        ->get();
+    public function index(){
+        $roles = Permission::all();
 
-        return response()->json(data: $mp);
+        return response()->json($roles);
     }
 
     public function store(Request $request){
-        try{
+        try {
             $dataList = $request->all();
-            $kurikulumId = ModelMP::where('prodi_id', $dataList[0]['prodiId'])
-                ->where('is_active', true)
-                ->value('id');
-            
-            if (!$kurikulumId) {
-                return response()->json([
-                    'message' => "Kurikulum aktif tidak ditemukan untuk prodi_id: {$request[0]['prodiId']}",
-                ], 404);
-            }
 
-            foreach ($dataList as $data) {
-                ModelMP::updateOrCreate(
+            foreach ($dataList as $data){
+                Permission::updateOrCreate(
                     ['id' => $data['_id'] ?? null],
                     [
-                        'code' => $data['code'],
-                        'description' => $data['description'],
-                        'kurikulum_id' => $kurikulumId,
+                        'name' => $data['name'],
                     ]
                 );
             }
+
             return response()->json([
                 'success' => 'Data berhasil disimpan',
             ], 200);
-        }catch(\Exception $e)
-        {
+        } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Terjadi kesalahan saat menyimpan data',
-                'error' => $e->getMessage(),
+                'error' => 'Terjadi kesalahan saat menyimpan data',
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
 
+    public function getRoleDropdown()
+    {
+        $roles = Permission::select('id', 'name')->get();
+
+        return response()->json($roles);
+    }
+
     public function destroy($id){
-        $mp = ModelMP::find($id);
-        if (!$mp) {
+        $sksu = Permission::find($id);
+        if (!$sksu) {
             return response()->json([
-                'message' => 'materi pembelajaran not found.',
+                'message' => 'role not found.',
             ], 404);
         }
-        // Hapus data SKSU
-        $mp->delete();
+        $sksu->delete();
 
         return response()->json([
-            'message' => `materi pembelajaran berhasil dihapus`
+            'message' => `role berhasil dihapus`
         ], 200);
     }
 
-    public function destroyCpkKknis(Request $request)
+    public function destroyPermissions(Request $request)
     {
         try {
             // Ambil daftar ID dari request
@@ -84,9 +74,9 @@ class MateriPembelajaran extends Controller
             $ids = array_column($data, '_id');
 
             // Cari SKSU berdasarkan ID
-            $mp = ModelMP::whereIn('id', $ids)->get();
+            $permissions = Permission::whereIn('id', $ids)->get();
 
-            if ($mp->isEmpty()) {
+            if ($permissions->isEmpty()) {
                 return response()->json([
                     'data' => $ids,
                     'message' => 'Data tidak ditemukan untuk ID yang diberikan',
@@ -94,9 +84,9 @@ class MateriPembelajaran extends Controller
             }
 
             // Loop untuk menghapus data terkait, jika ada
-            foreach ($mp as $materiPembelajaran) {
+            foreach ($permissions as $permission){
                 // Hapus data SKSU
-                $materiPembelajaran->delete();
+                $permission->delete();
             }
 
             return response()->json([

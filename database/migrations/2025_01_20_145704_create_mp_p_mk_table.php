@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('materi_pembelajaran', function (Blueprint $table) {
+        Schema::create('mp_p_mk', function (Blueprint $table) {
             $table->id();
-            $table->string('code');
-            $table->string('description');
-            $table->string('cognitif_proses');
-            $table->foreignId('kurikulum_id')->constrained('kurikulums')->onDelete('cascade');
+            $table->foreignId('mp_p_id')->constrained('p_mp')->onDelete('cascade');
+            $table->foreignId('mk_id')->constrained('mata_kuliahs')->onDelete('cascade');
             $table->timestamps();
+
+            $table->unique(['mp_p_id', 'mk_id']);
         });
     }
 
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('materi_pembelajaran');
+        Schema::dropIfExists('mp_p_mk');
     }
 };
