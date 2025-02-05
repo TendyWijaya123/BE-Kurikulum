@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Role;
+use App\Models\Permission;
 use Illuminate\Http\Request;
 
-class RoleController extends Controller
+class permissionController extends Controller
 {
     public function index(){
-        $roles = Role::all();
+        $roles = Permission::all();
 
         return response()->json($roles);
     }
@@ -18,7 +18,7 @@ class RoleController extends Controller
             $dataList = $request->all();
 
             foreach ($dataList as $data){
-                Role::updateOrCreate(
+                Permission::updateOrCreate(
                     ['id' => $data['_id'] ?? null],
                     [
                         'name' => $data['name'],
@@ -39,13 +39,13 @@ class RoleController extends Controller
 
     public function getRoleDropdown()
     {
-        $roles = Role::select('id', 'name')->get();
+        $roles = Permission::select('id', 'name')->get();
 
         return response()->json($roles);
     }
 
     public function destroy($id){
-        $sksu = Role::find($id);
+        $sksu = Permission::find($id);
         if (!$sksu) {
             return response()->json([
                 'message' => 'role not found.',
@@ -58,7 +58,7 @@ class RoleController extends Controller
         ], 200);
     }
 
-    public function destroyRoles(Request $request)
+    public function destroyPermissions(Request $request)
     {
         try {
             // Ambil daftar ID dari request
@@ -74,9 +74,9 @@ class RoleController extends Controller
             $ids = array_column($data, '_id');
 
             // Cari SKSU berdasarkan ID
-            $roles = Role::whereIn('id', $ids)->get();
+            $permissions = Permission::whereIn('id', $ids)->get();
 
-            if ($roles->isEmpty()) {
+            if ($permissions->isEmpty()) {
                 return response()->json([
                     'data' => $ids,
                     'message' => 'Data tidak ditemukan untuk ID yang diberikan',
@@ -84,9 +84,9 @@ class RoleController extends Controller
             }
 
             // Loop untuk menghapus data terkait, jika ada
-            foreach ($roles as $role) {
-                // Hapus data Role
-                $role->delete();
+            foreach ($permissions as $permission){
+                // Hapus data SKSU
+                $permission->delete();
             }
 
             return response()->json([

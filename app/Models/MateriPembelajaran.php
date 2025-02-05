@@ -25,13 +25,12 @@ class MateriPembelajaran extends Model
 
         static::saving(function ($model) {
             if (!$model->code) {
-                // Get the highest kode for the given kurikulum_id
                 $lastMp = self::where('kurikulum_id', $model->kurikulum_id)
                     ->orderBy('id', 'desc')
                     ->first();
 
                 // Determine the next number
-                $nextNumber = $lastMp ? ((int) str_replace('CPL-', '', $lastMp->code) + 1) : 1;
+                $nextNumber = $lastMp ? ((int) str_replace('MP-', '', $lastMp->code) + 1) : 1;
 
                 // Set the kode
                 $model->code = 'MP-' . $nextNumber;
@@ -39,8 +38,6 @@ class MateriPembelajaran extends Model
         });
 
         static::deleted(function ($model) {
-
-
             self::reindexKode($model->kurikulum_id);
         });
     }

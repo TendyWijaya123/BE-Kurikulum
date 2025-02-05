@@ -12,7 +12,7 @@ class RoleSeeder extends Seeder
         // Daftar roles yang akan dimasukkan ke dalam tabel
         $roles = [
             'admin',
-            'p2mpp',
+            'prodi',
         ];
 
         foreach ($roles as $role) {
