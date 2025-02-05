@@ -2,33 +2,38 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\BenchKurikulumTemplateExport;
+use App\Imports\BenchKurikulumImport;
 use Illuminate\Http\Request;
 use App\Models\BenchKurikulum as BenchKurikulumModel;
 use App\Models\Kurikulum;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BenchKurikulumsController extends Controller
 {
-    public function index(Request $request){
+    public function index(Request $request)
+    {
         $prodiId = $request->query('prodiId');
         $benchKurikulums = BenchKurikulumModel::with('bkCpls')->with('bkPpms')
-        ->whereHas('kurikulum', function ($query) use ($prodiId) {
-            $query->where('prodi_id', $prodiId)->where('is_active', true);
-        })
-        ->get();
+            ->whereHas('kurikulum', function ($query) use ($prodiId) {
+                $query->where('prodi_id', $prodiId)->where('is_active', true);
+            })
+            ->get();
 
         return response()->json($benchKurikulums);
     }
 
-    public function store(Request $request){
-        try{
+    public function store(Request $request)
+    {
+        try {
             DB::beginTransaction();
 
             $dataList = $request->all();
             $kurikulumId = Kurikulum::where('prodi_id', $dataList[0]['prodiId'])
                 ->where('is_active', true)
                 ->value('id');
-            
+
             if (!$kurikulumId) {
                 return response()->json([
                     'message' => "Kurikulum aktif tidak ditemukan untuk prodi_id: {$request[0]['prodiId']}",
@@ -66,12 +71,11 @@ class BenchKurikulumsController extends Controller
             }
 
             DB::commit();
-            
+
             return response()->json([
                 'success' => 'Data berhasil disimpan',
             ], 200);
-        }catch(\Exception $e)
-        {
+        } catch (\Exception $e) {
             DB::rollBack();
 
             return response()->json([
@@ -81,7 +85,8 @@ class BenchKurikulumsController extends Controller
         }
     }
 
-    public function destroy($id){
+    public function destroy($id)
+    {
         $benchKurikulums = BenchKurikulumModel::find($id);
         if (!$benchKurikulums) {
             return response()->json([
@@ -141,12 +146,33 @@ class BenchKurikulumsController extends Controller
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return response()->json([
                 'data' => $ids,
                 'message' => 'Terjadi kesalahan saat menghapus data',
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv'
+        ]);
+
+        try {
+            Excel::import(new BenchKurikulumImport, $request->file('file'));
+            return response()->json(['message' => 'Data berhasil diimport.'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        $fileName = 'benchkurikulum_template.xlsx';
+
+        return Excel::download(new BenchKurikulumTemplateExport, $fileName);
     }
 }

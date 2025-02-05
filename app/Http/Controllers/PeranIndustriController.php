@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\PeranIndustriTemplateExport;
+use App\Imports\PengetahuanImport;
+use App\Imports\PeranIndustriImport;
 use Illuminate\Http\Request;
 use App\Models\PeranIndustri;
 use App\Models\PeranIndustriDeskripsi;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class PeranIndustriController extends Controller
@@ -141,5 +145,27 @@ class PeranIndustriController extends Controller
             DB::rollBack();
             return response()->json(['message' => 'Terjadi kesalahan', 'error' => $e->getMessage()], 500);
         }
+    }
+
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv'
+        ]);
+
+        try {
+            Excel::import(new PeranIndustriImport, $request->file('file'));
+            return response()->json(['message' => 'Data berhasil diimport.'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        $fileName = 'peranindustri_template.xlsx';
+
+        return Excel::download(new PeranIndustriTemplateExport, $fileName);
     }
 }

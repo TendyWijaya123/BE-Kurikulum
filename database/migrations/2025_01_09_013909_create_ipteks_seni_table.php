@@ -13,7 +13,7 @@ class CreateIpteksSeniTable extends Migration
     {
         Schema::create('ipteks_seni', function (Blueprint $table) {
             $table->id();
-            $table->string('seni');
+            $table->text('seni');
             $table->foreignId('kurikulum_id')->constrained('kurikulums')->onDelete('cascade');
             $table->timestamps();
         });

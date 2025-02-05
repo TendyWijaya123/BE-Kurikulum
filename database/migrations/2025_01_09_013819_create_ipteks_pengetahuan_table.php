@@ -13,7 +13,7 @@ class CreateIpteksPengetahuanTable extends Migration
     {
         Schema::create('ipteks_pengetahuan', function (Blueprint $table) {
             $table->id();
-            $table->string('ilmu_pengetahuan');
+            $table->text('ilmu_pengetahuan');
             $table->foreignId('kurikulum_id')->constrained('kurikulums')->onDelete('cascade');
             $table->timestamps();
         });
