@@ -3,10 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Kurikulum;
-use App\Models\IpteksPengetahuan;
-use App\Models\IpteksTeknologi;
-use App\Models\IpteksSeni;
+use App\Models\Ipteks;
 
 class IpteksSeeder extends Seeder
 {
@@ -15,56 +12,25 @@ class IpteksSeeder extends Seeder
      */
     public function run()
     {
-        // Menggunakan kurikulum yang sudah ada dari KurikulumSeeder
-        $kurikulum = Kurikulum::where('tahun_awal', 2020)
-            ->where('tahun_akhir', 2024)
-            ->where('prodi_id', 1)
-            ->first();
+        Ipteks::create([
+            'kategori' => 'ilmu_pengetahuan',
+            'deskripsi' => 'Contoh deskripsi ilmu pengetahuan',
+            'link_sumber' => 'http://example.com',
+            'kurikulum_id' => 1, // Ganti dengan ID kurikulum yang sesuai
+        ]);
 
-        if (!$kurikulum) {
-            $this->command->info('Kurikulum tidak ditemukan. Pastikan menjalankan KurikulumSeeder terlebih dahulu.');
-            return;
-        }
-        ;
+        Ipteks::create([
+            'kategori' => 'teknologi',
+            'deskripsi' => 'Contoh deskripsi teknologi',
+            'link_sumber' => 'http://example.com',
+            'kurikulum_id' => 1,
+        ]);
 
-        // Seeder untuk ipteks_pengetahuan
-        $pengetahuan = [
-            'Fisika',
-            'Matematika',
-        ];
-
-        foreach ($pengetahuan as $ilmu) {
-            IpteksPengetahuan::firstOrCreate([
-                'ilmu_pengetahuan' => $ilmu,
-                'kurikulum_id' => $kurikulum->id,
-            ]);
-        }
-
-        // Seeder untuk ipteks_teknologi
-        $teknologi = [
-            'AI',
-            'Blockchain',
-        ];
-
-        foreach ($teknologi as $tech) {
-            IpteksTeknologi::firstOrCreate([
-                'teknologi' => $tech,
-                'kurikulum_id' => $kurikulum->id,
-            ]);
-        }
-
-        // Seeder untuk ipteks_seni
-        $seni = [
-            'Musik',
-            'Seni Rupa',
-        ];
-
-        foreach ($seni as $art) {
-            IpteksSeni::firstOrCreate([
-                'seni' => $art,
-                'kurikulum_id' => $kurikulum->id,
-            ]);
-        }
+        Ipteks::create([
+            'kategori' => 'seni',
+            'deskripsi' => 'Contoh deskripsi seni',
+            'link_sumber' => 'http://example.com',
+            'kurikulum_id' => 1,
+        ]);
     }
 }
-;
