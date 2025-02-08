@@ -80,7 +80,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::put('jurusans/{id}', [JurusanController::class, 'update']);
     Route::delete('jurusans/{id}', [JurusanController::class, 'destroy']);
 
-     /* ---------------------------------------Role API ------------------------------------------------*/
+    /* ---------------------------------------Role API ------------------------------------------------*/
 
     Route::get('roles', [RoleController::class, 'index']);
     Route::post('roles', [RoleController::class, 'store']);
@@ -170,11 +170,10 @@ Route::middleware(['auth:api'])->group(function () {
     /* --------------------------------------Peran Industri API--------------------------------------------------- */
 
     Route::get('peran-industri', [PeranIndustriController::class, 'index']);
-    Route::post('peran-industri', [PeranIndustriController::class, 'store']);
+    Route::post('peran-industri/upsert', [PeranIndustriController::class, 'upsert']);
     Route::get('peran-industri/template', [PeranIndustriController::class, 'downloadTemplate']);
     Route::post('peran-industri/import', [PeranIndustriController::class, 'import']);
-    Route::put('peran-industri/{id}', [PeranIndustriController::class, 'update']);
-    Route::delete('peran-industri/{id}', [PeranIndustriController::class, 'destroy']);
+    Route::delete('peran-industri/{id}', [PeranIndustriController::class, 'delete']);
     /* ------------------------------------ Ipteks API ------------------------------------------------------- */
     Route::get('ipteks', [IpteksController::class, 'index']);
     Route::get('ipteks/template', [IpteksController::class, 'downloadTemplate']);

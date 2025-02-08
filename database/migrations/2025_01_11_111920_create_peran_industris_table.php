@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('peran_industris', function (Blueprint $table) {
             $table->id();
             $table->string("jabatan");
+            $table->text("deskripsi");
             $table->foreignId("kurikulum_id")->constrained('kurikulums');
             $table->timestamps();
         });
