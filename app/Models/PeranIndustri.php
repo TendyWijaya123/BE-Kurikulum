@@ -23,6 +23,7 @@ class PeranIndustri extends Model
      */
     protected $fillable = [
         'jabatan',
+        'deskripsi',
         'kurikulum_id',
     ];
 
@@ -34,10 +35,5 @@ class PeranIndustri extends Model
     public function kurikulum()
     {
         return $this->belongsTo(Kurikulum::class);
-    }
-
-    public function  peranIndustriDeskripsis()
-    {
-        return $this->hasMany(PeranIndustriDeskripsi::class);
     }
 }

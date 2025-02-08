@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -13,8 +14,17 @@ class MataKuliah extends Model
         'kode',
         'nama',
         'tujuan',
+        'semester',
+        'teori_bt',
+        'teori_pt',
+        'teori_m',
+        'praktek_bt',
+        'praktek_pt',
+        'praktek_m',
         'kurikulum_id'
     ];
+
+
 
     public function kurikulum()
     {
@@ -36,7 +46,8 @@ class MataKuliah extends Model
         return  $this->hasMany(KemampuanAkhir::class);
     }
 
-    public function matriksPMp(){
+    public function matriksPMp()
+    {
         return $this->belongsToMany(MatriksPMp::class, 'mp_p_mk', 'mp_p_id', 'mk_id');
     }
 
