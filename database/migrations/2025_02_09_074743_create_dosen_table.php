@@ -11,10 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('bk_ppms', function (Blueprint $table) {
+        Schema::create('dosens', function (Blueprint $table) {
             $table->id();
-            $table->text('ppm');
-            $table->foreignId('bk_id')->constrained('bench_kurikulums')->onDelete('cascade');
+            $table->string('nip');
+            $table->string('nama');
+            $table->string('email');
+            $table->string('password');
+            $table->foreignId('role_id')->constrained('prodis')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -24,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('bk_ppms');
+        Schema::dropIfExists('dosens');
     }
 };

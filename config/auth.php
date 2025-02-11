@@ -44,6 +44,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'dosen' => [ 
+            'driver' => 'jwt',
+            'provider' => 'dosens',
+        ],
     ],
 
     /*
@@ -67,6 +71,10 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
+        ],
+        'dosens' => [ // Tambahkan ini
+            'driver' => 'eloquent',
+            'model' => App\Models\Dosen::class,
         ],
 
         // 'users' => [

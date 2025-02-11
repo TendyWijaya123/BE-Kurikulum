@@ -46,4 +46,8 @@ class MataKuliah extends Model
             ->withPivot('kategori')
             ->withTimestamps();
     }
+
+    public function dosens(){
+        return $this->belongsToMany(Dosen::class, 'dosen_has_matkul',  'mk_id', 'dosen_id');
+    }
 }

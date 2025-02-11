@@ -31,4 +31,9 @@ class Prodi extends Model
     {
         return $this->hasMany(Kurikulum::class);
     }
+
+    public function dosen()
+    {
+        return $this->belongsToMany(Dosen::class, 'dosen_has_prodi');
+    }
 }

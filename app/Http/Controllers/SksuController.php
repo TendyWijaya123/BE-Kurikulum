@@ -15,8 +15,7 @@ class SksuController extends Controller
     public function index(Request $request)
     {
         $prodiId = $request->query('prodiId');
-        $sksus = sksuModel::with('kompetensiKerja')
-            ->whereHas('kurikulum', function ($query) use ($prodiId) {
+        $sksus = sksuModel::whereHas('kurikulum', function ($query) use ($prodiId) {
                 $query->where('prodi_id', $prodiId)->where('is_active', true);
             })
             ->get();
@@ -48,20 +47,10 @@ class SksuController extends Controller
                         'profil_lulusan' => $data['profilLulusan'],
                         'kualifikasi' => $data['kualifikasi'],
                         'kategori' => $data['kategori'],
+                        'kompetensi_kerja' => $data['kompetensiKerja'],
                         'kurikulum_id' => $kurikulumId,
                     ]
                 );
-
-                // Menyimpan kompetensi kerja terkait
-                if (!empty($data['kompetensiKerja'])) {
-                    // Hapus data lama jika ada (untuk memperbarui data)
-                    $sksu->kompetensiKerja()->delete();
-                }
-                foreach ($data['kompetensiKerja'] as $kompetensi) {
-                    $sksu->kompetensiKerja()->create([
-                        'kompetensi_kerja' => $kompetensi,
-                    ]);
-                }
             }
 
             DB::commit();
@@ -87,8 +76,6 @@ class SksuController extends Controller
                 'message' => 'sksu not found.',
             ], 404);
         }
-        $sksu->kompetensiKerja()->delete();
-        // Hapus data SKSU
         $sksu->delete();
 
         return response()->json([
@@ -123,8 +110,6 @@ class SksuController extends Controller
 
             // Loop untuk menghapus data terkait, jika ada
             foreach ($sksus as $sksu) {
-                // Hapus data di tabel kompetensi kerja terkait
-                $sksu->kompetensiKerja()->delete();
 
                 // Hapus data SKSU
                 $sksu->delete();

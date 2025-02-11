@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('profil_lulusan');
             $table->string('kualifikasi');
             $table->enum('kategori', ['Siap Kerja', 'Siap Usaha']);
+            $table->text('kompetensi_kerja');
             $table->foreignId('kurikulum_id')->constrained('kurikulums')->onDelete('cascade');
             $table->timestamps();
         });

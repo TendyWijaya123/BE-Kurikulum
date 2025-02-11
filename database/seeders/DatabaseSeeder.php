@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             MetodePembelajaranSeeder::class,
             FormulasiCpaSeeder::class,
             KnowledgeDimensionSedeer::class,
+            DosenSeeder::class,
         ]);
     }
 }
