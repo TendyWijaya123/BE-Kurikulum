@@ -24,7 +24,6 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'password',
         'prodi_id',
-        'role_id',
     ];
 
     /**
@@ -66,15 +65,6 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsTo(Prodi::class);
     }
 
-    public function role()
-    {
-        return $this->belongsTo(Role::class);
-    }
-
-    public function permissions()
-    {
-        return $this->role->permissions();
-    }
 
     public function activeKurikulum()
     {
@@ -82,13 +72,5 @@ class User extends Authenticatable implements JWTSubject
             ->where('is_active', true)
             ->orderBy('tahun_awal', 'desc')
             ->first();
-    }
-
-
-    public function hasPermission($permissionName)
-    {
-        $permissions = $this->role->permissions->pluck('name')->toArray();
-
-        return in_array($permissionName, $permissions);
     }
 }
