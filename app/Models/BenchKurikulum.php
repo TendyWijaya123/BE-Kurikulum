@@ -13,6 +13,8 @@ class BenchKurikulum extends Model
     protected $fillable = [
         'program_studi',
         'kategori',
+        'cpl',
+        'ppm',
         'kurikulum_id',
     ];
 
@@ -24,15 +26,5 @@ class BenchKurikulum extends Model
     public function kurikulum()
     {
         return $this->belongsTo(Kurikulum::class);
-    }
-
-    public function bkCpls()
-    {
-        return $this->hasMany(BkCpl::class, 'bk_id', 'id');
-    }
-
-    public function bkPpms()
-    {
-        return $this->hasMany(BkPpm::class, 'bk_id', 'id');
     }
 }

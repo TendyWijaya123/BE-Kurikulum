@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('program_studi');
             $table->enum('kategori', ['Luar Negeri', 'Dalam Negeri']);
+            $table->text('cpl')->nullable();
+            $table->text('ppm')->nullable();
             $table->foreignId('kurikulum_id')->constrained('kurikulums')->onDelete('cascade');
             $table->timestamps();
         });

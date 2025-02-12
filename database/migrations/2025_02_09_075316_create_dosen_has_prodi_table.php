@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('bk_cpls', function (Blueprint $table) {
+        Schema::create('dosen_has_prodi', function (Blueprint $table) {
             $table->id();
-            $table->text('cpl');
-            $table->foreignId('bk_id')->constrained('bench_kurikulums')->onDelete('cascade');
-
+            $table->foreignId('dosen_id')->constrained('dosens')->onDelete('cascade');
+            $table->foreignId('prodi_id')->constrained('prodis')->onDelete('cascade');
             $table->timestamps();
+
+            $table->unique(['dosen_id', 'prodi_id']);
         });
     }
 
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('bk_cpls');
+        Schema::dropIfExists('dosen_has_prodi');
     }
 };
