@@ -148,12 +148,11 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('peran-industri/template', [PeranIndustriController::class, 'downloadTemplate']);
     Route::post('peran-industri/import', [PeranIndustriController::class, 'import']);
     Route::delete('peran-industri/{id}', [PeranIndustriController::class, 'delete']);
-
     /* ------------------------------------ Ipteks API ------------------------------------------------------- */
     Route::get('ipteks', [IpteksController::class, 'index']);
-    Route::post('ipteks', [IpteksController::class, 'store']);
+    Route::post('ipteks', [IpteksController::class, 'create']);
+    Route::put('ipteks/{id}', [IpteksController::class, 'update']);
     Route::delete('ipteks/{id}', [IpteksController::class, 'destroy']);
-    Route::delete('ipteks', [IpteksController::class, 'destroyMultiple']);
     Route::get('ipteks/template', [IpteksController::class, 'downloadTemplate']);
     Route::post('ipteks/import', [IpteksController::class, 'import']);
 
