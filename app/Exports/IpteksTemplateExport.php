@@ -9,6 +9,6 @@ class IpteksTemplateExport implements WithHeadings
 {
     public function headings(): array
     {
-        return ['seni', 'teknologi', 'pengetahuan'];
+        return ['kategori', 'deskripsi', 'link_sumber'];
     }
 }

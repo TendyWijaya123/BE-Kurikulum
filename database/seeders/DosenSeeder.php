@@ -15,23 +15,41 @@ class DosenSeeder extends Seeder
     {
         DB::table('dosens')->insert([
             [
-                'nip' => '197001012022011001',
-                'nama' => 'Dr. Ahmad Fauzi',
-                'email' => 'ahmad.fauzi@example.com',
+                'nip' => '123456789',
+                'nama' => 'Dr. Ahmad Fauzy',
+                'email' => 'ahmad.fauzy@example.com',
                 'password' => Hash::make('password123'),
-                'role_id' => 1,
+                'jenis_kelamin' => 'L',
+                'is_active' => true,
+                'jurusan_id' => 2,
+                'kode' => 'DF001A', // 6 karakter
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'nip' => '198502142022021002',
-                'nama' => 'Prof. Budi Santoso',
+                'nip' => '987654321',
+                'nama' => 'Dr. Budi Santoso',
                 'email' => 'budi.santoso@example.com',
                 'password' => Hash::make('password123'),
-                'role_id' => 2,
+                'jenis_kelamin' => 'L',
+                'is_active' => false,
+                'jurusan_id' => 1,
+                'kode' => 'DF002B', // 6 karakter
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            [
+                'nip' => '456789123',
+                'nama' => 'Dr. Siti Aisyah',
+                'email' => 'siti.aisyah@example.com',
+                'password' => Hash::make('password123'),
+                'jenis_kelamin' => 'P',
+                'is_active' => true,
+                'jurusan_id' => 3,
+                'kode' => 'DF003C', // 6 karakter
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
         ]);
     }
 }

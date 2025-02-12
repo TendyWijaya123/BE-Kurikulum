@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('kode')->unique();
             $table->boolean('is_active')->default(true);
             $table->foreignId('jurusan_id')->constrained('jurusans')->onDelete('cascade');
+            $table->foreignId('dosen_id')->nullable()->constrained('dosens')->onDelete('cascade');
             $table->timestamps();
         });
     }

@@ -30,11 +30,9 @@ class AuthController extends Controller
         $user = JWTAuth::user();
 
 
-        $permissions = $user->permissions()->pluck('name')->toArray();
 
         $customClaims = [
             'name' => $user->name,
-            'permissions' => $permissions,
         ];
 
         if ($user->prodi) {

@@ -13,12 +13,17 @@ return new class extends Migration
     {
         Schema::create('dosens', function (Blueprint $table) {
             $table->id();
-            $table->string('nip');
-            $table->string('nama');
-            $table->string('email');
+            $table->string('kode', 6)->unique();
+            $table->string('nip', 18)->unique();
+            $table->string('nama', 50);
+            $table->string('email', 50)->unique();
             $table->string('password');
-            $table->foreignId('role_id')->constrained('prodis')->onDelete('cascade');
+            $table->enum('jenis_kelamin', ['L', 'P']);
+            $table->boolean('is_active')->default(true);
+            $table->foreignId('jurusan_id')->constrained('jurusans')->onDelete('cascade');
+            $table->rememberToken();
             $table->timestamps();
+
         });
     }
 

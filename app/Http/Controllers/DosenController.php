@@ -2,41 +2,58 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Jurusan;
 use Illuminate\Http\Request;
 use App\Models\Dosen;
+use App\Models\Prodi;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class DosenController extends Controller
 {
     public function index()
     {
-        $dosen = Dosen::with('role')->get();
+        $jurusan = Jurusan::all(['id', 'nama']);
+        $prodi = Prodi::all(['id', 'name', 'jurusan_id']);
+        $dosen = Dosen::with(['prodi' => function ($query) {
+            $query->select('prodis.id', 'prodis.name');
+        }])->get(); 
 
-        return response()->json($dosen);
+        return response()->json([
+            'prodis' => $prodi,
+            'dosens' => $dosen,
+            'jurusans' => $jurusan
+        ]);
     }
 
 
     public function store(Request $request){
         try {
-            $dataList = $request->all();
+                DB::beginTransaction();
 
-            foreach ($dataList as $data){
-                Dosen::updateOrCreate(
-                    ['id' => $data['_id'] ?? null],
+                $data = $request->all();
+                $dosen = Dosen::Create(
                     [
+                        'kode' => $data['kode'],
                         'nip' => $data['nip'],
                         'nama' => $data['nama'],
                         'email' => $data['email'],
                         'password' => Hash::make('password123'),
-                        'role_id' => $data['role_id']
+                        'jenis_kelamin' => $data['jenisKelamin'],
+                        'is_active' => true,
+                        'jurusan_id' => $data['jurusan']
                     ]
                 );
-            }
 
-            return response()->json([
-                'success' => 'Data berhasil disimpan',
-            ], 200);
+                $dosen->prodi()->syncWithoutDetaching($data['prodi']);
+
+                DB::commit();
+
+                return response()->json([
+                    'success' => 'Data berhasil disimpan',
+                ], 200);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'error' => 'Terjadi kesalahan saat menyimpan data',
                 'message' => $e->getMessage(),
@@ -44,12 +61,65 @@ class DosenController extends Controller
         }
     }
 
-    public function getRoleDropdown()
+    public function edit(Request $request)
     {
-        $roles = Dosen::select('id', 'name')->get();
+        try {
+            DB::beginTransaction();
 
-        return response()->json($roles);
+            // Validasi request
+            $validatedData = $request->validate([
+                'id' => 'required|exists:dosens,id',
+                'kode' => 'required|string|size:6|unique:dosens,kode,' . $request->id,
+                'nip' => 'required|string|unique:dosens,nip,' . $request->id,
+                'nama' => 'required|string|max:50',
+                'email' => 'required|email|max:50|unique:dosens,email,' . $request->id,
+                'jenisKelamin' => 'required|in:L,P',
+                'jurusan' => 'required|exists:jurusans,id',
+                'prodi' => 'nullable|array',
+                'prodi.*' => 'exists:prodis,id',
+                'password' => 'nullable|string|min:8',
+            ]);
+
+            // Cari dosen berdasarkan ID
+            $dosen = Dosen::findOrFail($validatedData['id']);
+
+            // Update data dosen
+            $dosen->update([
+                'kode' => $validatedData['kode'],
+                'nip' => $validatedData['nip'],
+                'nama' => $validatedData['nama'],
+                'email' => $validatedData['email'],
+                'jenis_kelamin' => $validatedData['jenisKelamin'],
+                'jurusan_id' => $validatedData['jurusan'],
+                // 'is_active' => $validatedData['is_active'] ?? $dosen->is_active, // Default tidak berubah
+            ]);
+
+            // Update password jika dikirim dalam request
+            if (!empty($validatedData['password'])) {
+                $dosen->update([
+                    'password' => Hash::make($validatedData['password']),
+                ]);
+            }
+
+            // Jika ada program studi yang dikirim, sinkronisasi
+            if (isset($validatedData['prodi'])) {
+                $dosen->prodi()->sync($validatedData['prodi']); // Hapus yang lama, tambahkan yang baru
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => 'Data dosen berhasil diperbarui',
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => 'Terjadi kesalahan saat memperbarui data',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
+
 
     public function destroy($id){
         $sksu = Dosen::find($id);

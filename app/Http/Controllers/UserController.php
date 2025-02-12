@@ -14,7 +14,6 @@ class UserController extends Controller
     public function index()
     {
         $users = User::query()
-            ->with('role')
             ->paginate(10);
 
         return response()->json($users);
@@ -26,7 +25,6 @@ class UserController extends Controller
             $payload = [
                 'email' => $request->email,
                 'name' => $request->name,
-                'role_id' => $request->role_id,
                 'prodi_id' => $request->prodi_id,
             ];
             $payload['password'] = Hash::make($request->password);
@@ -69,7 +67,6 @@ class UserController extends Controller
             $validator = Validator::make($request->all(), [
                 'email' => 'required|email',
                 'name' => 'required|string',
-                'role_id' => 'required|exists:roles,id',
                 'prodi_id' => 'required|exists:prodis,id',
                 'password' => 'nullable|min:8',
             ]);
@@ -82,7 +79,6 @@ class UserController extends Controller
 
             $user->email = $request->email;
             $user->name = $request->name;
-            $user->role_id = $request->role_id;
             $user->prodi_id = $request->prodi_id;
 
             if ($request->password) {

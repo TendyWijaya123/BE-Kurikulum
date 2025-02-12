@@ -12,7 +12,6 @@ use App\Http\Controllers\IeaController;
 use App\Http\Controllers\JurusanController;
 use App\Http\Controllers\matriksMpPMkController;
 use App\Http\Controllers\MatrixPengetahuanMateriPembelajaranController;
-use App\Http\Controllers\permissionRoleController;
 use App\Http\Controllers\RpsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\KkniController;
@@ -23,7 +22,6 @@ use App\Http\Controllers\MisiPolbanController;
 use App\Http\Controllers\PeranIndustriController;
 use App\Http\Controllers\PpmController;
 use App\Http\Controllers\ProdiController;
-use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SksuController;
 use App\Http\Controllers\TujuanPolbanController;
 use App\Http\Controllers\VmtJurusanController;
@@ -36,16 +34,15 @@ use App\Http\Controllers\MatrixCplMkController;
 use App\Http\Controllers\MetodePembelajaranController;
 use App\Http\Controllers\PengetahuanController;
 use App\Http\Controllers\MatrixCplPController;
-use App\Http\Controllers\permissionController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
 Route::post('login-dosen', [DosenAuthController::class, 'login'])->name('login_dosen');
 
-Route::middleware(['auth:api'])->group(function () {
+Route::middleware(['auth:api,dosen'])->group(function () {
 
     /* ------------------------------------ Users API ------------------------------------------------------- */
-    Route::get('users', [UserController::class, 'index'])->middleware(['permission:view-users']);
+    Route::get('users', [UserController::class, 'index']);
     Route::get('users/{id}', [UserController::class, 'show']);
     Route::post('users', [UserController::class, 'store']);
     Route::put('users/{id}', [UserController::class, 'update']);
@@ -67,12 +64,6 @@ Route::middleware(['auth:api'])->group(function () {
     Route::delete('prodis/{id}', [ProdiController::class, 'destroy']);
     Route::get('prodi/dropdown', [ProdiController::class, 'getProdiDropdown']);
 
-
-    /* ---------------------------------------Role API----------------------------------------------------- */
-
-    Route::get('role/dropdown', [RoleController::class, 'getRoleDropdown']);
-
-
     /* --------------------------------------Jurusan API--------------------------------------------------- */
     Route::get('jurusans', [JurusanController::class, 'index']);
     Route::get('jurusans/dropdown', [JurusanController::class, 'dropdown']);
@@ -82,23 +73,6 @@ Route::middleware(['auth:api'])->group(function () {
     Route::put('jurusans/{id}', [JurusanController::class, 'update']);
     Route::delete('jurusans/{id}', [JurusanController::class, 'destroy']);
 
-     /* ---------------------------------------Role API ------------------------------------------------*/
-
-    Route::get('roles', [RoleController::class, 'index']);
-    Route::post('roles', [RoleController::class, 'store']);
-    Route::delete('roles/{id}', [RoleController::class, 'destroy']);
-    Route::delete('roles', [RoleController::class, 'destroyRoles']);
-
-    /* ---------------------------------------Permission API ------------------------------------------------*/
-
-    Route::get('permissions', [permissionController::class, 'index']);
-    Route::post('permissions', [permissionController::class, 'store']);
-    Route::delete('permissions/{id}', [permissionController::class, 'destroy']);
-    Route::delete('permissions', [permissionController::class, 'destroyPermissions']);
-
-    /* ------------------------------------ Matrix Cpl Iea API ------------------------------------------------------- */
-    Route::get('permission-role', [permissionRoleController::class, 'index']);
-    Route::put('permission-role', [permissionRoleController::class, 'update']);
 
     /* ---------------------------------------SKSU API --------------------------------------------------*/
     Route::get('sksu', [SksuController::class, 'index']);
@@ -172,19 +146,18 @@ Route::middleware(['auth:api'])->group(function () {
     /* --------------------------------------Peran Industri API--------------------------------------------------- */
 
     Route::get('peran-industri', [PeranIndustriController::class, 'index']);
-    Route::post('peran-industri', [PeranIndustriController::class, 'store']);
+    Route::post('peran-industri/upsert', [PeranIndustriController::class, 'upsert']);
     Route::get('peran-industri/template', [PeranIndustriController::class, 'downloadTemplate']);
     Route::post('peran-industri/import', [PeranIndustriController::class, 'import']);
-    Route::put('peran-industri/{id}', [PeranIndustriController::class, 'update']);
-    Route::delete('peran-industri/{id}', [PeranIndustriController::class, 'destroy']);
+    Route::delete('peran-industri/{id}', [PeranIndustriController::class, 'delete']);
 
     /* ------------------------------------ Ipteks API ------------------------------------------------------- */
     Route::get('ipteks', [IpteksController::class, 'index']);
+    Route::post('ipteks', [IpteksController::class, 'create']);
+    Route::put('ipteks/{id}', [IpteksController::class, 'update']);
+    Route::delete('ipteks/{id}', [IpteksController::class, 'destroy']);
     Route::get('ipteks/template', [IpteksController::class, 'downloadTemplate']);
     Route::post('ipteks/import', [IpteksController::class, 'import']);
-    Route::post('ipteks/{type}', [IpteksController::class, 'create']);
-    Route::put('ipteks/{type}/{id}', [IpteksController::class, 'update']);
-    Route::delete('ipteks/{type}/{id}', [IpteksController::class, 'destroy']);
 
     /* ------------------------------------ IEA API ------------------------------------------------------- */
     Route::get('iea', [IeaController::class, 'index']);
@@ -242,6 +215,7 @@ Route::middleware(['auth:api'])->group(function () {
 
     Route::get('dosen', [DosenController::class, 'index']);
     Route::post('dosen', [DosenController::class, 'store']);
+    Route::put('dosen',[DosenController::class, 'edit']);
     Route::delete('dosen/{id}', [DosenController::class, 'destroy']);
     Route::delete('dosen', [DosenController::class, 'destroyDosens']);
 
@@ -252,10 +226,10 @@ Route::middleware(['auth:api'])->group(function () {
     // Route::delete('dosen/{id}', [DosenController::class, 'destroy']);
     // Route::delete('dosen', [DosenController::class, 'destroyDosens']);
 
+    Route::get('rps/prodi-dropdown/{id}', [ProdiController::class, 'show']);
+    Route::get('rps/matkul-dropdown/{id}', [RpsController::class, 'dropdownMatkul']);
 
-    Route::get('me', [AuthController::class, 'me'])->middleware(['permission:view-dashboard']);
+
+    Route::get('me', [AuthController::class, 'me']);
 });
 
-Route::middleware(['auth:dosen'])->group(function () {
-     Route::get('rps/matkul-dropdown/{id}', [RpsController::class, 'dropdownMatkul']);
-});

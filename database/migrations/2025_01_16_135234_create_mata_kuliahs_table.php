@@ -16,8 +16,15 @@ return new class extends Migration
             $table->string('kode')->unique();
             $table->string('nama');
             $table->text('tujuan');
-            $table->integer('total_beban_belajar')->default(0);
+            $table->integer('semester')->nullable();
+            $table->integer('teori_bt')->nullable()->default(0);
+            $table->integer('teori_pt')->nullable()->default(0);
+            $table->integer('teori_m')->nullable()->default(0);
+            $table->integer('praktek_bt')->nullable()->default(0);
+            $table->integer('praktek_pt')->nullable()->default(0);
+            $table->integer('praktek_m')->nullable()->default(0);
             $table->decimal('sks', 5, 1)->default(0);
+            $table->integer('total_beban_belajar')->default(0);
             $table->foreignId('kurikulum_id')->constrained('kurikulums')->onDelete('cascade');
             $table->timestamps();
         });

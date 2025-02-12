@@ -12,11 +12,14 @@ class Dosen extends Authenticatable implements JWTSubject
     use HasFactory;
     
     protected $fillable = [
+        'kode',
         'nip',
         'nama',
         'email',
         'password',
-        'role_id',
+        'jenis_kelamin',
+        'is_active',
+        'jurusan_id',
     ];
 
     public function getJWTIdentifier()
@@ -29,24 +32,17 @@ class Dosen extends Authenticatable implements JWTSubject
         return [
             'id' => $this->id,
             'name' => $this->nama,
-            'permissions' => $this->permissions()->pluck('name')->toArray(),
             'prodi' => $this->prodi()->select('prodi_id')->get()->toArray(),
         ];
-    }
-
-    public function role()
-    {
-        return $this->belongsTo(Role::class);
-    }
-
-    public function permissions()
-    {
-        return $this->role->permissions();
     }
 
     public function prodi()
     {
         return $this->belongsToMany(Prodi::class, 'dosen_has_prodi');
+    }
+
+    public function kaprodi(){
+        return $this->hasOne(Prodi::class, 'prodis');
     }
 
     public function matkul() {
