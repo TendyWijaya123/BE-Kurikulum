@@ -3,8 +3,6 @@
 namespace App\Imports;
 
 use App\Models\BenchKurikulum;
-use App\Models\BkCpl;
-use App\Models\BkPpm;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -27,23 +25,9 @@ class BenchKurikulumImport implements ToCollection, WithHeadingRow
                 $currentBenchKurikulum = BenchKurikulum::create([
                     'program_studi' => $row['program_studi'],
                     'kategori'      => $row['kategori'],
+                    'cpl'           => $row['cpl'],
+                    'ppm'           => $row['ppm'],
                     'kurikulum_id'  => $kurikulum->id,
-                ]);
-            }
-
-            // Simpan data CPL jika ada
-            if (!empty($row['cpl']) && $currentBenchKurikulum) {
-                BkCpl::create([
-                    'cpl' => $row['cpl'],
-                    'bk_id' => $currentBenchKurikulum->id,
-                ]);
-            }
-
-            // Simpan data PPM jika ada
-            if (!empty($row['ppm']) && $currentBenchKurikulum) {
-                BkPpm::create([
-                    'ppm' => $row['ppm'],
-                    'bk_id' => $currentBenchKurikulum->id,
                 ]);
             }
         }
