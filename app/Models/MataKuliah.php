@@ -57,4 +57,9 @@ class MataKuliah extends Model
             ->withPivot('kategori')
             ->withTimestamps();
     }
+
+    public function tujuanBelajars()
+    {
+        return $this->hasMany(TujuanBelajar::class, 'mata_kuliah_id');
+    }
 }

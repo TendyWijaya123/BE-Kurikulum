@@ -133,6 +133,37 @@ class PeranIndustriController extends Controller
         }
     }
 
+    public function destroyPeranIndustris(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'peran_industris_id' => 'array',
+                'peran_industris_id.*' => 'integer|exists:peran_industris,id', // Pastikan setiap ID adalah integer dan ada di database
+            ]);
+
+            $peranIndustriIds = $validated['peran_industris_id'];
+
+            $deleted = PeranIndustri::whereIn('id', $peranIndustriIds)->delete();
+
+            if ($deleted === 0) {
+                return response()->json(['error' => 'Tidak ada Peran Industri yang dihapus'], 404);
+            }
+
+            return response()->json(['message' => 'Peran Industro berhasil dihapus'], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'error' => 'Validasi gagal',
+                'messages' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Terjadi kesalahan',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
     /**
      * Import Peran Industri data from an Excel file.
      */

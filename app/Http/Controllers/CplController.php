@@ -128,6 +128,36 @@ class CplController extends Controller
         }
     }
 
+    public function destroyCpls(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'cplss_id' => 'array',
+                'cpls_id.*' => 'integer|exists:cpls,id',
+            ]);
+
+            $cplIds = $validated['cpls_id'];
+
+            $deleted = Cpl::whereIn('id', $cplIds)->delete();
+
+            if ($deleted === 0) {
+                return response()->json(['error' => 'Tidak ada CPL yang dihapus'], 404);
+            }
+
+            return response()->json(['message' => 'CPL berhasil dihapus'], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'error' => 'Validasi gagal',
+                'messages' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Terjadi kesalahan',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function import(Request $request)
     {
         $request->validate([
