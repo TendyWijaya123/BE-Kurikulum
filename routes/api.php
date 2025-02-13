@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BenchKurikulumsController;
 use App\Http\Controllers\BentukPembelajaranController;
+use App\Http\Controllers\BukuReferensiController;
 use App\Http\Controllers\CplController;
 use App\Http\Controllers\DosenAuthController;
 use App\Http\Controllers\DosenController;
@@ -34,6 +35,9 @@ use App\Http\Controllers\MatrixCplMkController;
 use App\Http\Controllers\MetodePembelajaranController;
 use App\Http\Controllers\PengetahuanController;
 use App\Http\Controllers\MatrixCplPController;
+use App\Imports\PeranIndustriImport;
+use App\Models\BenchKurikulum;
+use App\Models\PeranIndustri;
 use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
@@ -132,6 +136,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('cpls/upsert', [CplController::class, 'upsert']);
     Route::get('cpls/template', [CplController::class, 'downloadTemplate']);
     Route::post('cpls/import', [CplController::class, 'import']);
+    Route::delete('cpls/multiple-delete', [CplController::class, 'destroyCpls']);
+
     Route::delete('cpls/{id}', [CplController::class, 'delete']);
 
 
@@ -140,6 +146,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('ppms/upsert', [PpmController::class, 'upsert']);
     Route::get('ppms/template', [PpmController::class, 'downloadTemplate']);
     Route::post('ppms/import', [PpmController::class, 'import']);
+    Route::delete('ppms/multiple-delete', [PpmController::class, 'destroyPpms']);
     Route::delete('ppms/{id}', [PpmController::class, 'delete']);
 
 
@@ -149,6 +156,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('peran-industri/upsert', [PeranIndustriController::class, 'upsert']);
     Route::get('peran-industri/template', [PeranIndustriController::class, 'downloadTemplate']);
     Route::post('peran-industri/import', [PeranIndustriController::class, 'import']);
+    Route::delete('peran-industri/multiple-delete', [PeranIndustriController::class, 'destroyPeranIndustris']);
     Route::delete('peran-industri/{id}', [PeranIndustriController::class, 'delete']);
 
     /* ------------------------------------ Ipteks API ------------------------------------------------------- */
@@ -193,6 +201,10 @@ Route::middleware(['auth:api'])->group(function () {
     Route::put('/mata-kuliah/{id}', [MataKuliahController::class, 'update']);
     Route::delete('/mata-kuliah/{id}', [MataKuliahController::class, 'destroy']);
 
+    Route::get('/mata-kuliah/show-jurusan', [MataKuliahController::class, 'showMataKuliahByJurusan']);
+    Route::post('/mata-kuliah/assign-referensi', [MataKuliahController::class, 'assignReferensiKeMataKuliah']);
+
+
 
     /* -------------------------------------Bentuk Pembelajaran API -------------------------------------------------- */
     Route::get('bentuk-pembelajaran/dropdown', [BentukPembelajaranController::class, 'dropdown']);
@@ -219,13 +231,21 @@ Route::middleware(['auth:api'])->group(function () {
     // Route::delete('dosen/{id}', [DosenController::class, 'destroy']);
     // Route::delete('dosen', [DosenController::class, 'destroyDosens']);
 
-    Route::get('rps/prodi-dropdown/{id}', [ProdiController::class, 'show']);
+    /* --------------------------------------- Buku referensi(Dosen) API ------------------------------------------------*/
+    Route::prefix('buku-referensi')->group(function () {
+        Route::get('/', [BukuReferensiController::class, 'index']);
+        Route::post('/', [BukuReferensiController::class, 'store']);
+        Route::get('/dropdown-by-jurusan', [BukuReferensiController::class, 'dropdownBuku']);
+        Route::get('/{id}', [BukuReferensiController::class, 'show']);
+        Route::put('/{id}', [BukuReferensiController::class, 'update']);
+        Route::delete('/{id}', [BukuReferensiController::class, 'destroy']);
+    });
+
     Route::get('rps/matkul-dropdown/{id}', [RpsController::class, 'dropdownMatkul']);
 
 
     Route::get('me', [AuthController::class, 'me']);
 });
-
 Route::middleware(['auth:dosen'])->group(function () {
     /* ---------------------------------------Dosen API ------------------------------------------------*/
 
@@ -234,5 +254,7 @@ Route::middleware(['auth:dosen'])->group(function () {
     Route::put('dosen',[DosenController::class, 'edit']);
     Route::delete('dosen/{id}', [DosenController::class, 'destroy']);
     Route::delete('dosen', [DosenController::class, 'destroyDosens']);
+
+    Route::get('rps/prodi-dropdown/{id}', [ProdiController::class, 'show']);
 
 });
