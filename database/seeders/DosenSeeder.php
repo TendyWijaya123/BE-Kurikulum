@@ -45,7 +45,7 @@ class DosenSeeder extends Seeder
                 'password' => Hash::make('password123'),
                 'jenis_kelamin' => 'P',
                 'is_active' => true,
-                'jurusan_id' => 3,
+                'jurusan_id' => 6,
                 'kode' => 'DF003C', // 6 karakter
                 'created_at' => now(),
                 'updated_at' => now(),

@@ -12,4 +12,9 @@ class Jurusan extends Model
     {
         return $this->hasMany(Prodi::class);
     }
+
+    public function bukuReferensis()
+    {
+        return $this->hasMany(BukuReferensi::class);
+    }
 }
