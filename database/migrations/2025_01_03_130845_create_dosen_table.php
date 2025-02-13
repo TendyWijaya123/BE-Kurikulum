@@ -11,15 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('prodis', function (Blueprint $table) {
+        Schema::create('dosens', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->enum('jenjang', ['D3', 'D4', 'S1', 'S2', 'S3']);
-            $table->string('kode')->unique();
+            $table->string('kode', 6)->unique();
+            $table->string('nip', 18)->unique();
+            $table->string('nama', 50);
+            $table->string('email', 50)->unique();
+            $table->string('password');
+            $table->enum('jenis_kelamin', ['L', 'P']);
             $table->boolean('is_active')->default(true);
             $table->foreignId('jurusan_id')->constrained('jurusans')->onDelete('cascade');
-            $table->foreignId('dosen_id')->nullable()->constrained('dosens')->onDelete('cascade');
+            $table->rememberToken();
             $table->timestamps();
+
         });
     }
 
@@ -28,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('prodis');
+        Schema::dropIfExists('dosens');
     }
 };

@@ -15,8 +15,7 @@ class BenchKurikulumsController extends Controller
     public function index(Request $request)
     {
         $prodiId = $request->query('prodiId');
-        $benchKurikulums = BenchKurikulumModel::with('bkCpls')->with('bkPpms')
-            ->whereHas('kurikulum', function ($query) use ($prodiId) {
+        $benchKurikulums = BenchKurikulumModel::whereHas('kurikulum', function ($query) use ($prodiId) {
                 $query->where('prodi_id', $prodiId)->where('is_active', true);
             })
             ->get();
@@ -46,28 +45,11 @@ class BenchKurikulumsController extends Controller
                     [
                         'program_studi' => $data['programStudi'],
                         'kategori' => $data['kategori'],
+                        'cpl' => $data['cpl'],
+                        'ppm' => $data['ppm'],
                         'kurikulum_id' => $kurikulumId,
                     ]
                 );
-
-                // Menyimpan cpl dan ppm terkait
-                if (!empty($data['cpl'])) {
-                    $benchKurikulums->bkCpls()->delete();
-                }
-                foreach ($data['cpl'] as $cpl) {
-                    $benchKurikulums->bkCpls()->create([
-                        'cpl' => $cpl,
-                    ]);
-                }
-
-                if (!empty($data['ppm'])) {
-                    $benchKurikulums->bkPpms()->delete();
-                }
-                foreach ($data['ppm'] as $ppm) {
-                    $benchKurikulums->bkPpms()->create([
-                        'ppm' => $ppm,
-                    ]);
-                }
             }
 
             DB::commit();
@@ -93,8 +75,6 @@ class BenchKurikulumsController extends Controller
                 'message' => 'bench kurikulum not found.',
             ], 404);
         }
-        $benchKurikulums->bkCpls()->delete();
-        $benchKurikulums->bkPpms()->delete();
         // Hapus data Bench kurikulum
         $benchKurikulums->delete();
 
@@ -131,11 +111,7 @@ class BenchKurikulumsController extends Controller
 
             // Loop untuk menghapus data terkait, jika ada
             foreach ($benchKurikulums as $bk) {
-                // Hapus data di tabel kompetensi kerja terkait
-                $bk->bkCpls()->delete();
-                $bk->bkPpms()->delete();
-
-                // Hapus data SKSU
+                // Hapus data BK
                 $bk->delete();
             }
 

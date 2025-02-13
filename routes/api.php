@@ -4,11 +4,15 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BenchKurikulumsController;
 use App\Http\Controllers\BentukPembelajaranController;
 use App\Http\Controllers\CplController;
+use App\Http\Controllers\DosenAuthController;
+use App\Http\Controllers\DosenController;
+use App\Http\Controllers\DosenHasMatkulController;
 use App\Http\Controllers\FormulasiCpaController;
 use App\Http\Controllers\IeaController;
 use App\Http\Controllers\JurusanController;
 use App\Http\Controllers\matriksMpPMkController;
 use App\Http\Controllers\MatrixPengetahuanMateriPembelajaranController;
+use App\Http\Controllers\RpsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\KkniController;
 use App\Http\Controllers\KurikulumController;
@@ -29,7 +33,6 @@ use App\Http\Controllers\MatrixCplIeaController;
 use App\Http\Controllers\MatrixCplMkController;
 use App\Http\Controllers\MetodePembelajaranController;
 use App\Http\Controllers\PengetahuanController;
-use App\Models\MatriksPMp;
 use App\Http\Controllers\MatrixCplPController;
 use App\Imports\PeranIndustriImport;
 use App\Models\BenchKurikulum;
@@ -37,8 +40,9 @@ use App\Models\PeranIndustri;
 use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
+Route::post('login-dosen', [DosenAuthController::class, 'login'])->name('login_dosen');
 
-Route::middleware(['auth:api'])->group(function () {
+Route::middleware(['auth:api,dosen'])->group(function () {
 
     /* ------------------------------------ Users API ------------------------------------------------------- */
     Route::get('users', [UserController::class, 'index']);
@@ -153,13 +157,15 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('peran-industri/import', [PeranIndustriController::class, 'import']);
     Route::delete('peran-industri/multiple-delete', [PeranIndustriController::class, 'destroyPeranIndustris']);
     Route::delete('peran-industri/{id}', [PeranIndustriController::class, 'delete']);
+
     /* ------------------------------------ Ipteks API ------------------------------------------------------- */
     Route::get('ipteks', [IpteksController::class, 'index']);
-    Route::post('ipteks', [IpteksController::class, 'create']);
-    Route::put('ipteks/{id}', [IpteksController::class, 'update']);
+    Route::post('ipteks', [IpteksController::class, 'store']);
     Route::delete('ipteks/{id}', [IpteksController::class, 'destroy']);
+    Route::delete('ipteks', [IpteksController::class, 'destroyMultiple']);
     Route::get('ipteks/template', [IpteksController::class, 'downloadTemplate']);
     Route::post('ipteks/import', [IpteksController::class, 'import']);
+
 
     /* ------------------------------------ IEA API ------------------------------------------------------- */
     Route::get('iea', [IeaController::class, 'index']);
@@ -213,6 +219,25 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('matrix-mk-cpl', [MatrixCplMkController::class, 'index']);
     Route::put('matrix-mk-cpl', [MatrixCplMkController::class, 'update']);
 
+    /* ---------------------------------------Dosen API ------------------------------------------------*/
+
+    Route::get('dosen', [DosenController::class, 'index']);
+    Route::post('dosen', [DosenController::class, 'store']);
+    Route::put('dosen',[DosenController::class, 'edit']);
+    Route::delete('dosen/{id}', [DosenController::class, 'destroy']);
+    Route::delete('dosen', [DosenController::class, 'destroyDosens']);
+
+    /* ---------------------------------------Dosen Has Makul API ------------------------------------------------*/
+
+    Route::get('dosen-has-matkul', [DosenHasMatkulController::class, 'index']);
+    Route::post('dosen-has-matkul', [DosenHasMatkulController::class, 'store']);
+    // Route::delete('dosen/{id}', [DosenController::class, 'destroy']);
+    // Route::delete('dosen', [DosenController::class, 'destroyDosens']);
+
+    Route::get('rps/prodi-dropdown/{id}', [ProdiController::class, 'show']);
+    Route::get('rps/matkul-dropdown/{id}', [RpsController::class, 'dropdownMatkul']);
+
 
     Route::get('me', [AuthController::class, 'me']);
 });
+

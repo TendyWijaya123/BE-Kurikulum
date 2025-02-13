@@ -14,16 +14,12 @@ class Sksu extends Model
         'profil_lulusan',
         'kualifikasi',
         'kategori',
+        'kompetensi_kerja',
         'kurikulum_id',
     ];
 
     public function kurikulum()
     {
         return $this->belongsTo(Kurikulum::class);
-    }
-
-    public function kompetensiKerja()
-    {
-        return $this->hasMany(KompetensiKerja::class);
     }
 }

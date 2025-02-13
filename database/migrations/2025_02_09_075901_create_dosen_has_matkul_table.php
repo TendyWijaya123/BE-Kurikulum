@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('bk_ppms', function (Blueprint $table) {
+        Schema::create('dosen_has_matkul', function (Blueprint $table) {
             $table->id();
-            $table->text('ppm');
-            $table->foreignId('bk_id')->constrained('bench_kurikulums')->onDelete('cascade');
+            $table->foreignId('dosen_id')->constrained('dosens')->onDelete('cascade');
+            $table->foreignId('mk_id')->constrained('mata_kuliahs')->onDelete('cascade');
             $table->timestamps();
+
+            $table->unique(['dosen_id', 'mk_id']);
         });
     }
 
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('bk_ppms');
+        Schema::dropIfExists('dosen_has_matkul');
     }
 };
