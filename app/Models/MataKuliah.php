@@ -67,4 +67,9 @@ class MataKuliah extends Model
     {
         return $this->hasMany(TujuanBelajar::class, 'mata_kuliah_id');
     }
+
+    public function bukuReferensis()
+    {
+        return $this->belongsToMany(BukuReferensi::class, 'mata_kuliah_has_buku_referensi');
+    }
 }

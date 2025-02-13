@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BukuReferensi;
 use App\Models\MataKuliah;
 use App\Models\KemampuanAkhir;
 use App\Models\TujuanBelajar;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -74,6 +76,76 @@ class MataKuliahController extends Controller
             'data' => $data,
         ]);
     }
+
+    public function showMataKuliahByJurusan()
+    {
+        try {
+            $user = Auth::guard('dosen')->user();
+
+            if (!$user) {
+                return response()->json([
+                    'error' => 'User tidak ditemukan atau tidak terautentikasi',
+                ], 401);
+            }
+
+            $mataKuliahs = MataKuliah::with('bukuReferensis:id,judul')
+                ->whereRelation('kurikulum', 'is_active', true)
+                ->whereRelation('kurikulum.prodi', 'is_active', true)
+                ->whereRelation('kurikulum.prodi.jurusan', 'id', $user->jurusan_id)
+                ->select('id', 'kode', 'nama', 'semester')
+                ->get();
+
+            return response()->json([
+                'mata_kuliahs' => $mataKuliahs,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Error fetching Mata Kuliah by Jurusan: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Terjadi kesalahan saat mengambil data',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
+    /**
+     * Assign buku referensi ke mata kuliah
+     */
+    public function assignReferensiKeMataKuliah(Request $request)
+    {
+        Log::info($request->all());
+        try {
+            $request->validate([
+                'mata_kuliah_id' => 'required|exists:mata_kuliahs,id',
+                'buku_referensi_id' => 'array',
+                'buku_referensi_id.*' => 'exists:buku_referensis,id',
+            ]);
+
+            $mataKuliah = MataKuliah::find($request->mata_kuliah_id);
+            $bukuReferensiIds = $request->buku_referensi_id;
+
+            if (!$mataKuliah) {
+                return response()->json([
+                    'error' => 'Mata Kuliah tidak ditemukan',
+                ], 404);
+            }
+
+            $mataKuliah->bukuReferensis()->sync($bukuReferensiIds);
+
+            return response()->json([
+                'message' => 'Buku Referensi berhasil ditambahkan ke Mata Kuliah',
+                'mata_kuliah' => $mataKuliah->load('bukuReferensis:id,judul'),
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Error assigning Buku Referensi to Mata Kuliah: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Terjadi kesalahan saat menghubungkan Buku Referensi ke Mata Kuliah',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
 
     public function store(Request $request)
     {

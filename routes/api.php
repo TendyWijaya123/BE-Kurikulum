@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BenchKurikulumsController;
 use App\Http\Controllers\BentukPembelajaranController;
+use App\Http\Controllers\BukuReferensiController;
 use App\Http\Controllers\CplController;
 use App\Http\Controllers\DosenAuthController;
 use App\Http\Controllers\DosenController;
@@ -41,6 +42,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
 Route::post('login-dosen', [DosenAuthController::class, 'login'])->name('login_dosen');
+
+
 
 Route::middleware(['auth:api,dosen'])->group(function () {
 
@@ -200,6 +203,10 @@ Route::middleware(['auth:api,dosen'])->group(function () {
     Route::put('/mata-kuliah/{id}', [MataKuliahController::class, 'update']);
     Route::delete('/mata-kuliah/{id}', [MataKuliahController::class, 'destroy']);
 
+    Route::get('/mata-kuliah/show-jurusan', [MataKuliahController::class, 'showMataKuliahByJurusan']);
+    Route::post('/mata-kuliah/assign-referensi', [MataKuliahController::class, 'assignReferensiKeMataKuliah']);
+
+
 
     /* -------------------------------------Bentuk Pembelajaran API -------------------------------------------------- */
     Route::get('bentuk-pembelajaran/dropdown', [BentukPembelajaranController::class, 'dropdown']);
@@ -223,7 +230,7 @@ Route::middleware(['auth:api,dosen'])->group(function () {
 
     Route::get('dosen', [DosenController::class, 'index']);
     Route::post('dosen', [DosenController::class, 'store']);
-    Route::put('dosen',[DosenController::class, 'edit']);
+    Route::put('dosen', [DosenController::class, 'edit']);
     Route::delete('dosen/{id}', [DosenController::class, 'destroy']);
     Route::delete('dosen', [DosenController::class, 'destroyDosens']);
 
@@ -234,10 +241,19 @@ Route::middleware(['auth:api,dosen'])->group(function () {
     // Route::delete('dosen/{id}', [DosenController::class, 'destroy']);
     // Route::delete('dosen', [DosenController::class, 'destroyDosens']);
 
+    /* --------------------------------------- Buku referensi(Dosen) API ------------------------------------------------*/
+    Route::prefix('buku-referensi')->group(function () {
+        Route::get('/', [BukuReferensiController::class, 'index']);
+        Route::post('/', [BukuReferensiController::class, 'store']);
+        Route::get('/dropdown-by-jurusan', [BukuReferensiController::class, 'dropdownBuku']);
+        Route::get('/{id}', [BukuReferensiController::class, 'show']);
+        Route::put('/{id}', [BukuReferensiController::class, 'update']);
+        Route::delete('/{id}', [BukuReferensiController::class, 'destroy']);
+    });
+
     Route::get('rps/prodi-dropdown/{id}', [ProdiController::class, 'show']);
     Route::get('rps/matkul-dropdown/{id}', [RpsController::class, 'dropdownMatkul']);
 
 
     Route::get('me', [AuthController::class, 'me']);
 });
-
