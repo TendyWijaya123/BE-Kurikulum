@@ -43,9 +43,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('login', [AuthController::class, 'login'])->name('login');
 Route::post('login-dosen', [DosenAuthController::class, 'login'])->name('login_dosen');
 
-
-
-Route::middleware(['auth:api,dosen'])->group(function () {
+Route::middleware(['auth:api'])->group(function () {
 
     /* ------------------------------------ Users API ------------------------------------------------------- */
     Route::get('users', [UserController::class, 'index']);
@@ -226,14 +224,6 @@ Route::middleware(['auth:api,dosen'])->group(function () {
     Route::get('matrix-mk-cpl', [MatrixCplMkController::class, 'index']);
     Route::put('matrix-mk-cpl', [MatrixCplMkController::class, 'update']);
 
-    /* ---------------------------------------Dosen API ------------------------------------------------*/
-
-    Route::get('dosen', [DosenController::class, 'index']);
-    Route::post('dosen', [DosenController::class, 'store']);
-    Route::put('dosen', [DosenController::class, 'edit']);
-    Route::delete('dosen/{id}', [DosenController::class, 'destroy']);
-    Route::delete('dosen', [DosenController::class, 'destroyDosens']);
-
     /* ---------------------------------------Dosen Has Makul API ------------------------------------------------*/
 
     Route::get('dosen-has-matkul', [DosenHasMatkulController::class, 'index']);
@@ -251,9 +241,20 @@ Route::middleware(['auth:api,dosen'])->group(function () {
         Route::delete('/{id}', [BukuReferensiController::class, 'destroy']);
     });
 
-    Route::get('rps/prodi-dropdown/{id}', [ProdiController::class, 'show']);
     Route::get('rps/matkul-dropdown/{id}', [RpsController::class, 'dropdownMatkul']);
 
 
     Route::get('me', [AuthController::class, 'me']);
+});
+Route::middleware(['auth:dosen'])->group(function () {
+    /* ---------------------------------------Dosen API ------------------------------------------------*/
+
+    Route::get('dosen', [DosenController::class, 'index']);
+    Route::post('dosen', [DosenController::class, 'store']);
+    Route::put('dosen',[DosenController::class, 'edit']);
+    Route::delete('dosen/{id}', [DosenController::class, 'destroy']);
+    Route::delete('dosen', [DosenController::class, 'destroyDosens']);
+
+    Route::get('rps/prodi-dropdown/{id}', [ProdiController::class, 'show']);
+
 });

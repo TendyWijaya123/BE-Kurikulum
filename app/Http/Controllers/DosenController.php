@@ -17,7 +17,7 @@ class DosenController extends Controller
         $prodi = Prodi::all(['id', 'name', 'jurusan_id']);
         $dosen = Dosen::with(['prodi' => function ($query) {
             $query->select('prodis.id', 'prodis.name');
-        }])->get(); 
+        }])->with('jurusan')->get(); 
 
         return response()->json([
             'prodis' => $prodi,
@@ -70,14 +70,15 @@ class DosenController extends Controller
             $validatedData = $request->validate([
                 'id' => 'required|exists:dosens,id',
                 'kode' => 'required|string|size:6|unique:dosens,kode,' . $request->id,
-                'nip' => 'required|string|unique:dosens,nip,' . $request->id,
+                'nip' => 'required|string|size:18|unique:dosens,nip,' . $request->id,
                 'nama' => 'required|string|max:50',
-                'email' => 'required|email|max:50|unique:dosens,email,' . $request->id,
+                'email' => 'required|max:50|unique:dosens,email,' . $request->id,
                 'jenisKelamin' => 'required|in:L,P',
                 'jurusan' => 'required|exists:jurusans,id',
                 'prodi' => 'nullable|array',
                 'prodi.*' => 'exists:prodis,id',
                 'password' => 'nullable|string|min:8',
+                'isActive' => 'boolean'
             ]);
 
             // Cari dosen berdasarkan ID
@@ -91,7 +92,7 @@ class DosenController extends Controller
                 'email' => $validatedData['email'],
                 'jenis_kelamin' => $validatedData['jenisKelamin'],
                 'jurusan_id' => $validatedData['jurusan'],
-                // 'is_active' => $validatedData['is_active'] ?? $dosen->is_active, // Default tidak berubah
+                'is_active' => $validatedData['isActive'] ?? $dosen->is_active,
             ]);
 
             // Update password jika dikirim dalam request
