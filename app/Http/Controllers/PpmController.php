@@ -6,6 +6,7 @@ use App\Exports\PpmTemplateExport;
 use App\Imports\PpmImport;
 use App\Models\Ppm;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -107,7 +108,7 @@ class PpmController extends Controller
     /**
      * Delete PPM by ID for the active kurikulum of the authenticated user.
      */
-    public function delete(Request $request, $id)
+    public function delete($id)
     {
         try {
             // Authenticate user using JWT
@@ -138,6 +139,38 @@ class PpmController extends Controller
             return response()->json(['error' => 'Terjadi kesalahan', 'message' => $e->getMessage()], 500);
         }
     }
+
+    public function destroyPpms(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'ppms_id' => 'array',
+                'ppms_id.*' => 'integer|exists:ppms,id', // Pastikan setiap ID adalah integer dan ada di database
+            ]);
+
+            $ppmIds = $validated['ppms_id'];
+
+            $deleted = Ppm::whereIn('id', $ppmIds)->delete();
+
+            if ($deleted === 0) {
+                return response()->json(['error' => 'Tidak ada PPM yang dihapus'], 404);
+            }
+
+            return response()->json(['message' => 'PPM berhasil dihapus'], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'error' => 'Validasi gagal',
+                'messages' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Terjadi kesalahan',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
 
     public function import(Request $request)
     {

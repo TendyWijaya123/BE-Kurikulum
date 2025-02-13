@@ -27,7 +27,6 @@ class Ppm extends Model
                     ->orderBy('id', 'desc')
                     ->first();
 
-                // Determine the next number
                 $nextNumber = $lastPpm ? ((int) str_replace('PPM-', '', $lastPpm->kode) + 1) : 1;
 
                 // Set the kode

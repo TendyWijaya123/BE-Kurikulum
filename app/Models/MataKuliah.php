@@ -58,7 +58,13 @@ class MataKuliah extends Model
             ->withTimestamps();
     }
 
-    public function dosens(){
+    public function dosens()
+    {
         return $this->belongsToMany(Dosen::class, 'dosen_has_matkul',  'mk_id', 'dosen_id');
+    }
+
+    public function tujuanBelajars()
+    {
+        return $this->hasMany(TujuanBelajar::class, 'mata_kuliah_id');
     }
 }

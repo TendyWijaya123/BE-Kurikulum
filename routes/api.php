@@ -34,6 +34,9 @@ use App\Http\Controllers\MatrixCplMkController;
 use App\Http\Controllers\MetodePembelajaranController;
 use App\Http\Controllers\PengetahuanController;
 use App\Http\Controllers\MatrixCplPController;
+use App\Imports\PeranIndustriImport;
+use App\Models\BenchKurikulum;
+use App\Models\PeranIndustri;
 use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
@@ -132,6 +135,8 @@ Route::middleware(['auth:api,dosen'])->group(function () {
     Route::post('cpls/upsert', [CplController::class, 'upsert']);
     Route::get('cpls/template', [CplController::class, 'downloadTemplate']);
     Route::post('cpls/import', [CplController::class, 'import']);
+    Route::delete('cpls/multiple-delete', [CplController::class, 'destroyCpls']);
+
     Route::delete('cpls/{id}', [CplController::class, 'delete']);
 
 
@@ -140,6 +145,7 @@ Route::middleware(['auth:api,dosen'])->group(function () {
     Route::post('ppms/upsert', [PpmController::class, 'upsert']);
     Route::get('ppms/template', [PpmController::class, 'downloadTemplate']);
     Route::post('ppms/import', [PpmController::class, 'import']);
+    Route::delete('ppms/multiple-delete', [PpmController::class, 'destroyPpms']);
     Route::delete('ppms/{id}', [PpmController::class, 'delete']);
 
 
@@ -149,6 +155,7 @@ Route::middleware(['auth:api,dosen'])->group(function () {
     Route::post('peran-industri/upsert', [PeranIndustriController::class, 'upsert']);
     Route::get('peran-industri/template', [PeranIndustriController::class, 'downloadTemplate']);
     Route::post('peran-industri/import', [PeranIndustriController::class, 'import']);
+    Route::delete('peran-industri/multiple-delete', [PeranIndustriController::class, 'destroyPeranIndustris']);
     Route::delete('peran-industri/{id}', [PeranIndustriController::class, 'delete']);
 
     /* ------------------------------------ Ipteks API ------------------------------------------------------- */

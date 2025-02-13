@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\MataKuliah;
 use App\Models\KemampuanAkhir;
+use App\Models\TujuanBelajar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class MataKuliahController extends Controller
@@ -24,7 +26,8 @@ class MataKuliahController extends Controller
             'kemampuanAkhirs' => function ($query) {
                 $query->with(['bentukPembelajarans:id', 'metodePembelajarans:id']);
             },
-            'formulasiCpas:id'
+            'formulasiCpas:id',
+            'tujuanBelajars:id,kode,deskripsi,mata_kuliah_id' // Tambahkan relasi tujuan belajar
         ])
             ->where('kurikulum_id', $activeKurikulum->id)
             ->get()
@@ -44,7 +47,6 @@ class MataKuliahController extends Controller
                     'praktek_pt' => $mataKuliah->praktek_pt,
                     'praktek_m' => $mataKuliah->praktek_m,
 
-
                     'kemampuan_akhir' => $mataKuliah->kemampuanAkhirs->map(function ($kemampuan) {
                         return [
                             'id' => $kemampuan->id,
@@ -54,11 +56,18 @@ class MataKuliahController extends Controller
                             'metode_pembelajaran' => $kemampuan->metodePembelajarans->pluck('id'),
                         ];
                     }),
-                    'formulasi_cpas' => $mataKuliah->formulasiCpas->pluck('id'), // ID formulasi cpas
+
+                    'formulasi_cpas' => $mataKuliah->formulasiCpas->pluck('id'),
+
+                    'tujuan_belajar' => $mataKuliah->tujuanBelajars->map(function ($tujuan) {
+                        return [
+                            'id' => $tujuan->id,
+                            'kode' => $tujuan->kode,
+                            'deskripsi' => $tujuan->deskripsi,
+                        ];
+                    }),
                 ];
             });
-
-
 
         return response()->json([
             'success' => true,
@@ -93,6 +102,10 @@ class MataKuliahController extends Controller
             'kemampuan_akhirs.*.estimasi_beban_belajar' => 'required|numeric',
             'kemampuan_akhirs.*.metode_pembelajaran_ids' => 'array',
             'kemampuan_akhirs.*.bentuk_pembelajaran_ids' => 'array',
+            'tujuan_belajar' => 'array',
+            'tujuan_belajar.*.deskripsi' => 'required|string',
+
+
             'formulasi_cpa_ids' => 'array',
         ]);
 
@@ -113,6 +126,14 @@ class MataKuliahController extends Controller
                 'kurikulum_id' => $activeKurikulum->id,
             ]);
 
+            foreach ($request->tujuan_belajar as $tujuan) {
+                TujuanBelajar::create([
+                    'deskripsi' => $tujuan['deskripsi'],
+                    'mata_kuliah_id' => $mataKuliah->id,
+                ]);
+            }
+
+
             if ($request->has('kemampuan_akhirs')) {
                 foreach ($request->kemampuan_akhirs as $kemampuan) {
                     $kemampuanAkhir = KemampuanAkhir::create([
@@ -130,6 +151,8 @@ class MataKuliahController extends Controller
                     }
                 }
             }
+
+
 
             if ($request->has('formulasi_cpa_ids')) {
                 $mataKuliah->formulasiCpas()->sync($request->formulasi_cpa_ids);
@@ -177,6 +200,8 @@ class MataKuliahController extends Controller
             'kemampuan_akhirs.*.metode_pembelajaran_ids' => 'array',
             'kemampuan_akhirs.*.bentuk_pembelajaran_ids' => 'array',
             'formulasi_cpa_ids' => 'array',
+            'tujuan_belajar' => 'array',
+            'tujuan_belajar.*.deskripsi' => 'required|string',
         ]);
 
         DB::beginTransaction();
@@ -198,14 +223,13 @@ class MataKuliahController extends Controller
                 'kurikulum_id' => $activeKurikulum->id,
             ]);
 
-            // Menangani kemampuan akhir
             if ($request->has('kemampuan_akhirs')) {
 
                 $mataKuliah->kemampuanAkhirs()->delete();
 
                 foreach ($request->kemampuan_akhirs as $kemampuan) {
                     $kemampuanAkhir = KemampuanAkhir::updateOrCreate(
-                        ['id' => $kemampuan['id'] ?? null], // Jika id tidak ada, berarti ini data baru
+                        ['id' => $kemampuan['id'] ?? null],
                         [
                             'deskripsi' => $kemampuan['deskripsi'],
                             'estimasi_beban_belajar' => $kemampuan['estimasi_beban_belajar'],
@@ -220,6 +244,14 @@ class MataKuliahController extends Controller
                     if (isset($kemampuan['bentuk_pembelajaran_ids'])) {
                         $kemampuanAkhir->bentukPembelajarans()->sync($kemampuan['bentuk_pembelajaran_ids']);
                     }
+                }
+            }
+
+            if ($request->has('tujuan_belajar')) {
+                $mataKuliah->tujuanBelajars()->delete();
+
+                foreach ($request->tujuan_belajar as $tujuanBelajar) {
+                    $tujuanBelajar = TujuanBelajar::updateOrCreate(['id' => $tujuanBelajar['id'] ?? null], ['deskripsi' => $tujuanBelajar['deskripsi'],]);
                 }
             }
 
