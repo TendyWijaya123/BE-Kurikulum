@@ -85,6 +85,11 @@ class Kurikulum extends Model
         return $this->hasMany(PeranIndustri::class);
     }
 
+    public function mataKuliahs()
+    {
+        return $this->hasMany(MataKuliah::class);
+    }
+
 
     protected static function boot()
     {

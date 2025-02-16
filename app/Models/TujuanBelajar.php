@@ -46,6 +46,11 @@ class TujuanBelajar extends Model
         return $this->belongsTo(MataKuliah::class, 'mata_kuliah_id');
     }
 
+    public function rpss()
+    {
+        return $this->hasMany(RpsMatakuliah::class, 'tujuan_belajar_id');
+    }
+
     /**
      * Reindex kode untuk TujuanBelajar dalam satu mata_kuliah_id.
      *

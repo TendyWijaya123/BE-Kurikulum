@@ -16,7 +16,21 @@ class MatriksPMp extends Model
         'mp_id',
     ];
 
-    public function mataKuliahs(){
-        return $this->belongsToMany(MataKuliah::class, 'mp_p_mk','mp_p_id', 'mk_id');
+    public function mataKuliahs()
+    {
+        return $this->belongsToMany(MataKuliah::class, 'mp_p_mk', 'mp_p_id', 'mk_id');
+    }
+
+    public function materiPembelajaran()
+    {
+        return $this->belongsTo(MateriPembelajaran::class, 'mp_id', 'id');
+    }
+
+    /**
+     * Relasi ke Pengetahuan (Many to One)
+     */
+    public function pengetahuan()
+    {
+        return $this->belongsTo(Pengetahuan::class, 'p_id', 'id');
     }
 }
