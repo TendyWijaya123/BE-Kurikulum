@@ -14,20 +14,24 @@ class MateriPembelajaranTemplateExport implements WithHeadings, WithStyles, Shou
     public function headings(): array
     {
         return [
-            'Deskripsi'
+            'deskripsi',
+            'cognitif_proses'
         ];
     }
 
     public function styles(Worksheet $sheet)
     {
-        $lastColumn = $sheet->getHighestColumn() ?? 'A'; // Menghindari error saat data kosong
+        $lastColumn = $sheet->getHighestColumn();
 
-        // Format Header
-        $sheet->getStyle("A1:{$lastColumn}1")->applyFromArray([
-            'font' => ['bold' => true],
+        $sheet->getStyle('A1:' . $lastColumn . '1')->applyFromArray([
+            'font' => [
+                'bold' => true,
+            ],
             'fill' => [
                 'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => 'E2EFDA'],
+                'startColor' => [
+                    'rgb' => 'E2EFDA',
+                ],
             ],
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
@@ -35,12 +39,26 @@ class MateriPembelajaranTemplateExport implements WithHeadings, WithStyles, Shou
             ],
         ]);
 
-        // Menambahkan Border hingga baris ke-10 untuk semua kolom
-        $sheet->getStyle("A1:{$lastColumn}10")->applyFromArray([
+        $sheet->getStyle('A1:' . $lastColumn . '10')->applyFromArray([
             'borders' => [
-                'allBorders' => ['borderStyle' => Border::BORDER_THIN],
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                ],
             ],
         ]);
+
+        $validation = $sheet->getCell('B2')->getDataValidation();
+        $validation->setType(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST)
+            ->setErrorStyle(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::STYLE_INFORMATION)
+            ->setAllowBlank(false)
+            ->setShowInputMessage(true)
+            ->setShowErrorMessage(true)
+            ->setShowDropDown(true)
+            ->setFormula1('"Remembering,Understanding,Applying,Analyzing,Evaluating,Creating"');
+
+        for ($i = 2; $i <= 10; $i++) {
+            $sheet->getCell('B' . $i)->setDataValidation(clone $validation);
+        }
 
         return [
             1 => ['font' => ['bold' => true]],

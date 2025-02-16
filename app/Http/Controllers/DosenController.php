@@ -8,6 +8,9 @@ use App\Models\Dosen;
 use App\Models\Prodi;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\DosenCreatedMail;
 
 class DosenController extends Controller
 {
@@ -15,9 +18,11 @@ class DosenController extends Controller
     {
         $jurusan = Jurusan::all(['id', 'nama']);
         $prodi = Prodi::all(['id', 'name', 'jurusan_id']);
-        $dosen = Dosen::with(['prodi' => function ($query) {
-            $query->select('prodis.id', 'prodis.name');
-        }])->with('jurusan')->get(); 
+        $dosen = Dosen::with([
+            'prodi' => function ($query) {
+                $query->select('prodis.id', 'prodis.name');
+            }
+        ])->with('jurusan')->get();
 
         return response()->json([
             'prodis' => $prodi,
@@ -27,31 +32,35 @@ class DosenController extends Controller
     }
 
 
-    public function store(Request $request){
+    public function store(Request $request)
+    {
         try {
-                DB::beginTransaction();
+            DB::beginTransaction();
 
-                $data = $request->all();
-                $dosen = Dosen::Create(
-                    [
-                        'kode' => $data['kode'],
-                        'nip' => $data['nip'],
-                        'nama' => $data['nama'],
-                        'email' => $data['email'],
-                        'password' => Hash::make('password123'),
-                        'jenis_kelamin' => $data['jenisKelamin'],
-                        'is_active' => true,
-                        'jurusan_id' => $data['jurusan']
-                    ]
-                );
+            $data = $request->all();
+            $password = Str::random(8); // Generate random password
 
-                $dosen->prodi()->syncWithoutDetaching($data['prodi']);
+            $dosen = Dosen::Create([
+                'kode' => $data['kode'],
+                'nip' => $data['nip'],
+                'nama' => $data['nama'],
+                'email' => $data['email'],
+                'password' => Hash::make($password),
+                'jenis_kelamin' => $data['jenisKelamin'],
+                'is_active' => true,
+                'jurusan_id' => $data['jurusan']
+            ]);
 
-                DB::commit();
+            $dosen->prodi()->syncWithoutDetaching($data['prodi']);
 
-                return response()->json([
-                    'success' => 'Data berhasil disimpan',
-                ], 200);
+            // Send email
+            Mail::to($dosen->email)->send(new DosenCreatedMail($dosen, $password));
+
+            DB::commit();
+
+            return response()->json([
+                'success' => 'Data berhasil disimpan dan email telah dikirim',
+            ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -122,7 +131,8 @@ class DosenController extends Controller
     }
 
 
-    public function destroy($id){
+    public function destroy($id)
+    {
         $sksu = Dosen::find($id);
         if (!$sksu) {
             return response()->json([
@@ -162,7 +172,7 @@ class DosenController extends Controller
             }
 
             // Loop untuk menghapus data terkait, jika ada
-            foreach ($dosens as $dosen){
+            foreach ($dosens as $dosen) {
                 // Hapus data SKSU
                 $dosen->delete();
             }

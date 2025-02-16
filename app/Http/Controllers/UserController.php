@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Mail;
+use App\Mail\UserCreatedMail;
 
 class UserController extends Controller
 {
@@ -22,20 +25,39 @@ class UserController extends Controller
     public function store(CreateUserRequest $request)
     {
         try {
+            // Validasi input secara eksplisit
+            $validator = Validator::make($request->all(), [
+                'email' => 'required|email|unique:users,email',
+                'name' => 'required|string|max:255',
+                'prodi_id' => 'required|exists:prodis,id',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['error' => $validator->errors()], 422);
+            }
+
+            // Generate password random
+            $randomPassword = Str::random(10);
+
             $payload = [
                 'email' => $request->email,
                 'name' => $request->name,
                 'prodi_id' => $request->prodi_id,
+                'password' => Hash::make($randomPassword), // Simpan password yang sudah di-hash
             ];
-            $payload['password'] = Hash::make($request->password);
+
+            // Buat user
             $user = User::create($payload);
+
+            // Kirim email dengan password yang dibuat
+            Mail::to($user->email)->send(new UserCreatedMail($user, $randomPassword));
+
             return response()->json(['user' => $user, 'message' => 'User Created Successfully'], 201);
         } catch (\Exception $e) {
             Log::error('Error in Store Method:', ['message' => $e->getMessage()]);
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
 
     /**
      * Show user by ID.
