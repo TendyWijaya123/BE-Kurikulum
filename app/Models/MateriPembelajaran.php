@@ -29,10 +29,12 @@ class MateriPembelajaran extends Model
                     ->orderBy('id', 'desc')
                     ->first();
 
-                // Determine the next number
                 $nextNumber = $lastMp ? ((int) str_replace('MP-', '', $lastMp->code) + 1) : 1;
 
-                // Set the kode
+                if ($nextNumber < 1) {
+                    $nextNumber = 1;
+                }
+
                 $model->code = 'MP-' . $nextNumber;
             }
         });
@@ -57,7 +59,7 @@ class MateriPembelajaran extends Model
         return $this->belongsToMany(KnowledgeDimension::class, 'knowledge_mp', 'mp_id', 'code_knowledge_dimension', 'id', 'code');
     }
 
-    public static function reindexKode(int $kurikulumId) 
+    public static function reindexKode(int $kurikulumId)
     {
         DB::beginTransaction();
 
