@@ -77,6 +77,27 @@ class MataKuliahController extends Controller
         ]);
     }
 
+    public function showMataKuliahByDosenPengampu()
+    {
+        $dosen = Auth::guard('dosen')->user();
+
+        if (!$dosen) {
+            return response()->json(['message' => 'Dosen tidak ditemukan'], 404);
+        }
+
+        $matkul = MataKuliah::whereHas('dosens', function ($query) use ($dosen) {
+            $query->where('dosen_id', $dosen->id);
+        })
+            ->whereHas('kurikulum', function ($query) {
+                $query->where('is_active', true);
+            })
+            ->select('id', 'kode', 'nama')
+            ->get();
+
+        return response()->json($matkul);
+    }
+
+
     public function showMataKuliahByJurusan()
     {
         try {
@@ -323,7 +344,7 @@ class MataKuliahController extends Controller
                 $mataKuliah->tujuanBelajars()->delete();
 
                 foreach ($request->tujuan_belajar as $tujuanBelajar) {
-                    $tujuanBelajar = TujuanBelajar::updateOrCreate(['id' => $tujuanBelajar['id'] ?? null], ['deskripsi' => $tujuanBelajar['deskripsi'],]);
+                    $tujuanBelajar = TujuanBelajar::updateOrCreate(['id' => $tujuanBelajar['id'] ?? null], ['deskripsi' => $tujuanBelajar['deskripsi'],  'mata_kuliah_id' => $mataKuliah->id,]);
                 }
             }
 

@@ -23,6 +23,15 @@ class KemampuanAkhir extends Model
         return $this->belongsTo(MataKuliah::class, 'mata_kuliah_id', 'id');
     }
 
+
+    public function rpss()
+    {
+        return $this->hasMany(RpsMatakuliah::class, 'kemampuan_akhir_id');
+
+    }
+
+    
+
     /**
      * Relasi ke BentukPembelajaran
      */

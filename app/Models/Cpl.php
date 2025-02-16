@@ -84,6 +84,11 @@ class Cpl extends Model
             ->withTimestamps();
     }
 
+    public function rpss()
+    {
+        return $this->hasMany(RpsMatakuliah::class, 'cpl_id');
+    }
+
     public static function reindexKode(int $kurikulumId)
     {
         DB::beginTransaction();

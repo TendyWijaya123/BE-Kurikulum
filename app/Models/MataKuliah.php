@@ -10,6 +10,7 @@ class MataKuliah extends Model
 {
     use HasFactory;
 
+    protected $table = 'mata_kuliahs';
     protected $fillable = [
         'kode',
         'nama',
@@ -48,8 +49,22 @@ class MataKuliah extends Model
 
     public function matriksPMp()
     {
-        return $this->belongsToMany(MatriksPMp::class, 'mp_p_mk', 'mp_p_id', 'mk_id');
+        return $this->belongsToMany(MatriksPMp::class, 'mp_p_mk', 'mk_id', 'mp_p_id');
     }
+
+    public function materiPembelajarans()
+    {
+        return $this->belongsToMany(
+            MateriPembelajaran::class,
+            'p_mp',
+            'mp_id',
+            'p_id'
+        )->whereIn('mp_id', $this->matriksPMp()->pluck('mp_p_id'));
+    }
+
+
+
+
 
     public function cpls()
     {
@@ -71,5 +86,10 @@ class MataKuliah extends Model
     public function bukuReferensis()
     {
         return $this->belongsToMany(BukuReferensi::class, 'mata_kuliah_has_buku_referensi');
+    }
+
+    public function rpss()
+    {
+        return $this->hasMany(RpsMatakuliah::class, 'mata_kuliah_id');
     }
 }
