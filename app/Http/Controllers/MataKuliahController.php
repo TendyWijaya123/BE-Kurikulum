@@ -393,4 +393,83 @@ class MataKuliahController extends Controller
             ], 500);
         }
     }
+
+
+    public function storePrasyarat(Request $request, $mataKuliahId)
+    {
+        try {
+            // Validasi input untuk prasyarat_ids
+            $request->validate([
+                'prasyarat_ids' => 'array',
+                'prasyarat_ids.*' => 'exists:mata_kuliahs,id', // Pastikan ID yang ada di database
+            ]);
+
+            // Mencari MataKuliah berdasarkan ID
+            $mataKuliah = MataKuliah::findOrFail($mataKuliahId);
+
+            // Debug: Cek relasi yang sudah ada
+            Log::info('Prasyarat yang ada sebelum dihapus:', $mataKuliah->prasyarat->toArray());
+
+            // Hapus semua relasi yang ada
+            $mataKuliah->prasyarat()->detach(); // Menghapus semua relasi yang ada
+
+            // Debug: Cek apakah relasi terhapus
+            Log::info('Prasyarat setelah dihapus:', $mataKuliah->prasyarat->toArray());
+
+            // Jika ada prasyarat_ids, tambahkan relasi baru
+            if (!empty($request->prasyarat_ids)) {
+                $mataKuliah->prasyarat()->attach($request->prasyarat_ids); // Menambahkan relasi baru
+            }
+
+            // Kembalikan respons dengan pesan dan data terbaru relasi prasyarat
+            return response()->json([
+                'message' => 'Prasyarat berhasil diperbarui',
+                'data' => $mataKuliah->prasyarat, // Tampilkan data relasi prasyarat yang terbaru
+            ]);
+        } catch (\Exception $e) {
+            // Menangkap error dan mengembalikan respons error
+            Log::error('Error saat menyimpan prasyarat: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat memperbarui prasyarat',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
+
+
+
+    /**
+     * Update Prasyarat Mata Kuliah (Ganti dengan daftar baru)
+     */
+    public function updatePrasyarat(Request $request, $mataKuliahId)
+    {
+        $request->validate([
+            'prasyarat_ids' => 'required|array',
+            'prasyarat_ids.*' => 'exists:mata_kuliahs,id'
+        ]);
+
+        $mataKuliah = MataKuliah::findOrFail($mataKuliahId);
+        $mataKuliah->prasyarat()->sync($request->prasyarat_ids);
+
+        return response()->json([
+            'message' => 'Prasyarat berhasil diperbarui',
+            'data' => $mataKuliah->prasyarat
+        ]);
+    }
+
+    public function getPrasyaratGraph($id)
+    {
+        $mataKuliah = MataKuliah::find($id);
+
+        if (!$mataKuliah) {
+            return response()->json(['message' => 'Mata kuliah tidak ditemukan.'], 404);
+        }
+
+        $graph = $mataKuliah->prasyaratGraphById();
+
+        return response()->json($graph);
+    }
 }

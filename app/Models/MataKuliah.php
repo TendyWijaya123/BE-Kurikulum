@@ -92,4 +92,65 @@ class MataKuliah extends Model
     {
         return $this->hasMany(RpsMatakuliah::class, 'mata_kuliah_id');
     }
+
+
+    public function prasyarat()
+    {
+        return $this->belongsToMany(
+            MataKuliah::class,
+            'prasyarat_mata_kuliah',
+            'mata_kuliah_id',
+            'prasyarat_id'
+        );
+    }
+
+    public function digunakanSebagaiPrasyarat()
+    {
+        return $this->belongsToMany(
+            MataKuliah::class,
+            'prasyarat_mata_kuliah',
+            'prasyarat_id',
+            'mata_kuliah_id'
+        );
+    }
+
+    public function prasyaratGraphById()
+    {
+        $nodes = [];
+        $edges = [];
+
+        $addNode = function ($id, $nama) use (&$nodes) {
+            // Cek apakah ID sudah ada dalam nodes
+            if (!isset($nodes[$id])) {
+                $nodes[$id] = $nama;
+            }
+        };
+
+        $addEdge = function ($toId, $fromId) use (&$edges) {
+            $edges[] = ['from' => $fromId, 'to' => $toId];
+        };
+
+        $addNode($this->id, $this->nama);
+
+        $prasyarat = $this->prasyarat()->get();
+
+        foreach ($prasyarat as $item) {
+            $addNode($item->id, $item->nama);
+            $addEdge($this->id, $item->id);
+
+            $subGraph = $item->prasyaratGraphById();
+
+            foreach ($subGraph['nodes'] as $id => $nama) {
+                $addNode($id, $nama);
+            }
+            foreach ($subGraph['edges'] as $edge) {
+                $edges[] = $edge;
+            }
+        }
+
+        return [
+            'nodes' => $nodes,
+            'edges' => $edges,
+        ];
+    }
 }

@@ -44,6 +44,13 @@ use Illuminate\Support\Facades\Route;
 Route::post('login', [AuthController::class, 'login'])->name('login');
 Route::post('login-dosen', [DosenAuthController::class, 'login'])->name('login_dosen');
 
+
+Route::prefix('mata-kuliah-contoh/{mataKuliahId}')->group(function () {
+    Route::post('prasyarat', [MataKuliahController::class, 'storePrasyarat']);
+    Route::put('prasyarat', [MataKuliahController::class, 'updatePrasyarat']);
+    Route::get('prasyarat-graph', [MataKuliahController::class, 'getPrasyaratGraph']);
+});
+
 Route::middleware(['auth:api'])->group(function () {
 
     /* ------------------------------------ Users API ------------------------------------------------------- */
