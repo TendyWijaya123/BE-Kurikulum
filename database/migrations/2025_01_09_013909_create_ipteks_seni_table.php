@@ -11,9 +11,10 @@ class CreateIpteksSeniTable extends Migration
      */
     public function up()
     {
-        Schema::create('ipteks_seni', function (Blueprint $table) {
+        Schema::create('senis', function (Blueprint $table) {
             $table->id();
-            $table->text('seni');
+            $table->text('deskripsi');
+            $table->string('link_sumber')->nullable();
             $table->foreignId('kurikulum_id')->constrained('kurikulums')->onDelete('cascade');
             $table->timestamps();
         });
@@ -24,6 +25,6 @@ class CreateIpteksSeniTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ipteks_seni');
+        Schema::dropIfExists('senis');
     }
 }

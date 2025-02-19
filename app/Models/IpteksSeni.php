@@ -9,10 +9,10 @@ class IpteksSeni extends Model
 {
     use HasFactory;
 
-    protected $table = 'ipteks_seni';
-
+    protected $table = 'senis';
     protected $fillable = [
-        'seni',
+        'deskripsi',
+        'link_sumber',
         'kurikulum_id',
     ];
 
