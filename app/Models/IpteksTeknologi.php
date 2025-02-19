@@ -8,11 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class IpteksTeknologi extends Model
 {
     use HasFactory;
-
-    protected $table = 'ipteks_teknologi';
-
+    protected $table = 'teknologis';
     protected $fillable = [
-        'teknologi',
+        'deskripsi',
+        'link_sumber',
         'kurikulum_id',
     ];
 

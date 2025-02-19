@@ -11,9 +11,10 @@ class CreateIpteksTeknologiTable extends Migration
      */
     public function up()
     {
-        Schema::create('ipteks_teknologi', function (Blueprint $table) {
+        Schema::create('teknologis', function (Blueprint $table) {
             $table->id();
-            $table->text('teknologi');
+            $table->text('deskripsi');
+            $table->string('link_sumber')->nullable();
             $table->foreignId('kurikulum_id')->constrained('kurikulums')->onDelete('cascade');
             $table->timestamps();
         });
@@ -24,6 +25,6 @@ class CreateIpteksTeknologiTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ipteks_teknologi');
+        Schema::dropIfExists('tekonologis');
     }
 }

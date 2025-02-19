@@ -39,6 +39,12 @@ use App\Http\Controllers\RpsMataKuliahController;
 use App\Imports\PeranIndustriImport;
 use App\Models\BenchKurikulum;
 use App\Models\PeranIndustri;
+use App\Models\RpsMataKuliah;
+use App\Http\Controllers\IlmuPengetahuanController;
+use App\Http\Controllers\SeniController;
+use App\Http\Controllers\TeknologiController;
+use App\Http\Controllers\DashboardController;
+
 use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
@@ -161,15 +167,6 @@ Route::middleware(['auth:api'])->group(function () {
     Route::delete('peran-industri/multiple-delete', [PeranIndustriController::class, 'destroyPeranIndustris']);
     Route::delete('peran-industri/{id}', [PeranIndustriController::class, 'delete']);
 
-    /* ------------------------------------ Ipteks API ------------------------------------------------------- */
-    Route::get('ipteks', [IpteksController::class, 'index']);
-    Route::post('ipteks', [IpteksController::class, 'store']);
-    Route::delete('ipteks/{id}', [IpteksController::class, 'destroy']);
-    Route::delete('ipteks', [IpteksController::class, 'destroyMultiple']);
-    Route::get('ipteks/template', [IpteksController::class, 'downloadTemplate']);
-    Route::post('ipteks/import', [IpteksController::class, 'import']);
-
-
     /* ------------------------------------ IEA API ------------------------------------------------------- */
     Route::get('iea', [IeaController::class, 'index']);
 
@@ -232,6 +229,40 @@ Route::middleware(['auth:api'])->group(function () {
     // Route::delete('dosen/{id}', [DosenController::class, 'destroy']);
     // Route::delete('dosen', [DosenController::class, 'destroyDosens']);
 
+    /* --------------------------------------- ipteks API ------------------------------------------------*/
+
+    Route::prefix('ilmu-pengetahuan')->group(function () {
+        Route::get('/', [IlmuPengetahuanController::class, 'index']);
+        Route::post('/', [IlmuPengetahuanController::class, 'store']);
+        Route::delete('/{id}', [IlmuPengetahuanController::class, 'destroy']);
+        Route::delete('/', [IlmuPengetahuanController::class, 'destroyMultiple']);
+        Route::delete('/', [IlmuPengetahuanController::class, 'destroyMultiple']);
+        Route::get('/template', [IlmuPengetahuanController::class, 'downloadTemplate']);
+        Route::post('/import', [IlmuPengetahuanController::class, 'import']);
+    });
+
+    Route::prefix('teknologi')->group(function () {
+        Route::get('/', [TeknologiController::class, 'index']);
+        Route::post('/', [TeknologiController::class, 'store']);
+        Route::delete('/{id}', [TeknologiController::class, 'destroy']);
+        Route::delete('/', [TeknologiController::class, 'destroyMultiple']);
+        Route::get('/template', [TeknologiController::class, 'downloadTemplate']);
+        Route::post('/import', [TeknologiController::class, 'import']);
+    });
+
+    Route::prefix('seni')->group(function () {
+        Route::get('/', [SeniController::class, 'index']);
+        Route::post('/', [SeniController::class, 'store']);
+        Route::delete('/{id}', [SeniController::class, 'destroy']);
+        Route::delete('/', [SeniController::class, 'destroyMultiple']);
+        Route::get('/template', [SeniController::class, 'downloadTemplate']);
+        Route::post('/import', [SeniController::class, 'import']);
+    });
+
+    /* ---------------------------------------Dashboard-----------------------------------------------*/
+    // Route::get('dashboard/jurusans', [DashboardController::class, 'getJurusans']);
+    // Route::get('dashboard/prodis', [DashboardController::class, 'getProdis']);
+    // Route::get('dashboard/curriculum-data', [DashboardController::class, 'getCurriculumData']);
 
 
     Route::get('rps/matkul-dropdown/{id}', [RpsController::class, 'dropdownMatkul']);
@@ -273,4 +304,6 @@ Route::middleware(['auth:dosen'])->group(function () {
         Route::put('/{id}', [RpsMataKuliahController::class, 'update']); // Menambahkan route untuk update
         Route::delete('/{id}', [RpsMataKuliahController::class, 'destroy']); // Menambahkan route untuk delete
     });
+
+
 });
