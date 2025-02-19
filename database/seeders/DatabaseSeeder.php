@@ -27,6 +27,8 @@ class DatabaseSeeder extends Seeder
             FormulasiCpaSeeder::class,
             KnowledgeDimensionSedeer::class,
             DosenSeeder::class,
+            PengetahuanKKNISeed::class,
+            KemampuanKerjaKKNISeed::class,
         ]);
     }
 }

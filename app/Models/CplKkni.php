@@ -15,6 +15,8 @@ class CplKkni extends Model
     protected $fillable = [
         'code',
         'description',
+        'pengetahuan_kkni_id',
+        'kemampuan_kerja_id',
         'kurikulum_id',
     ];
 
@@ -52,6 +54,14 @@ class CplKkni extends Model
     public function kurikulum()
     {
         return $this->belongsTo(Kurikulum::class);
+    }
+
+    public function pengetahuanKKNI(){
+        return $this->hasMany('pengetahuan_kkni');
+    }
+
+    public function kemampuanKerjaKKNI(){
+        return $this->hasMany('kemampuan_kerja_kkni');
     }
 
     public static function reindexKode(int $kurikulumId)

@@ -36,10 +36,6 @@ use App\Http\Controllers\MetodePembelajaranController;
 use App\Http\Controllers\PengetahuanController;
 use App\Http\Controllers\MatrixCplPController;
 use App\Http\Controllers\RpsMataKuliahController;
-use App\Imports\PeranIndustriImport;
-use App\Models\BenchKurikulum;
-use App\Models\PeranIndustri;
-use App\Models\RpsMataKuliah;
 use App\Http\Controllers\IlmuPengetahuanController;
 use App\Http\Controllers\SeniController;
 use App\Http\Controllers\TeknologiController;
@@ -105,6 +101,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/kkni', [KkniController::class, 'index']);
     Route::post('/kkni', [KkniController::class, 'store']);
     Route::get('kkni/template', [KkniController::class, 'downloadTemplate']);
+    Route::get('/kkni/auto', [KkniController::class, 'autoCpl']);
     Route::post('kkni/import', [KkniController::class, 'import']);
     Route::delete('/kkni/{id}', [KkniController::class, 'destroy']);
     Route::delete('/kkni', [KkniController::class, 'destroyCpkKknis']);
@@ -259,9 +256,9 @@ Route::middleware(['auth:api'])->group(function () {
     });
 
     /* ---------------------------------------Dashboard-----------------------------------------------*/
-    Route::get('dashboard/jurusans', [DashboardController::class, 'getJurusans']);
-    Route::get('dashboard/prodis', [DashboardController::class, 'getProdis']);
-    Route::get('dashboard/curriculum-data', [DashboardController::class, 'getCurriculumData']);
+    // Route::get('dashboard/jurusans', [DashboardController::class, 'getJurusans']);
+    // Route::get('dashboard/prodis', [DashboardController::class, 'getProdis']);
+    // Route::get('dashboard/curriculum-data', [DashboardController::class, 'getCurriculumData']);
 
 
     Route::get('rps/matkul-dropdown/{id}', [RpsController::class, 'dropdownMatkul']);
