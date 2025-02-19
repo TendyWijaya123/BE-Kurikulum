@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use App\Models\CplKkni;
+use App\Models\IpteksPengetahuan;
+use App\Models\IpteksSeni;
+use App\Models\IpteksTeknologi;
 use App\Models\KemampuanKerjaKKNI;
 use Illuminate\Support\ServiceProvider;
 use App\Models\Prodi;
@@ -46,17 +49,17 @@ class PromptProvider extends ServiceProvider
             $query->where('prodi_id', $prodiId)->where('is_active', true);
         })->get();
 
-        $ipteksPengetahuan = Ipteks::whereHas('kurikulum', function ($query) use ($prodiId) {
+        $ipteksPengetahuan = IpteksPengetahuan::whereHas('kurikulum', function ($query) use ($prodiId) {
             $query->where('prodi_id', $prodiId)->where('is_active', true);
-        })->where('kategori', 'ilmu_pengetahuan')->get();
+        })->get();
 
-        $ipteksTeknologi = Ipteks::whereHas('kurikulum', function ($query) use ($prodiId) {
+        $ipteksTeknologi = IpteksTeknologi::whereHas('kurikulum', function ($query) use ($prodiId) {
             $query->where('prodi_id', $prodiId)->where('is_active', true);
-        })->where('kategori', 'teknologi')->get();
+        })->get();
 
-        $ipteksSeni = Ipteks::whereHas('kurikulum', function ($query) use ($prodiId) {
+        $ipteksSeni = IpteksSeni::whereHas('kurikulum', function ($query) use ($prodiId) {
             $query->where('prodi_id', $prodiId)->where('is_active', true);
-        })->where('kategori', 'seni')->get();
+        })->get();
 
         // Ambil nama prodi untuk prompt
         $prodi = Prodi::find($prodiId);

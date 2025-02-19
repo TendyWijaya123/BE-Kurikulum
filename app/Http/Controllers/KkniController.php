@@ -196,11 +196,9 @@ class KkniController extends Controller
         // Bersihkan format teks, hapus ```json dan ```
         $jsonText = preg_replace('/```json|```/', '', trim($jsonText));
 
-        // Konversi JSON menjadi array PHP
+        // // Konversi JSON menjadi array PHP
         $dataArray = json_decode($jsonText, true);
 
-        return response()->json([
-            'data' => $dataArray
-        ]);
+        return response()->json(['data' => $dataArray]);
     }
 }
