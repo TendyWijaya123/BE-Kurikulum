@@ -99,6 +99,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/kkni', [KkniController::class, 'index']);
     Route::post('/kkni', [KkniController::class, 'store']);
     Route::get('kkni/template', [KkniController::class, 'downloadTemplate']);
+    Route::get('/kkni/auto', [KkniController::class, 'autoCpl']);
     Route::post('kkni/import', [KkniController::class, 'import']);
     Route::delete('/kkni/{id}', [KkniController::class, 'destroy']);
     Route::delete('/kkni', [KkniController::class, 'destroyCpkKknis']);
