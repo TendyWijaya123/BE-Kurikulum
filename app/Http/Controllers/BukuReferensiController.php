@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\BukuReferensi;
-
+use App\Exports\BukuReferensiTemplateExport;
+use App\Imports\BukuReferensiImport;
+use Maatwebsite\Excel\Facades\Excel;
 class BukuReferensiController extends Controller
 {
     /**
@@ -147,5 +149,26 @@ class BukuReferensiController extends Controller
         $buku->delete();
 
         return response()->json(['message' => 'Buku referensi berhasil dihapus']);
+    }
+
+    public function downloadTemplate()
+    {
+        $fileName = 'buku_referensi_template.xlsx';
+        return Excel::download(new BukuReferensiTemplateExport, $fileName);
+    }
+
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv'
+        ]);
+
+        try {
+            Excel::import(new BukuReferensiImport, $request->file('file'));
+            return response()->json(['message' => 'Data buku referensi berhasil diimport.'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+        }
     }
 }

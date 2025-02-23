@@ -51,7 +51,7 @@ class Pengetahuan extends Model
                 $number = 1;
             }
 
-            $pengetahuan->kode_pengetahuan = 'P-' . str_pad($number, 3, '0', STR_PAD_LEFT);
+            $pengetahuan->kode_pengetahuan = 'P-' . str_pad($number, 2, '0', STR_PAD_LEFT);
         });
 
         static::deleted(function ($pengetahuan) {
@@ -69,7 +69,7 @@ class Pengetahuan extends Model
 
             $number = 1;
             foreach ($pengetahuans as $pengetahuan) {
-                $newCode = 'P-' . str_pad($number, 3, '0', STR_PAD_LEFT);
+                $newCode = 'P-' . str_pad($number, 2, '0', STR_PAD_LEFT);
                 if ($pengetahuan->kode_pengetahuan !== $newCode) {
                     $pengetahuan->kode_pengetahuan = $newCode;
                     $pengetahuan->save();
