@@ -10,7 +10,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Trigger AFTER INSERT
         DB::unprepared("
             CREATE TRIGGER kemampuan_akhirs_after_insert
             AFTER INSERT ON kemampuan_akhirs
