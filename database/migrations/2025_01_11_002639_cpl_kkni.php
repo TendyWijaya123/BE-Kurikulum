@@ -16,8 +16,6 @@ return new class extends Migration
             $table->string('code');
             $table->text('description');
             $table->foreignId('kurikulum_id')->constrained('kurikulums')->onDelete('cascade');
-            $table->foreignId('pengetahuan_kkni_id')->constrained('pengetahuan_kkni')->onDelete('cascade');
-            $table->foreignId('kemampuan_kerja_id')->constrained('kemampuan_kerja_kkni')->onDelete('cascade');
 
             $table->timestamps();
         });
