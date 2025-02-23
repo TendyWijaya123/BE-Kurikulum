@@ -255,9 +255,9 @@ Route::middleware(['auth:api'])->group(function () {
     });
 
     /* ---------------------------------------Dashboard-----------------------------------------------*/
-    // Route::get('dashboard/jurusans', [DashboardController::class, 'getJurusans']);
-    // Route::get('dashboard/prodis', [DashboardController::class, 'getProdis']);
-    // Route::get('dashboard/curriculum-data', [DashboardController::class, 'getCurriculumData']);
+    Route::get('dashboard/jurusans', [DashboardController::class, 'getJurusans']);
+    Route::get('dashboard/prodis', [DashboardController::class, 'getProdis']);
+    Route::get('dashboard/curriculum-data/{id}', [DashboardController::class, 'getCurriculumData']);
 
 
     Route::get('rps/matkul-dropdown/{id}', [RpsController::class, 'dropdownMatkul']);
