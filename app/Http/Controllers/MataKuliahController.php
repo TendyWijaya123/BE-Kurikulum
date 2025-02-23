@@ -45,9 +45,13 @@ class MataKuliahController extends Controller
                     'teori_bt' => $mataKuliah->teori_bt,
                     'teori_pt' => $mataKuliah->teori_pt,
                     'teori_m' => $mataKuliah->teori_m,
+                    'total_teori' => $mataKuliah->total_teori,
+
                     'praktek_bt' => $mataKuliah->praktek_bt,
                     'praktek_pt' => $mataKuliah->praktek_pt,
                     'praktek_m' => $mataKuliah->praktek_m,
+                    'total_praktek' => $mataKuliah->total_praktek,
+
 
                     'kemampuan_akhir' => $mataKuliah->kemampuanAkhirs->map(function ($kemampuan) {
                         return [
@@ -91,7 +95,7 @@ class MataKuliahController extends Controller
             ->whereHas('kurikulum', function ($query) {
                 $query->where('is_active', true);
             })
-            ->select('id', 'kode', 'nama')
+            ->select('id', 'kode', 'nama', 'deskripsi_singkat')
             ->get();
 
         return response()->json($matkul);
@@ -368,6 +372,37 @@ class MataKuliahController extends Controller
             ], 500);
         }
     }
+
+    public function updateDeskripsiSingkat(Request $request, $id)
+    {
+        $request->validate([
+            'deskripsi_singkat' => 'string',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $mataKuliah = MataKuliah::findOrFail($id);
+            $mataKuliah->update([
+                'deskripsi_singkat' => $request->deskripsi_singkat,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'data' => $mataKuliah,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat memperbarui deskripsi singkat: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
 
     public function destroy($id)
     {

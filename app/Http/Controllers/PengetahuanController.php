@@ -40,7 +40,7 @@ class PengetahuanController extends Controller
         }
     }
 
-    public function create(Request $request)
+    public function upsert(Request $request)
     {
         try {
             $user = JWTAuth::parseToken()->authenticate();
@@ -52,56 +52,30 @@ class PengetahuanController extends Controller
                 ], 404);
             }
 
-            $validated = $request->validate([
-                'deskripsi' => 'required|string'
-            ]);
+            $dataList = $request->all();
+            $results = [];
 
-            $pengetahuan = new Pengetahuan();
-            $pengetahuan->deskripsi = $validated['deskripsi'];
-            $pengetahuan->kurikulum_id = $activeKurikulum->id;
-            $pengetahuan->save();
-
-            return response()->json([
-                'message' => 'Pengetahuan berhasil dibuat',
-                'data' => $pengetahuan
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Gagal membuat pengetahuan',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    public function update(Request $request, $id)
-    {
-        try {
-            $user = JWTAuth::parseToken()->authenticate();
-            $activeKurikulum = $user->activeKurikulum();
-
-            if (!$activeKurikulum) {
-                return response()->json([
-                    'message' => 'Kurikulum aktif tidak ditemukan'
-                ], 404);
+            DB::beginTransaction();
+            foreach ($dataList as $data) {
+                $pengetahuan = Pengetahuan::updateOrCreate(
+                    ['id' => $data['id'] ?? null],
+                    [
+                        'deskripsi' => $data['deskripsi'],
+                        'kurikulum_id' => $activeKurikulum->id,
+                    ]
+                );
+                $results[] = $pengetahuan;
             }
-
-            $pengetahuan = Pengetahuan::where('kurikulum_id', $activeKurikulum->id)
-                ->findOrFail($id);
-
-            $validated = $request->validate([
-                'kode_pengetahuan' => 'required|string|max:255',
-                'deskripsi' => 'nullable|string'
-            ]);
-
-            $pengetahuan->update($validated);
+            DB::commit();
 
             return response()->json([
-                'message' => 'Pengetahuan berhasil diperbarui',
-                'data' => $pengetahuan
+                'message' => 'Data pengetahuan berhasil disimpan',
+                'data' => $results
             ], 200);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
-                'message' => 'Gagal memperbarui pengetahuan',
+                'message' => 'Gagal menyimpan data pengetahuan',
                 'error' => $e->getMessage()
             ], 500);
         }

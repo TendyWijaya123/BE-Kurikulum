@@ -22,7 +22,7 @@ return new class extends Migration
             $table->text('hasil_belajar')->nullable();
             $table->foreignId('tujuan_belajar_id')->nullable()->constrained('tujuan_belajars')->onDelete('set null');
             $table->foreignId('cpl_id')->nullable()->constrained('cpls')->onDelete('set null');
-            $table->integer('bobot_penilaian');
+            $table->integer('bobot_penilaian')->nullable();
             $table->timestamps();
 
             $table->unique(['mata_kuliah_id', 'minggu']);
