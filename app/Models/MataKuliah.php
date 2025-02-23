@@ -5,6 +5,7 @@ namespace App\Models;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\ValidationException;
 
 class MataKuliah extends Model
 {
@@ -14,16 +15,59 @@ class MataKuliah extends Model
     protected $fillable = [
         'kode',
         'nama',
+        'deskripsi_singkat',
         'tujuan',
         'semester',
         'teori_bt',
         'teori_pt',
         'teori_m',
+        'total_teori',
         'praktek_bt',
         'praktek_pt',
         'praktek_m',
+        'total_praktek',
+        'sks',
+        'total_beban_belajar',
         'kurikulum_id'
     ];
+
+
+    public static function boot()
+    {
+        parent::boot();
+
+
+        static::created(function ($model) {
+            self::updateTotalBebanBelajar($model);
+            $model->generateRpsMinggu();
+        });
+
+        static::updated(function ($model) {
+            self::updateTotalBebanBelajar($model);
+        });
+    }
+
+    /**
+     * Generate RPS (Rencana Pembelajaran Semester) dengan 14 minggu
+     */
+    public function generateRpsMinggu()
+    {
+        $rpsData = [];
+        for ($i = 1; $i <= 14; $i++) {
+            $rpsData[] = ['minggu' => $i];
+        }
+        $this->rpss()->createMany($rpsData);
+    }
+
+    /**
+     * Update total teori, total praktek, dan total beban belajar
+     */
+    private static function updateTotalBebanBelajar($model)
+    {
+        $model->total_teori = round((($model->teori_bt ?? 0) + ($model->teori_pt ?? 0) + ($model->teori_m ?? 0)) / 170);
+        $model->total_praktek = round((($model->praktek_bt ?? 0) + ($model->praktek_pt ?? 0) + ($model->praktek_m ?? 0)) / 170);
+        $model->saveQuietly();
+    }
 
 
 

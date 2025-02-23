@@ -20,7 +20,9 @@ class RpsMataKuliahController extends Controller
             ], 404);
         }
 
-        $rps = RpsMataKuliah::where('mata_kuliah_id', $id)->get();
+        $rps = RpsMatakuliah::where('mata_kuliah_id', $id)
+            ->with(['tujuanBelajar', 'kemampuanAkhir', 'cpl'])
+            ->get();
 
         $data = [
             'mataKuliah' => $mataKuliah,
