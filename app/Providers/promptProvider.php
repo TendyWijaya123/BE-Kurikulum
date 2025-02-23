@@ -61,6 +61,17 @@ class PromptProvider extends ServiceProvider
             $query->where('prodi_id', $prodiId)->where('is_active', true);
         })->get();
 
+        if (
+            $siapKerja->isEmpty() || 
+            $siapUsaha->isEmpty() || 
+            $benchCurriculum->isEmpty() || 
+            $ipteksPengetahuan->isEmpty() || 
+            $ipteksSeni->isEmpty() || 
+            $ipteksTeknologi->isEmpty()
+        ) {
+            return "analisis konsideran belum lengkap";
+        } 
+
         // Ambil nama prodi untuk prompt
         $prodi = Prodi::find($prodiId);
         $prodiName = $prodi ? $prodi->nama : 'Prodi Tidak Diketahui';

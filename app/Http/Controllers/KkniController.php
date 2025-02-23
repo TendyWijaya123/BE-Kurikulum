@@ -176,7 +176,12 @@ class KkniController extends Controller
         $prodiId = $request->query('prodiId');
 
         $prompt = PromptProvider::generatePrompt($prodiId, $request->query('pengatahuanId'), $request->query('kemampuanKerjaId'));
-
+        if($prompt == "analisis konsideran belum lengkap") {
+            return response()->json([
+                'warning' => 'analisis konsideran belum lengkap'
+            ]);
+        };
+        
         $geminiApiKey = env('GEMINI_API_KEY'); // Simpan API Key di .env
         $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$geminiApiKey}", [
             "contents" => [
