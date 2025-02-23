@@ -15,8 +15,6 @@ class CplKkni extends Model
     protected $fillable = [
         'code',
         'description',
-        'pengetahuan_kkni_id',
-        'kemampuan_kerja_id',
         'kurikulum_id',
     ];
 

@@ -61,8 +61,6 @@ class KkniController extends Controller
                     [
                         'code' => $data['code'],
                         'description' => $data['description'],
-                        'pengetahuan_kkni_id' => $selectedPengetahuan,
-                        'kemampuan_kerja_id' => $selectedKemampuanKerja,
                         'kurikulum_id' => $kurikulumId,
                     ]
                 );
