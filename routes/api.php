@@ -291,6 +291,7 @@ Route::middleware(['auth:dosen'])->group(function () {
 
     Route::prefix('mata-kuliah')->group(function () {
         Route::get('/pengampu', [MataKuliahController::class, 'showMataKuliahByDosenPengampu']);
+        Route::put('/pengampu/{id}', [MataKuliahController::class, 'updateDeskripsiSingkat']);
         Route::get('/show-jurusan', [MataKuliahController::class, 'showMataKuliahByJurusan']);
         Route::post('/assign-referensi', [MataKuliahController::class, 'assignReferensiKeMataKuliah']);
     });
@@ -298,9 +299,8 @@ Route::middleware(['auth:dosen'])->group(function () {
     Route::prefix('rps')->group(function () {
         Route::get('/{id}', [RpsMataKuliahController::class, 'showRpsMataKuliah']);
         Route::post('', [RpsMataKuliahController::class, 'store']);
-        Route::put('/{id}', [RpsMataKuliahController::class, 'update']); // Menambahkan route untuk update
-        Route::delete('/{id}', [RpsMataKuliahController::class, 'destroy']); // Menambahkan route untuk delete
+        Route::put('/bulk-update', [RpsMataKuliahController::class, 'bulkUpdate']);
+        Route::put('/{id}', [RpsMataKuliahController::class, 'update']);
+        Route::delete('/{id}', [RpsMataKuliahController::class, 'destroy']);
     });
-
-
 });
