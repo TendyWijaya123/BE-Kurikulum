@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\MataKuliahTemplateExport;
+use App\Imports\MataKuliahImport;
 use App\Models\BukuReferensi;
 use App\Models\MataKuliah;
 use App\Models\KemampuanAkhir;
@@ -10,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Excel as ExcelExcel;
+use Maatwebsite\Excel\Facades\Excel;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class MataKuliahController extends Controller
@@ -402,6 +406,38 @@ class MataKuliahController extends Controller
             ], 500);
         }
     }
+
+    public function exportTemplate()
+    {
+        return Excel::download(new MataKuliahTemplateExport(), 'template_mata_kuliah.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv'
+        ]);
+
+
+        if (!$request->hasFile('file')) {
+            return response()->json(['message' => 'File tidak ditemukan'], 400);
+        }
+
+        $file = $request->file('file');
+
+        if (!$file->isValid()) {
+            return response()->json(['message' => 'File tidak valid'], 400);
+        }
+
+        try {
+            Excel::import(new MataKuliahImport, $file);
+
+            return response()->json(['message' => 'Data berhasil diimport.'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+        }
+    }
+
 
 
     public function destroy($id)

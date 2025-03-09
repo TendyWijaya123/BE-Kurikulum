@@ -1,5 +1,6 @@
 <?php
 
+use App\Exports\PenyusunanKurikulum\PenyusunanKurikulumExport;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BenchKurikulumsController;
 use App\Http\Controllers\BentukPembelajaranController;
@@ -40,11 +41,19 @@ use App\Http\Controllers\IlmuPengetahuanController;
 use App\Http\Controllers\SeniController;
 use App\Http\Controllers\TeknologiController;
 use App\Http\Controllers\DashboardController;
-
+use App\Http\Controllers\PenyusunanKurikulumController;
+use App\Imports\MataKuliahImport;
+use App\Models\MataKuliah;
 use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
 Route::post('login-dosen', [DosenAuthController::class, 'login'])->name('login_dosen');
+Route::get('rps/template/{mataKuliahId}', [RpsMataKuliahController::class, 'exportTemplate']);
+Route::post('rps/import/{mataKuliahId}', [RpsMataKuliahController::class, 'import']);
+Route::get('penyusunan-kurikulum/export/{kurikulumId}', [PenyusunanKurikulumController::class, 'export']);
+
+
+
 
 Route::middleware(['auth:api'])->group(function () {
 
@@ -70,6 +79,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::put('prodis/{id}', [ProdiController::class, 'update']);
     Route::delete('prodis/{id}', [ProdiController::class, 'destroy']);
     Route::get('prodi/dropdown', [ProdiController::class, 'getProdiDropdown']);
+    Route::get('prodi/dropdown-prodi-kurikulum', [ProdiController::class, 'getProdiWithKurikulumDropdown']);
+
 
     /* --------------------------------------Jurusan API--------------------------------------------------- */
     Route::get('jurusans', [JurusanController::class, 'index']);
@@ -193,6 +204,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/mata-kuliah', [MataKuliahController::class, 'index']);
     Route::post('/mata-kuliah', [MataKuliahController::class, 'store']);
     Route::put('/mata-kuliah/{id}', [MataKuliahController::class, 'update']);
+    Route::get('mata-kuliah/template', [MataKuliahController::class, 'exportTemplate']);
+    Route::post('mata-kuliah/import', [MataKuliahController::class, 'import']);
     Route::delete('/mata-kuliah/{id}', [MataKuliahController::class, 'destroy']);
 
 

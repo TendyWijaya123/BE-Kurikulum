@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Kurikulum extends Model
 {
     use HasFactory;
+
+
 
     /**
      * The table associated with the model.
@@ -102,6 +105,24 @@ class Kurikulum extends Model
                     ->where('is_active', true)
                     ->update(['is_active' => false]);
             }
+        });
+
+
+        static::created(function ($kurikulum) {
+            DB::transaction(function () use ($kurikulum) {
+                VmtPolban::firstOrCreate(
+                    ['kurikulum_id' => $kurikulum->id],
+                    ['visi_polban' => 'Isikan visi polban']
+                );
+
+                VmtJurusan::firstOrCreate(
+                    ['kurikulum_id' => $kurikulum->id],
+                    [
+                        'visi_jurusan' => 'Isikan visi jurusan',
+                        'visi_keilmuan_prodi' => 'Isikan visi keilmuan prodi',
+                    ]
+                );
+            });
         });
     }
 }

@@ -13,9 +13,9 @@ class BentukPembelajaranSeeder extends Seeder
     public function run(): void
     {
         $data = [
-            ['nama' => 'kuliah'],
-            ['nama' => 'penugasan'],
-            ['nama' => 'praktikum'],
+            ['nama' => 'Kuliah'],
+            ['nama' => 'Penugasan'],
+            ['nama' => 'Praktikum'],
         ];
 
         foreach ($data as $item) {
