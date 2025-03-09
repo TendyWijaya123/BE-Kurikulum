@@ -11,20 +11,17 @@ class VmtPolbanController extends Controller
     public function firstOrCreate(Request $request)
     {
         try {
-            // Autentikasi pengguna
             $user = JWTAuth::parseToken()->authenticate();
 
-            // Ambil kurikulum aktif
             $activeKurikulum = $user->activeKurikulum();
             if (!$activeKurikulum) {
                 return response()->json(['error' => 'Kurikulum aktif tidak ditemukan untuk prodi user'], 404);
             }
 
-            // Ambil atau buat VmtPolban berdasarkan kurikulum aktif
             $vmtPolban = VmtPolban::with(['misiPolbans', 'tujuanPolbans'])
                 ->firstOrCreate(
                     ['kurikulum_id' => $activeKurikulum->id],
-                    ['visi_polban' => 'Isikan visi polban'] // Nilai default jika tidak ditemukan
+                    ['visi_polban' => 'Isikan visi polban']
                 );
 
             return response()->json([

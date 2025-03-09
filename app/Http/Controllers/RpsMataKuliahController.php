@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\RpsTemplateExport;
+use App\Imports\RpsImport;
 use App\Models\MataKuliah;
 use App\Models\RpsMatakuliah;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Facades\Excel;
 
 class RpsMataKuliahController extends Controller
 {
@@ -112,6 +115,39 @@ class RpsMataKuliahController extends Controller
             ], 422);
         }
     }
+
+    public function exportTemplate($mataKuliahid)
+    {
+        return Excel::download(new RpsTemplateExport($mataKuliahid), 'template_rps.xlsx');
+    }
+
+    public function import(Request $request, $mataKuliahId)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv'
+        ]);
+
+
+        if (!$request->hasFile('file')) {
+            return response()->json(['message' => 'File tidak ditemukan'], 400);
+        }
+
+        $file = $request->file('file');
+
+        if (!$file->isValid()) {
+            return response()->json(['message' => 'File tidak valid'], 400);
+        }
+
+        try {
+            Excel::import(new RpsImport($mataKuliahId), $file);
+
+            return response()->json(['message' => 'Data berhasil diimport.'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+        }
+    }
+
+
 
     /**
      * Menghapus data RPS Mata Kuliah

@@ -106,4 +106,10 @@ class ProdiController extends Controller
 
         return response()->json($prodis);
     }
+
+    public function getProdiWithKurikulumDropdown()
+    {
+        $prodis = Prodi::with('kurikulums')->get(['id', 'name']);
+        return response()->json($prodis);
+    }
 }
