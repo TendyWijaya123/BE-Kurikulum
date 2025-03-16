@@ -17,12 +17,13 @@ class UserSeeder extends Seeder
 
         if ($prodis->count() > 0) {
             foreach ($prodis as $prodi) {
-                User::create([
+                $user = User::create([
                     'name' => 'Admin ' . $prodi->name,
                     'email' => strtolower(str_replace(' ', '', $prodi->name)) . '@polban.ac.id',
                     'password' => Hash::make('password123'),
                     'prodi_id' => $prodi->id,
                 ]);
+                $user->assignRole('Penyusun Kurikulum');
             }
 
             $usersWithoutProdi = [
@@ -31,13 +32,15 @@ class UserSeeder extends Seeder
                 ['name' => 'Admin', 'email' => 'admin@polban.ac.id'],
             ];
 
+            $prodiTeknikKimia = Prodi::where('name', "D3 Teknik Kimia")->first();
             foreach ($usersWithoutProdi as $userData) {
-                User::create([
+                $user = User::create([
                     'name' => $userData['name'],
                     'email' => $userData['email'],
                     'password' => Hash::make('password123'),
-                    'prodi_id' => null,
+                    'prodi_id' => $prodiTeknikKimia->id,
                 ]);
+                $user->assignRole('P2MPP');
             }
         }
     }

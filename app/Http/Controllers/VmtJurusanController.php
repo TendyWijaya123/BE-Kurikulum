@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kurikulum;
+use App\Models\Prodi;
 use App\Models\VmtJurusan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,17 +12,24 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class VmtJurusanController extends Controller
 {
-    public function firstOrCreate()
+    public function firstOrCreate(Request $request)
     {
         try {
             $user = JWTAuth::parseToken()->authenticate();
-            $activeKurikulum = $user->activeKurikulum();
-
-
-            if (!$activeKurikulum) {
-                return response()->json(['error' => 'Kurikulum aktif tidak ditemukan untuk prodi user'], 404);
+            $prodiId = $request->input('prodiId');
+            if ($prodiId) {
+                $prodi = Prodi::find($prodiId);
+                if (!$prodi) {
+                    return response()->json(['error' => 'Prodi tidak ditemukan'], 404);
+                }
+                $activeKurikulum = $prodi->activeKurikulum();
+            } else {
+                $activeKurikulum = $user->activeKurikulum();
             }
 
+            if (!$activeKurikulum) {
+                return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
+            }
             $vmtJurusan = VmtJurusan::with('misiJurusans')
                 ->where('kurikulum_id', $activeKurikulum->id)
                 ->first();

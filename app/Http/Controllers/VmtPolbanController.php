@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Prodi;
 use App\Models\VmtPolban;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -12,10 +13,20 @@ class VmtPolbanController extends Controller
     {
         try {
             $user = JWTAuth::parseToken()->authenticate();
+            $prodiId = $request->input('prodiId');
 
-            $activeKurikulum = $user->activeKurikulum();
+            if ($prodiId) {
+                $prodi = Prodi::find($prodiId);
+                if (!$prodi) {
+                    return response()->json(['error' => 'Prodi tidak ditemukan'], 404);
+                }
+                $activeKurikulum = $prodi->activeKurikulum();
+            } else {
+                $activeKurikulum = $user->activeKurikulum();
+            }
+
             if (!$activeKurikulum) {
-                return response()->json(['error' => 'Kurikulum aktif tidak ditemukan untuk prodi user'], 404);
+                return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
             }
 
             $vmtPolban = VmtPolban::with(['misiPolbans', 'tujuanPolbans'])
@@ -29,7 +40,6 @@ class VmtPolbanController extends Controller
                 'data' => $vmtPolban
             ], 200);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            // Penanganan validasi
             return response()->json(['error' => 'Validasi gagal', 'messages' => $e->errors()], 422);
         } catch (\Exception $e) {
             // Penanganan kesalahan umum

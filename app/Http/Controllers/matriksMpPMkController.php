@@ -6,26 +6,36 @@ use App\Models\MateriPembelajaran;
 use App\Models\MatriksPMp;
 use App\Models\Pengetahuan;
 use App\Models\MataKuliah;
+use App\Models\Prodi;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class matriksMpPMkController extends Controller
 {
-    public function index(Request $request){
-        $prodiId = $request->query('prodiId');
+    public function index(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
 
-        $mps = MateriPembelajaran::with('knowledgeDimension') // Eager load relasi knowledgeDimension
-            ->whereHas('kurikulum', function ($query) use ($prodiId) {
-                $query->where('prodi_id', $prodiId)->where('is_active', true);
-            })
+        if ($request->has('prodiId')) {
+            $prodi = Prodi::find($request->prodiId);
+            if (!$prodi) {
+                return response()->json(['error' => 'Prodi tidak ditemukan'], 404);
+            }
+            $activeKurikulum = $prodi->activeKurikulum();
+        } else {
+            $activeKurikulum = $user->activeKurikulum();
+        }
+
+        if (!$activeKurikulum) {
+            return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
+        }
+        $mps = MateriPembelajaran::with('knowledgeDimension')
+            ->where("kurikulum_id", $activeKurikulum->id)
             ->get();
 
-        $pengetahuans = Pengetahuan::whereHas('kurikulum', function ($query) use ($prodiId) {
-            $query->where('prodi_id', $prodiId)->where('is_active', true);
-        })->get();
+        $pengetahuans = Pengetahuan::where("kurikulum_id", $activeKurikulum->id)->get();
 
-        $mataKuliahData = MataKuliah::whereHas('kurikulum', function ($query) use ($prodiId) {
-            $query->where('prodi_id', $prodiId)->where('is_active', true);
-        })->get();
+        $mataKuliahData = MataKuliah::where("kurikulum_id", $activeKurikulum->id)->get();
 
         $matrix = [];
         foreach ($mps as $mp) {
@@ -33,9 +43,9 @@ class matriksMpPMkController extends Controller
             foreach ($pengetahuans as $pengetahuan) {
                 // Cek apakah ada relasi MP dan Pengetahuan di MatriksMPp
                 $relation = MatriksPMp::where('mp_id', $mp->id)
-                ->where('p_id', $pengetahuan->id)
-                ->first();
-            
+                    ->where('p_id', $pengetahuan->id)
+                    ->first();
+
                 if ($relation) {
                     $hasRelation = true;
                     $relationId = $relation->id; // Mendapatkan id dari relasi
@@ -47,12 +57,12 @@ class matriksMpPMkController extends Controller
                 // Ambil daftar mata kuliah jika ada relasi
                 $mataKuliahs = $hasRelation
                     ? MatriksPMp::with('mataKuliahs')
-                        ->where('mp_id', $mp->id)
-                        ->where('p_id', $pengetahuan->id)
-                        ->get()
-                        ->flatMap(function ($item) {
-                            return $item->mataKuliahs; // Ambil nama mata kuliah
-                        })
+                    ->where('mp_id', $mp->id)
+                    ->where('p_id', $pengetahuan->id)
+                    ->get()
+                    ->flatMap(function ($item) {
+                        return $item->mataKuliahs; // Ambil nama mata kuliah
+                    })
                     : [];
 
                 $row[] = [
@@ -105,5 +115,4 @@ class matriksMpPMkController extends Controller
             'message' => 'Data berhasil diperbarui!',
         ]);
     }
-
 }

@@ -5,20 +5,34 @@ namespace App\Http\Controllers;
 use App\Exports\SksuTemplateExport;
 use App\Imports\SksuImport;
 use App\Models\Kurikulum;
+use App\Models\Prodi;
 use Illuminate\Http\Request;
 use App\Models\Sksu as sksuModel;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class SksuController extends Controller
 {
     public function index(Request $request)
     {
-        $prodiId = $request->query('prodiId');
-        $sksus = sksuModel::whereHas('kurikulum', function ($query) use ($prodiId) {
-                $query->where('prodi_id', $prodiId)->where('is_active', true);
-            })
-            ->get();
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if ($request->has('prodiId')) {
+            $prodi = Prodi::find($request->prodiId);
+            if (!$prodi) {
+                return response()->json(['error' => 'Prodi tidak ditemukan'], 404);
+            }
+            $activeKurikulum = $prodi->activeKurikulum();
+        } else {
+            $activeKurikulum = $user->activeKurikulum();
+        }
+
+        if (!$activeKurikulum) {
+            return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
+        }
+
+        $sksus = sksuModel::where('kurikulum_id', $activeKurikulum->id)->get();
 
         return response()->json($sksus);
     }

@@ -9,23 +9,31 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Exports\IlmuPengetahuanTemplateExport;
 use App\Imports\IlmuPengetahuanImport;
+use App\Models\Prodi;
 use Maatwebsite\Excel\Facades\Excel;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class IlmuPengetahuanController extends Controller
 {
     public function index(Request $request)
     {
         try {
-            $prodiId = $request->query('prodiId');
+            $user = JWTAuth::parseToken()->authenticate();
 
-            // Validate prodiId
-            if (!$prodiId) {
-                return response()->json(['message' => 'prodiId parameter is required'], 400);
+            if ($request->has('prodiId')) {
+                $prodi = Prodi::find($request->prodiId);
+                if (!$prodi) {
+                    return response()->json(['error' => 'Prodi tidak ditemukan'], 404);
+                }
+                $activeKurikulum = $prodi->activeKurikulum();
+            } else {
+                $activeKurikulum = $user->activeKurikulum();
             }
 
-            $data = IpteksPengetahuan::whereHas('kurikulum', function ($query) use ($prodiId) {
-                $query->where('prodi_id', $prodiId);
-            })->get();
+            if (!$activeKurikulum) {
+                return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
+            }
+            $data = IpteksPengetahuan::where("kurikulum_id", $activeKurikulum->id)->get();
 
             return response()->json([
                 'message' => 'Data Ilmu Pengetahuan berhasil diambil.',
@@ -89,7 +97,6 @@ class IlmuPengetahuanController extends Controller
                 'message' => 'Data berhasil disimpan.',
                 'data' => $savedItems
             ], 200);
-
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -159,7 +166,6 @@ class IlmuPengetahuanController extends Controller
                 'message' => 'Data berhasil dihapus.',
                 'count' => $deletedCount
             ], 200);
-
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
