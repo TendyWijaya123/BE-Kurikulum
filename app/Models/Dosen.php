@@ -5,12 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Spatie\Permission\Traits\HasRoles;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class Dosen extends Authenticatable implements JWTSubject
 {
-    use HasFactory;
-    
+    use HasFactory, HasRoles;
+
     protected $fillable = [
         'kode',
         'nip',
@@ -41,15 +42,18 @@ class Dosen extends Authenticatable implements JWTSubject
         return $this->belongsToMany(Prodi::class, 'dosen_has_prodi');
     }
 
-    public function kaprodi(){
+    public function kaprodi()
+    {
         return $this->hasOne(Prodi::class);
     }
 
-    public function matkul() {
+    public function matkul()
+    {
         return $this->belongsToMany(MataKuliah::class, 'dosen_has_matkul', 'dosen_id', 'mk_id');
-    }  
-    
-    public function jurusan(){
+    }
+
+    public function jurusan()
+    {
         return $this->belongsTo(Jurusan::class);
     }
 }

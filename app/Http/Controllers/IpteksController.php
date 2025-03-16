@@ -69,7 +69,6 @@ class IpteksController extends Controller
                 'message' => 'Data IPTEKS berhasil disimpan.',
                 'success' => true
             ], 200);
-
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -113,7 +112,6 @@ class IpteksController extends Controller
 
             DB::commit();
             return response()->json(['message' => 'Data berhasil dihapus.'], 200);
-
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([

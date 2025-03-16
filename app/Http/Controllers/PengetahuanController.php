@@ -6,6 +6,7 @@ use App\Exports\PengetahuanTemplateExport;
 use App\Imports\PengetahuanImport;
 use Illuminate\Http\Request;
 use App\Models\Pengetahuan;
+use App\Models\Prodi;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
@@ -16,12 +17,19 @@ class PengetahuanController extends Controller
     {
         try {
             $user = JWTAuth::parseToken()->authenticate();
-            $activeKurikulum = $user->activeKurikulum();
+
+            if ($request->has('prodiId')) {
+                $prodi = Prodi::find($request->prodiId);
+                if (!$prodi) {
+                    return response()->json(['error' => 'Prodi tidak ditemukan'], 404);
+                }
+                $activeKurikulum = $prodi->activeKurikulum();
+            } else {
+                $activeKurikulum = $user->activeKurikulum();
+            }
 
             if (!$activeKurikulum) {
-                return response()->json([
-                    'message' => 'Kurikulum aktif tidak ditemukan'
-                ], 404);
+                return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
             }
 
             $pengetahuan = Pengetahuan::where('kurikulum_id', $activeKurikulum->id)

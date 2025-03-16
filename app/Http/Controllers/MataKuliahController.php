@@ -7,6 +7,7 @@ use App\Imports\MataKuliahImport;
 use App\Models\BukuReferensi;
 use App\Models\MataKuliah;
 use App\Models\KemampuanAkhir;
+use App\Models\Prodi;
 use App\Models\TujuanBelajar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,14 +19,22 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class MataKuliahController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
 
-        $activeKurikulum = $user->activeKurikulum();
+        if ($request->has('prodiId')) {
+            $prodi = Prodi::find($request->prodiId);
+            if (!$prodi) {
+                return response()->json(['error' => 'Prodi tidak ditemukan'], 404);
+            }
+            $activeKurikulum = $prodi->activeKurikulum();
+        } else {
+            $activeKurikulum = $user->activeKurikulum();
+        }
 
         if (!$activeKurikulum) {
-            return response()->json(['error' => 'Kurikulum aktif tidak ditemukan untuk prodi user'], 404);
+            return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
         }
 
         $data = MataKuliah::with([

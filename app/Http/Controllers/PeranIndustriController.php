@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\PeranIndustriTemplateExport;
 use App\Imports\PeranIndustriImport;
 use App\Models\PeranIndustri;
+use App\Models\Prodi;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -14,22 +15,27 @@ class PeranIndustriController extends Controller
     /**
      * Get all Peran Industri for the active kurikulum of the authenticated user.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            // Authenticate user using JWT
             $user = JWTAuth::parseToken()->authenticate();
 
-            $activeKurikulum = $user->activeKurikulum();
-
-            if (!$activeKurikulum) {
-                return response()->json(['error' => 'Kurikulum aktif tidak ditemukan untuk prodi user'], 404);
+            if ($request->has('prodiId')) {
+                $prodi = Prodi::find($request->prodiId);
+                if (!$prodi) {
+                    return response()->json(['error' => 'Prodi tidak ditemukan'], 404);
+                }
+                $activeKurikulum = $prodi->activeKurikulum();
+            } else {
+                $activeKurikulum = $user->activeKurikulum();
             }
 
-            // Get Peran Industri associated with the active kurikulum
+            if (!$activeKurikulum) {
+                return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
+            }
+
             $peranIndustri = PeranIndustri::where('kurikulum_id', $activeKurikulum->id)->get(['id', 'jabatan', 'deskripsi']);
 
-            // Return success response
             return response()->json([
                 'success' => true,
                 'data' => $peranIndustri,

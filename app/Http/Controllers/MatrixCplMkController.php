@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cpl;
 use App\Models\MataKuliah;
+use App\Models\Prodi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -15,22 +16,30 @@ class MatrixCplMkController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
 
-        // Ambil kurikulum aktif
-        $activeKurikulum = $user->activeKurikulum();
+        if ($request->has('prodiId')) {
+            $prodi = Prodi::find($request->prodiId);
+            if (!$prodi) {
+                return response()->json(['error' => 'Prodi tidak ditemukan'], 404);
+            }
+            $activeKurikulum = $prodi->activeKurikulum();
+        } else {
+            $activeKurikulum = $user->activeKurikulum();
+        }
+
         if (!$activeKurikulum) {
-            return response()->json(['error' => 'Kurikulum aktif tidak ditemukan untuk prodi user'], 404);
+            return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
         }
 
         $cpls = Cpl::with(['mataKuliahs' => function ($query) {
             $query->select('mata_kuliahs.id', 'kode', 'nama')
-                ->withPivot('kategori'); // Mengambil kategori dari tabel pivot
+                ->withPivot('kategori');
         }])
-        ->where('kurikulum_id', $activeKurikulum->id)
-        ->get(['id', 'kode', 'keterangan']);
+            ->where('kurikulum_id', $activeKurikulum->id)
+            ->get(['id', 'kode', 'keterangan']);
 
         $mataKuliahs = MataKuliah::where('kurikulum_id', $activeKurikulum->id)
             ->get(['id', 'kode', 'nama']);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\CplTemplateExport;
 use App\Imports\CplImport;
 use App\Models\Cpl;
+use App\Models\Prodi;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -14,35 +15,39 @@ class CplController extends Controller
     /**
      * Get all CPLs for the active kurikulum of the authenticated user.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            // Authenticate user using JWT
             $user = JWTAuth::parseToken()->authenticate();
 
-            // Retrieve the active kurikulum for the user
-            $activeKurikulum = $user->activeKurikulum();
-
-            if (!$activeKurikulum) {
-                return response()->json(['error' => 'Kurikulum aktif tidak ditemukan untuk prodi user'], 404);
+            if ($request->has('prodiId')) {
+                $prodi = Prodi::find($request->prodiId);
+                if (!$prodi) {
+                    return response()->json(['error' => 'Prodi tidak ditemukan'], 404);
+                }
+                $activeKurikulum = $prodi->activeKurikulum();
+            } else {
+                $activeKurikulum = $user->activeKurikulum();
             }
 
-            // Get CPLs associated with the active kurikulum
-            $cpl = Cpl::where('kurikulum_id', $activeKurikulum->id)->orderBy('id', 'asc') ->get(['id', 'kode', 'keterangan']);
+            if (!$activeKurikulum) {
+                return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
+            }
 
-            // Return success response
+            $cpl = Cpl::where('kurikulum_id', $activeKurikulum->id)->get(['id', 'kode', 'keterangan']);
+
             return response()->json([
                 'success' => true,
                 'data' => $cpl,
             ], 200);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            // Handle validation errors
+
             return response()->json([
                 'error' => 'Validasi gagal',
                 'messages' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
-            // Handle generic exceptions
+
             return response()->json([
                 'error' => 'Terjadi kesalahan',
                 'message' => $e->getMessage(),

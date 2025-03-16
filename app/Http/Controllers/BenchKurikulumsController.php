@@ -7,17 +7,31 @@ use App\Imports\BenchKurikulumImport;
 use Illuminate\Http\Request;
 use App\Models\BenchKurikulum as BenchKurikulumModel;
 use App\Models\Kurikulum;
+use App\Models\Prodi;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class BenchKurikulumsController extends Controller
 {
     public function index(Request $request)
     {
-        $prodiId = $request->query('prodiId');
-        $benchKurikulums = BenchKurikulumModel::whereHas('kurikulum', function ($query) use ($prodiId) {
-                $query->where('prodi_id', $prodiId)->where('is_active', true);
-            })
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if ($request->has('prodiId')) {
+            $prodi = Prodi::find($request->prodiId);
+            if (!$prodi) {
+                return response()->json(['error' => 'Prodi tidak ditemukan'], 404);
+            }
+            $activeKurikulum = $prodi->activeKurikulum();
+        } else {
+            $activeKurikulum = $user->activeKurikulum();
+        }
+
+        if (!$activeKurikulum) {
+            return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
+        }
+        $benchKurikulums = BenchKurikulumModel::where('kurikulum_id', $activeKurikulum->id)
             ->get();
 
         return response()->json($benchKurikulums);

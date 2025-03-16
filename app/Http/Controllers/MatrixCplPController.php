@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cpl;
 use App\Models\Pengetahuan;
+use App\Models\Prodi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -11,15 +12,23 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class MatrixCplPController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         try {
             $user = JWTAuth::parseToken()->authenticate();
 
-            // Get active curriculum
-            $activeKurikulum = $user->activeKurikulum();
+            if ($request->has('prodiId')) {
+                $prodi = Prodi::find($request->prodiId);
+                if (!$prodi) {
+                    return response()->json(['error' => 'Prodi tidak ditemukan'], 404);
+                }
+                $activeKurikulum = $prodi->activeKurikulum();
+            } else {
+                $activeKurikulum = $user->activeKurikulum();
+            }
+
             if (!$activeKurikulum) {
-                return response()->json(['error' => 'Kurikulum aktif tidak ditemukan untuk prodi user'], 404);
+                return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
             }
 
             $cpls = Cpl::with('pengetahuans:id')
@@ -46,7 +55,6 @@ class MatrixCplPController extends Controller
                 'ps' => $pengetahuans,
                 'matrix' => $matrix,
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error in MatrixCplPController@index:', [
                 'message' => $e->getMessage(),
