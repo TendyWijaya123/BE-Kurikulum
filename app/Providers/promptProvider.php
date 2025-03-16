@@ -140,4 +140,18 @@ class PromptProvider extends ServiceProvider
 
         return $prompt;
     }
+
+
+    public static function promptTranslate($cpl){
+        // Ambil hanya data yang diperlukan (keterangan)
+        $data = $cpl->pluck('keterangan')->toArray();
+        
+        // Gabungkan semua keterangan menjadi satu teks dengan pemisah newline
+        $text = implode("\n", $data);
+        
+        // Buat prompt untuk GPT
+        $prompt = "Terjemahkan teks berikut ke dalam bahasa Inggris:\n\n" . $text;
+        
+        return $prompt;
+    }
 }

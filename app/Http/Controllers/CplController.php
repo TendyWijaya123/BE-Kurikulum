@@ -28,7 +28,7 @@ class CplController extends Controller
             }
 
             // Get CPLs associated with the active kurikulum
-            $cpl = Cpl::where('kurikulum_id', $activeKurikulum->id)->get(['id', 'kode', 'keterangan']);
+            $cpl = Cpl::where('kurikulum_id', $activeKurikulum->id)->orderBy('id', 'asc') ->get(['id', 'kode', 'keterangan']);
 
             // Return success response
             return response()->json([
@@ -67,7 +67,7 @@ class CplController extends Controller
             $validated = $request->validate([
                 'cpls' => 'required|array',
                 'cpls.*.id' => 'nullable|integer',  // id boleh kosong, namun jika ada harus berupa integer
-                'cpls.*.keterangan' => 'required|string|max:255',
+                'cpls.*.keterangan' => 'required',
             ]);
 
             // Loop untuk upsert setiap item dalam cpls

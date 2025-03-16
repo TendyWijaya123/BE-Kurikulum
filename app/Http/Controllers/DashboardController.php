@@ -8,8 +8,9 @@ use App\Models\Ppm;
 use App\Models\VmtJurusan;
 use App\Models\Pengetahuan;
 use App\Models\MateriPembelajaran;
-
+use App\Providers\PromptProvider;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class DashboardController extends Controller
 {
@@ -41,10 +42,45 @@ class DashboardController extends Controller
 
         // Get CPLs
         $cpls = Cpl::where('kurikulum_id', $kurikulum->id)
-            ->select('id', 'kode', 'keterangan')
+            ->select('id', 'kode', 'keterangan')->orderBy('id', 'asc') 
             ->get();
+        
+        $prompt = PromptProvider::promptTranslate($cpls);
+        $geminiApiKey = env('GEMINI_API_KEY'); // Simpan API Key di .env
+        $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$geminiApiKey}", [
+            "contents" => [
+                [
+                    "parts" => [
+                        ["text" => $prompt]
+                    ]
+                ]
+            ]
+        ]);
+        // Ambil hasil dari API Gemini
+        $translatedText = $response->json();
 
-            // dd($cpls);
+        // Ambil teks dari bagian response
+        $cplTexts = [];
+        if (isset($translatedText['candidates'][0]['content']['parts'][0]['text'])) {
+            $rawText = $translatedText['candidates'][0]['content']['parts'][0]['text'];
+            
+            // Pisahkan teks berdasarkan baris kosong sebagai pemisah antar CPL
+            $cplTexts = array_filter(array_map('trim', explode("\n\n", $rawText)));
+        }
+
+        // Format ulang hasil untuk dikirim ke API Flask
+        $formattedData = [
+            "cpl_texts" => array_values($cplTexts)
+        ];
+
+        $flaskResponse = Http::post("http://127.0.0.1:5000/analyze", $formattedData);
+
+        $flaskResults = $flaskResponse->json()['results'] ?? [];
+
+        foreach ($cpls as $index => $cpl) {
+            $issues = $flaskResults[$index]['issues'] ?? [];
+            $cpl->issues = is_array($issues) ? implode(', ', $issues) : $issues;
+        }
 
         // Get PPMs
         $ppms = Ppm::where('kurikulum_id', $kurikulum->id)
