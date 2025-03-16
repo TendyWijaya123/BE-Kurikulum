@@ -9,16 +9,29 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Validator;
 use App\Exports\TeknologiTemplateExport;
 use App\Imports\TeknologiImport;
+use App\Models\Prodi;
 use Maatwebsite\Excel\Facades\Excel;
 
 class TeknologiController extends Controller
 {
     public function index(Request $request)
     {
-        $prodiId = $request->query('prodiId');
-        $data = IpteksTeknologi::whereHas('kurikulum', function ($query) use ($prodiId) {
-            $query->where('prodi_id', $prodiId);
-        })->get();
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if ($request->has('prodiId')) {
+            $prodi = Prodi::find($request->prodiId);
+            if (!$prodi) {
+                return response()->json(['error' => 'Prodi tidak ditemukan'], 404);
+            }
+            $activeKurikulum = $prodi->activeKurikulum();
+        } else {
+            $activeKurikulum = $user->activeKurikulum();
+        }
+
+        if (!$activeKurikulum) {
+            return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
+        }
+        $data = IpteksTeknologi::where("kurikulum_id", $activeKurikulum->id)->get();
 
         return response()->json([
             'message' => 'Data Ilmu Pengetahuan berhasil diambil.',
@@ -64,7 +77,6 @@ class TeknologiController extends Controller
 
             DB::commit();
             return response()->json(['message' => 'Data berhasil disimpan.'], 200);
-
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -108,7 +120,6 @@ class TeknologiController extends Controller
 
             DB::commit();
             return response()->json(['message' => 'Data berhasil dihapus.'], 200);
-
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([

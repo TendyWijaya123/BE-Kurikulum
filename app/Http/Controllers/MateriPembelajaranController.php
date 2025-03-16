@@ -8,23 +8,36 @@ use App\Imports\MateriPembelajaranImport;
 use App\Models\Kurikulum;
 use Illuminate\Http\Request;
 use App\Models\MateriPembelajaran as ModelMP;
+use App\Models\Prodi;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class MateriPembelajaranController extends Controller
 {
     public function index(Request $request)
     {
-        $prodiId = $request->query('prodiId');
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if ($request->has('prodiId')) {
+            $prodi = Prodi::find($request->prodiId);
+            if (!$prodi) {
+                return response()->json(['error' => 'Prodi tidak ditemukan'], 404);
+            }
+            $activeKurikulum = $prodi->activeKurikulum();
+        } else {
+            $activeKurikulum = $user->activeKurikulum();
+        }
+
+        if (!$activeKurikulum) {
+            return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
+        }
         $knowledgeDimensions = KnowledgeDimension::all();
-        $mp = ModelMP::whereHas('kurikulum', function ($query) use ($prodiId) {
-            $query->where('prodi_id', $prodiId)
-                ->where('is_active', true);
-        })
-        ->with('knowledgeDimension')
+        $mp = ModelMP::where("kurikulum_id", $activeKurikulum->id)
+            ->with('knowledgeDimension')
             ->get();
 
-        return response()->json(['data'=> $mp, 'knowledge' => $knowledgeDimensions]);
+        return response()->json(['data' => $mp, 'knowledge' => $knowledgeDimensions]);
     }
 
     public function store(Request $request)

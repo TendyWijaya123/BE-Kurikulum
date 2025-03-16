@@ -7,15 +7,29 @@ use App\Models\Cpl as ModelCpl;
 use App\Models\Iea as ModelIea;
 use App\Models\Prodi;
 use Illuminate\Support\Facades\DB;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class MatrixCplIeaController extends Controller
 {
     public function index(Request $request)
     {
-        $prodiId = $request->query('prodiId');
+        $user = JWTAuth::parseToken()->authenticate();
 
-        // Mendapatkan jenjang berdasarkan prodiId
-        $prodi = Prodi::find($prodiId);
+        if ($request->has('prodiId')) {
+            $prodi = Prodi::find($request->prodiId);
+            if (!$prodi) {
+                return response()->json(['error' => 'Prodi tidak ditemukan'], 404);
+            }
+            $activeKurikulum = $prodi->activeKurikulum();
+        } else {
+            $activeKurikulum = $user->activeKurikulum();
+        }
+
+        if (!$activeKurikulum) {
+            return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
+        }
+
+        $prodi = Prodi::find($user->prodi->id);
         if (!$prodi) {
             return response()->json(['error' => 'Prodi not found'], 404);
         }
@@ -25,11 +39,8 @@ class MatrixCplIeaController extends Controller
 
         // Ambil semua data CPL dan IEA
         $ieas = ModelIea::where('jenjang', $jenjangFilter)->get();
-        $cpls = ModelCpl::
-        whereHas('kurikulum', function ($query) use ($prodiId) {
-            $query->where('prodi_id', $prodiId)->where('is_active', true);
-        })
-        ->get();
+        $cpls = ModelCpl::where("kurikulum_id", $activeKurikulum->id)
+            ->get();
 
         // Bangun matriks CPL-IEA
         $matrix = [];
@@ -51,8 +62,9 @@ class MatrixCplIeaController extends Controller
         ]);
     }
 
-    public function update(Request $request){
-        try{
+    public function update(Request $request)
+    {
+        try {
 
             DB::beginTransaction();
 
@@ -63,26 +75,26 @@ class MatrixCplIeaController extends Controller
                 'updates.*.iea_id' => 'required|exists:iea,id',
                 'updates.*.has_relation' => 'required|boolean',
             ]);
-        
+
             $prodiId = $validated['prodiId'];
             $updates = $validated['updates'];
-        
+
             foreach ($updates as $update) {
                 $cplId = $update['cpl_id'];
                 $ieaId = $update['iea_id'];
                 $hasRelation = $update['has_relation'];
-        
+
                 // Ambil CPL berdasarkan ID dan pastikan prodi sesuai
                 $cpl = ModelCpl::where('id', $cplId)
                     ->whereHas('kurikulum', function ($query) use ($prodiId) {
                         $query->where('prodi_id', $prodiId);
                     })
                     ->first();
-        
+
                 if (!$cpl) {
                     return response()->json(['error' => 'CPL not found or not associated with the given prodi'], 404);
                 }
-        
+
                 // Tambahkan atau hapus hubungan di tabel pivot
                 if ($hasRelation) {
                     // Tambahkan relasi jika belum ada
@@ -94,9 +106,9 @@ class MatrixCplIeaController extends Controller
             }
 
             DB::commit();
-        
+
             return response()->json(['message' => 'Matrix updated successfully']);
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
             DB::rollBack();
 
             return response()->json([

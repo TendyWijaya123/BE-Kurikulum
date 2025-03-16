@@ -16,13 +16,13 @@ class ProdiSeeder extends Seeder
             Prodi::firstOrCreate([
                 'name' => 'D3 Teknik Kimia',
                 'jenjang' => 'D3',
-                'kode' => 'TK-D3-TK',
+                'kode' => 'TK',
                 'jurusan_id' => $jurusanTeknikKimia->id,
             ]);
             Prodi::firstOrCreate([
                 'name' => 'D3 Analis Kimia',
                 'jenjang' => 'D3',
-                'kode' => 'TK-D3-AK',
+                'kode' => 'KA',
                 'jurusan_id' => $jurusanTeknikKimia->id,
             ]);
             Prodi::firstOrCreate([
@@ -39,30 +39,29 @@ class ProdiSeeder extends Seeder
             Prodi::firstOrCreate([
                 'name' => 'D3 Teknik Mesin',
                 'jenjang' => 'D3',
-                'kode' => 'TM-D3-TM',
+                'kode' => 'ME',
                 'jurusan_id' => $jurusanTeknikMesin->id,
             ]);
             Prodi::firstOrCreate([
                 'name' => 'D3 Teknik Aeronautika',
                 'jenjang' => 'D3',
-                'kode' => 'TM-D3-TA',
+                'kode' => 'AE',
                 'jurusan_id' => $jurusanTeknikMesin->id,
             ]);
             Prodi::firstOrCreate([
                 'name' => 'D4 Teknik Perancangan dan Konstruksi Mesin',
                 'jenjang' => 'D4',
-                'kode' => 'TM-D4-TPKM',
+                'kode' => 'KM',
                 'jurusan_id' => $jurusanTeknikMesin->id,
             ]);
             Prodi::firstOrCreate([
                 'name' => 'D4 Proses Manufaktur',
                 'jenjang' => 'D4',
-                'kode' => 'TM-D4-PM',
+                'kode' => 'PM',
                 'jurusan_id' => $jurusanTeknikMesin->id,
             ]);
         }
 
-        // Teknik Refrigerasi dan Tata Udara
         $jurusanTeknikRefrigerasi = Jurusan::where('nama', 'Teknik Refrigerasi dan Tata Udara')->first();
         if ($jurusanTeknikRefrigerasi) {
             Prodi::firstOrCreate([
@@ -85,7 +84,7 @@ class ProdiSeeder extends Seeder
             Prodi::firstOrCreate([
                 'name' => 'D3 Teknik Konversi Energi',
                 'jenjang' => 'D3',
-                'kode' => 'TKE-D3',
+                'kode' => 'EN',
                 'jurusan_id' => $jurusanTeknikKonversiEnergi->id,
             ]);
             Prodi::firstOrCreate([
@@ -106,21 +105,21 @@ class ProdiSeeder extends Seeder
         $jurusanTeknikElektro = Jurusan::where('nama', 'Teknik Elektro')->first();
         if ($jurusanTeknikElektro) {
             Prodi::firstOrCreate([
-                'name' => 'D3 Teknik Elektro',
+                'name' => 'D3 Teknik Elektronika',
                 'jenjang' => 'D3',
-                'kode' => 'TE-D3',
+                'kode' => 'EC',
                 'jurusan_id' => $jurusanTeknikElektro->id,
             ]);
             Prodi::firstOrCreate([
                 'name' => 'D3 Teknik Listrik',
                 'jenjang' => 'D3',
-                'kode' => 'TE-D3-TL',
+                'kode' => 'LS',
                 'jurusan_id' => $jurusanTeknikElektro->id,
             ]);
             Prodi::firstOrCreate([
                 'name' => 'D3 Teknik Telekomunikasi',
                 'jenjang' => 'D3',
-                'kode' => 'TE-D3-TK',
+                'kode' => 'TC',
                 'jurusan_id' => $jurusanTeknikElektro->id,
             ]);
             Prodi::firstOrCreate([
@@ -149,25 +148,25 @@ class ProdiSeeder extends Seeder
             Prodi::firstOrCreate([
                 'name' => 'D3 Teknik Konstruksi Sipil',
                 'jenjang' => 'D3',
-                'kode' => 'TS-D3-TKS',
+                'kode' => 'KS',
                 'jurusan_id' => $jurusanTeknikSipil->id,
             ]);
             Prodi::firstOrCreate([
                 'name' => 'D3 Teknik Konstruksi Gedung',
                 'jenjang' => 'D3',
-                'kode' => 'TS-D3-TKG',
+                'kode' => 'KG',
                 'jurusan_id' => $jurusanTeknikSipil->id,
             ]);
             Prodi::firstOrCreate([
                 'name' => 'D4 Teknik Perancangan Jalan dan Jembatan',
                 'jenjang' => 'D4',
-                'kode' => 'TS-D4-TPJJ',
+                'kode' => 'JJ',
                 'jurusan_id' => $jurusanTeknikSipil->id,
             ]);
             Prodi::firstOrCreate([
                 'name' => 'D4 Teknik Perawatan dan Perbaikan Gedung',
                 'jenjang' => 'D4',
-                'kode' => 'TS-D4-TPPG',
+                'kode' => 'PG',
                 'jurusan_id' => $jurusanTeknikSipil->id,
             ]);
             Prodi::firstOrCreate([
@@ -184,7 +183,7 @@ class ProdiSeeder extends Seeder
             Prodi::firstOrCreate([
                 'name' => 'D3 Teknik Informatika',
                 'jenjang' => 'D3',
-                'kode' => 'TKI-D3',
+                'kode' => 'IF',
                 'jurusan_id' => $jurusanTeknikKomputerInformatika->id,
             ]);
             Prodi::firstOrCreate([

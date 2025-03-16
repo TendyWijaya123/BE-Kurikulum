@@ -9,7 +9,6 @@ class Prodi extends Model
 {
     use HasFactory;
 
-    // Kolom yang bisa diisi
     protected $fillable = ['name', 'jenjang', 'kode', 'jurusan_id', 'is_active'];
 
     /**
@@ -37,8 +36,13 @@ class Prodi extends Model
         return $this->belongsToMany(Dosen::class, 'dosen_has_prodi');
     }
 
-    public function kaprodi(){
+    public function kaprodi()
+    {
         return $this->belongsTo(Dosen::class, 'dosens');
-        
+    }
+
+    public function  activeKurikulum()
+    {
+        return $this->kurikulums()->where('is_active', true)->first();
     }
 }

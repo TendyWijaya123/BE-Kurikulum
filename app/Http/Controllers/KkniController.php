@@ -12,29 +12,43 @@ use App\Models\Sksu;
 use Illuminate\Http\Request;
 use App\Models\CplKkni as ModelKkni;
 use App\Models\Kurikulum;
+use App\Models\Prodi;
 use App\Providers\PromptProvider;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Facades\Excel;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class KkniController extends Controller
 {
     public function index(Request $request)
     {
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if ($request->has('prodiId')) {
+            $prodi = Prodi::find($request->prodiId);
+            if (!$prodi) {
+                return response()->json(['error' => 'Prodi tidak ditemukan'], 404);
+            }
+            $activeKurikulum = $prodi->activeKurikulum();
+        } else {
+            $activeKurikulum = $user->activeKurikulum();
+        }
+
+        if (!$activeKurikulum) {
+            return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
+        }
         $pengetahuan = PengetahuanKKNI::all();
         $kemampuanKerja = KemampuanKerjaKKNI::all();
-        $prodiId = $request->query('prodiId');
-        $kkni = ModelKkni::whereHas('kurikulum', function ($query) use ($prodiId) {
-                $query->where('prodi_id', $prodiId)->where('is_active', true);
-            })
+        $kkni = ModelKkni::where("kurikulum_id", $activeKurikulum->id)
             ->get();
 
         return response()
-        ->json([
-            'kkni' => $kkni,
-            'pengetahuan' => $pengetahuan,
-            'kemampuanKerja' => $kemampuanKerja,
-        ]);
+            ->json([
+                'kkni' => $kkni,
+                'pengetahuan' => $pengetahuan,
+                'kemampuanKerja' => $kemampuanKerja,
+            ]);
     }
 
     public function store(Request $request)
@@ -169,17 +183,18 @@ class KkniController extends Controller
         return Excel::download(new KkniTemplateExport, $fileName);
     }
 
-    public function autoCpl(Request $request){
+    public function autoCpl(Request $request)
+    {
         // dd($request);
         $prodiId = $request->query('prodiId');
 
         $prompt = PromptProvider::generatePrompt($prodiId, $request->query('pengatahuanId'), $request->query('kemampuanKerjaId'));
-        if($prompt == "analisis konsideran belum lengkap") {
+        if ($prompt == "analisis konsideran belum lengkap") {
             return response()->json([
                 'warning' => 'analisis konsideran belum lengkap'
             ]);
         };
-        
+
         $geminiApiKey = env('GEMINI_API_KEY'); // Simpan API Key di .env
         $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$geminiApiKey}", [
             "contents" => [

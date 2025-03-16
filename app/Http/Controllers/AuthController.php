@@ -13,37 +13,33 @@ class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 400);
-        }
-
-        // Cek kredensial
-        if (!$token = JWTAuth::attempt($request->only('email', 'password'))) {
+        if (!$token = JWTAuth::attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
         $user = JWTAuth::user();
-
-
-
         $customClaims = [
             'name' => $user->name,
+            'roles' => $user->getRoleNames(),
         ];
 
         if ($user->prodi) {
-            $customClaims['prodiId'] = $user->prodi_id;
-            $customClaims['isActiveProdi'] = $user->prodi->is_active;
+            $customClaims += [
+                'prodiId' => $user->prodi_id,
+                'isActiveProdi' => $user->prodi->is_active,
+            ];
         }
 
-        $token = JWTAuth::customClaims($customClaims)->attempt($request->only('email', 'password'));
+        $token = JWTAuth::customClaims($customClaims)->attempt($credentials);
 
         return response()->json(['token' => $token]);
     }
+
 
     public function logout()
     {
