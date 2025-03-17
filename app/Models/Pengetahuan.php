@@ -28,12 +28,29 @@ class Pengetahuan extends Model
             ->withTimestamps();
     }
 
+    public function mps()
+    {
+        return $this->hasMany(MatriksPMp::class, 'p_id', 'id');
+    }
+
+
     public function cpls(): BelongsToMany
     {
         return $this->belongsToMany(Cpl::class, 'cpl_p', 'p_id', 'cpl_id')
             ->withTimestamps();
     }
 
+    public function mataKuliahs()
+    {
+        return $this->hasManyThrough(
+            MataKuliah::class,
+            MatriksPMp::class,
+            'p_id',
+            'id',
+            'id',
+            'mp_id'
+        )->join('mp_p_mk', 'mp_p_mk.mp_p_id', '=', 'p_mp.mp_id')->select('mata_kuliahs.*');
+    }
     protected static function boot()
     {
         parent::boot();

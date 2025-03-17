@@ -50,6 +50,7 @@ class MataKuliahController extends Controller
                 return [
                     'id' => $mataKuliah->id,
                     'nama' => $mataKuliah->nama,
+                    'kategori' => $mataKuliah->kategori,
                     'tujuan' => $mataKuliah->tujuan,
                     'kode' => $mataKuliah->kode,
                     'sks' => $mataKuliah->sks,
@@ -200,6 +201,7 @@ class MataKuliahController extends Controller
             'kode' => 'required|string|unique:mata_kuliahs,kode,' . $request->id,
             'nama' => 'required|string',
             'tujuan' => 'required|string',
+            'kategori' => 'required|string|in:Institusi,Prodi,Nasional',
             'semester' => 'nullable|integer|min:1',
             'teori_bt' => 'nullable|integer|min:0',
             'teori_pt' => 'nullable|integer|min:0',
@@ -225,6 +227,7 @@ class MataKuliahController extends Controller
             $mataKuliah = MataKuliah::create([
                 'kode' => $request->kode,
                 'nama' => $request->nama,
+                'kategori' => $request->kategori,
                 'tujuan' => $request->tujuan,
                 'semester' => $request->semester,
                 'teori_bt' => $request->teori_bt,
@@ -296,6 +299,7 @@ class MataKuliahController extends Controller
         $request->validate([
             'kode' => 'required|string|unique:mata_kuliahs,kode,' . $request->id,
             'nama' => 'required|string',
+            'kategori' => 'required|string|in:Institusi,Prodi,Nasional',
             'tujuan' => 'required|string',
             'semester' => 'nullable|integer|min:1',
             'teori_bt' => 'nullable|integer|min:0',
@@ -322,6 +326,7 @@ class MataKuliahController extends Controller
             $mataKuliah->update([
                 'kode' => $request->kode,
                 'nama' => $request->nama,
+                'kategori' => $request->kategori,
                 'tujuan' => $request->tujuan,
                 'semester' => $request->semester,
                 'teori_bt' => $request->teori_bt,
