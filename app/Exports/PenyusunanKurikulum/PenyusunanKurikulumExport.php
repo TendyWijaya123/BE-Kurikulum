@@ -37,7 +37,8 @@ class PenyusunanKurikulumExport implements WithMultipleSheets
             new MatriksPPMCPLSheetExport($this->kurikulum->id),
             new MatriksCPLIEASheetExport($this->kurikulum->id),
             new MatriksPCPLSheetExport($this->kurikulum->id),
-
+            new MatriksPMPSheetExport($this->kurikulum->id),
+            new MatriksPMPMKSheetExport($this->kurikulum->id),
         ];
     }
 }

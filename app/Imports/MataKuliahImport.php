@@ -65,6 +65,7 @@ class MataKuliahSheetImport implements ToCollection, WithHeadingRow
                         $mataKuliah = MataKuliah::create([
                             'kurikulum_id' => $kurikulum->id,
                             'kode' => $row['kode'],
+                            'kategori' => $row['kategori'] ?? "Prodi",
                             'nama' => $row['nama'],
                             'tujuan' => $row['tujuan'],
                             'deskripsi_singkat' => $row['deskripsi_singkat'] ?? null,
