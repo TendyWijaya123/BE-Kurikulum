@@ -44,6 +44,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PenyusunanKurikulumController;
 use App\Imports\MataKuliahImport;
 use App\Models\MataKuliah;
+use App\Http\Controllers\PetaKompetensiController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
@@ -277,6 +278,11 @@ Route::middleware(['auth:api'])->group(function () {
 
     Route::get('rps/matkul-dropdown/{id}', [RpsController::class, 'dropdownMatkul']);
     Route::get('me', [AuthController::class, 'me']);
+
+    /* --------------------------------------- Peta Kompetensi API ------------------------------------------------*/
+    Route::get('/peta-kompetensi/{id}', [PetaKompetensiController::class, 'getByProdi']);
+    Route::post('/peta-kompetensi', [PetaKompetensiController::class, 'uploadGambar']);
+    Route::delete('/peta-kompetensi/{id}', [PetaKompetensiController::class, 'deleteGambar']);
 });
 Route::middleware(['auth:dosen'])->group(function () {
     /* ---------------------------------------Dosen API ------------------------------------------------*/

@@ -54,6 +54,26 @@ class MateriPembelajaran extends Model
         return $this->belongsToMany(Pengetahuan::class, 'p_mp', 'p_id', 'mp_id');
     }
 
+    public function materiPembelajarans()
+    {
+        return $this->belongsToMany(MateriPembelajaran::class, 'p_mp', 'p_id', 'mp_id');
+    }
+
+    public function mataKuliahs()
+    {
+        return $this->belongsToMany(
+            MataKuliah::class,
+            'mp_p_mk',
+            'mp_p_id',
+            'mk_id'
+        )->join('p_mp', 'p_mp.mp_id', '=', 'mp_p_mk.mp_p_id')
+            ->where('p_mp.mp_id', $this->id)
+            ->select('mata_kuliahs.*'); // Pastikan 
+    }
+
+
+
+
     public function knowledgeDimension()
     {
         return $this->belongsToMany(KnowledgeDimension::class, 'knowledge_mp', 'mp_id', 'code_knowledge_dimension', 'id', 'code');
