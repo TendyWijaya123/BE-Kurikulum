@@ -81,7 +81,7 @@ class TemplateMataKuliahSheet implements WithHeadings, WithStyles, ShouldAutoSiz
     }
 }
 
-class DropDownCpaSheet implements WithHeadings, ShouldAutoSize, , FromCollection, WithTitle
+class DropDownCpaSheet implements WithHeadings, ShouldAutoSize, FromCollection, WithTitle
 {
     protected $formulasiCpa;
 

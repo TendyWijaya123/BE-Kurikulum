@@ -1,16 +1,14 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Jurusan;
+use App\Models\Kurikulum;
 use App\Models\Prodi;
-use App\Models\Cpl;
-use App\Models\Ppm;
-use App\Models\VmtJurusan;
-use App\Models\Pengetahuan;
-use App\Models\MateriPembelajaran;
-use App\Providers\PromptProvider;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Cache;
+use App\Jobs\ProcessProdiJob;
 
 class DashboardController extends Controller
 {
@@ -25,94 +23,82 @@ class DashboardController extends Controller
         $prodis = Prodi::all();
         return response()->json($prodis);
     }
-
-    public function getCurriculumData($id)
+    public function getCurriculumData()
     {
-        // Get the latest kurikulum for the prodi
-        $kurikulum = Prodi::find($id)
-            ->kurikulums()
-            ->latest()
-            ->first();
+        $kurikulums = Kurikulum::active()->with('prodi')->get();
 
-        if (!$kurikulum) {
-            return response()->json([
-                'message' => 'No curriculum found for this program'
-            ], 404);
+        // Jalankan batch baru
+        $batch = Bus::batch([])->dispatch();
+
+        foreach ($kurikulums as $kurikulum) {
+            $batch->add(new ProcessProdiJob($kurikulum));
         }
 
-        // Get CPLs
-        $cpls = Cpl::where('kurikulum_id', $kurikulum->id)
-            ->select('id', 'kode', 'keterangan')->orderBy('id', 'asc') 
-            ->get();
-        
-        $prompt = PromptProvider::promptTranslate($cpls);
-        $geminiApiKey = env('GEMINI_API_KEY'); // Simpan API Key di .env
-        $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$geminiApiKey}", [
-            "contents" => [
-                [
-                    "parts" => [
-                        ["text" => $prompt]
-                    ]
-                ]
-            ]
-        ]);
-        // Ambil hasil dari API Gemini
-        $translatedText = $response->json();
-
-        // Ambil teks dari bagian response
-        $cplTexts = [];
-        if (isset($translatedText['candidates'][0]['content']['parts'][0]['text'])) {
-            $rawText = $translatedText['candidates'][0]['content']['parts'][0]['text'];
-            
-            // Pisahkan teks berdasarkan baris kosong sebagai pemisah antar CPL
-            $cplTexts = array_filter(array_map('trim', explode("\n\n", $rawText)));
-        }
-
-        // Format ulang hasil untuk dikirim ke API Flask
-        $formattedData = [
-            "cpl_texts" => array_values($cplTexts)
-        ];
-
-        $flaskResponse = Http::post("http://127.0.0.1:5000/analyze", $formattedData);
-
-        $flaskResults = $flaskResponse->json()['results'] ?? [];
-
-        foreach ($cpls as $index => $cpl) {
-            $issues = $flaskResults[$index]['issues'] ?? [];
-            $cpl->issues = is_array($issues) ? implode(', ', $issues) : $issues;
-        }
-
-        // Get PPMs
-        $ppms = Ppm::where('kurikulum_id', $kurikulum->id)
-            ->select('id', 'kode', 'deskripsi')
-            ->get();
-
-        // Get Visi Misi
-        $visiMisi = VmtJurusan::where('kurikulum_id', $kurikulum->id)
-            ->with('misiJurusans')
-            ->first();
-
-        // Get Pengetahuan
-        $pengetahuan = Pengetahuan::where('kurikulum_id', $kurikulum->id)
-            ->select('id', 'kode_pengetahuan', 'deskripsi')
-            ->get();
-
-        // Get Materi Pembelajaran
-        $materiPembelajaran = MateriPembelajaran::with('knowledgeDimension')->where('kurikulum_id', $kurikulum->id)
-            ->select('id', 'code', 'description', 'cognitif_proses')
-            ->get();
+        // Simpan Batch ID ke cache selama 1 jam
+        Cache::put('current_batch_id', $batch->id, now()->addHour());
 
         return response()->json([
-            'cpls' => $cpls,
-            'ppms' => $ppms,
-            'visi_misi' => $visiMisi,
-            'pengetahuan' => $pengetahuan,
-            'materi_pembelajaran' => $materiPembelajaran,
-            'kurikulum' => [
-                'id' => $kurikulum->id,
-                'tahunAwal' => $kurikulum->tahun_awal,
-                'tahunAkhir' => $kurikulum->tahun_akhir,
-            ]
+            'message' => 'Batch processing started!',
+            'batch_id' => $batch->id
+        ]);
+    }
+
+    public function getProcessedData()
+    {
+        $kurikulums = Kurikulum::active()->get();
+        $results = [];
+    
+        foreach ($kurikulums as $kurikulum) {
+            $cacheKey = "processed_kurikulum_{$kurikulum->id}";
+            $cachedData = Cache::get($cacheKey);
+    
+            if ($cachedData) {
+                $results[$kurikulum->id] = $cachedData;
+            }
+        }
+    
+        if (empty($results)) {
+            return response()->json([], 404);
+        }
+    
+        return response()->json($results);
+    }
+
+    public function refreshCache()
+    {
+        $kurikulums = Kurikulum::active()->get();
+
+        foreach ($kurikulums as $kurikulum) {
+            $cacheKey = "processed_kurikulum_{$kurikulum->id}";
+            Cache::forget($cacheKey);
+        }
+
+        return response()->json([
+            'message' => 'Semua cache kurikulum telah direset!'
+        ]);
+    }
+
+    public function getBatchStatus()
+    {
+        // Ambil Batch ID dari cache
+        $batchId = Cache::get('current_batch_id');
+
+        if (!$batchId) {
+            return response()->json(['status' => 'Tidak ada proses berjalan'], 404);
+        }
+
+        // Cek status batch di Laravel
+        $batch = Bus::findBatch($batchId);
+
+        if (!$batch) {
+            return response()->json(['status' => 'Batch tidak ditemukan atau sudah selesai'], 404);
+        }
+
+        return response()->json([
+            'status' => $batch->finished() ? 'Selesai' : 'Sedang diproses',
+            'progress' => $batch->progress() ,
+            'pending_jobs' => $batch->pendingJobs,
+            'failed_jobs' => $batch->failedJobs
         ]);
     }
 }
