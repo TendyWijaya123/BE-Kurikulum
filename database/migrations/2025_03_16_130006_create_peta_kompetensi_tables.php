@@ -12,11 +12,9 @@ return new class extends Migration {
     {
         Schema::create('peta_kompetensis', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('prodi_id');
+            $table->foreignId('kurikulum_id')->constrained('kurikulums')->onDelete('cascade');
             $table->string('gambar_url');
             $table->timestamps();
-
-            $table->foreign('prodi_id')->references('id')->on('prodis')->onDelete('cascade');
         });
     }
 

@@ -3,18 +3,34 @@
 namespace App\Http\Controllers;
 
 use App\Models\PetaKompetensi;
+use App\Models\Prodi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class PetaKompetensiController extends Controller
 {
-    public function getByProdi($prodiId)
+    public function getByProdi(Request $request)
     {
         try {
-            $petaKompetensi = PetaKompetensi::where('prodi_id', $prodiId)->first();
+            $user = JWTAuth::parseToken()->authenticate();
 
+            if ($request->has('prodiId')) {
+                $prodi = Prodi::find($request->prodiId);
+                if (!$prodi) {
+                    return response()->json(['error' => 'Prodi tidak ditemukan'], 404);
+                }
+                $activeKurikulum = $prodi->activeKurikulum();
+            } else {
+                $activeKurikulum = $user->activeKurikulum();
+            }
+
+            if (!$activeKurikulum) {
+                return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
+            }
+            $petaKompetensi = PetaKompetensi::where('kurikulum_id', $activeKurikulum->id)->first();
             return response()->json([
                 'success' => true,
                 'data' => $petaKompetensi,
@@ -32,9 +48,24 @@ class PetaKompetensiController extends Controller
     {
         Log::info('Upload request received', $request->all());
 
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if ($request->has('prodiId')) {
+            $prodi = Prodi::find($request->prodiId);
+            if (!$prodi) {
+                return response()->json(['error' => 'Prodi tidak ditemukan'], 404);
+            }
+            $activeKurikulum = $prodi->activeKurikulum();
+        } else {
+            $activeKurikulum = $user->activeKurikulum();
+        }
+
+        if (!$activeKurikulum) {
+            return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
+        }
+
         $validator = Validator::make($request->all(), [
             'gambar' => 'required|image|max:5120',
-            'prodi_id' => 'required|exists:prodis,id',
         ]);
 
         if ($validator->fails()) {
@@ -47,7 +78,7 @@ class PetaKompetensiController extends Controller
         }
 
         try {
-            $petaKompetensi = PetaKompetensi::where('prodi_id', $request->prodi_id)->first();
+            $petaKompetensi = PetaKompetensi::where('kurikulum_id', $activeKurikulum->id)->first();
 
             $gambarPath = $request->file('gambar')->store('peta-kompetensi', 'public');
             $storagePath = $gambarPath;
@@ -66,7 +97,7 @@ class PetaKompetensiController extends Controller
                 $petaKompetensi->save();
             } else {
                 $petaKompetensi = PetaKompetensi::create([
-                    'prodi_id' => $request->prodi_id,
+                    'kurikulum_id' => $activeKurikulum->id,
                     'gambar_url' => $storagePath
                 ]);
             }
