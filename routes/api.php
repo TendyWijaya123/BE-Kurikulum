@@ -283,7 +283,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('me', [AuthController::class, 'me']);
 
     /* --------------------------------------- Peta Kompetensi API ------------------------------------------------*/
-    Route::get('/peta-kompetensi/{id}', [PetaKompetensiController::class, 'getByProdi']);
+    Route::get('/peta-kompetensi', [PetaKompetensiController::class, 'getByProdi']);
     Route::post('/peta-kompetensi', [PetaKompetensiController::class, 'uploadGambar']);
     Route::delete('/peta-kompetensi/{id}', [PetaKompetensiController::class, 'deleteGambar']);
 });

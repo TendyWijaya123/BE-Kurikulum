@@ -12,12 +12,11 @@ class PetaKompetensi extends Model
     protected $table = 'peta_kompetensis';
 
     protected $fillable = [
-        'prodi_id',
+        'kurikulum_id',
         'gambar_url'
     ];
-    public function prodi()
+    public function kurikulum()
     {
-        return $this->belongsTo(Prodi::class, 'prodi_id');
+        return $this->belongsTo(Prodi::class, 'kurikulum_id');
     }
-}
-;
+};
