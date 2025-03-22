@@ -17,12 +17,12 @@ class DosenHasMatkulController extends Controller
             $dosens = Dosen::all();
 
             $mataKuliah = MataKuliah::whereHas('kurikulum', function ($query) use ($prodiId) {
-                    $query->where('prodi_id', $prodiId)->where('is_active', true);
-                })->with('dosens')
+                $query->where('prodi_id', $prodiId)->where('is_active', true);
+            })->with('dosens')
                 ->get();
 
             return response()->json([
-                'mata_kuliahs' => $mataKuliah, 
+                'mata_kuliahs' => $mataKuliah,
                 'dosens' => $dosens
             ]);
         } catch (\Exception $e) {

@@ -478,4 +478,26 @@ class MataKuliahController extends Controller
             ], 500);
         }
     }
+
+    public function dropdownByKurikulum(Request $request)
+    {
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+            $activeKurikulum = $user->activeKurikulum();
+
+            if (!$activeKurikulum) {
+                return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
+            }
+            $dropdownMatakuliah = MataKuliah::where("kurikulum_id", $activeKurikulum->id)->get(['id', 'nama']);
+            return response()->json([
+                'success' => true,
+                'data' => $dropdownMatakuliah,
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'error' => 'Validasi gagal',
+                'messages' => $e->errors(),
+            ], 422);
+        }
+    }
 }

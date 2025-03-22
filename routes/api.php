@@ -41,6 +41,7 @@ use App\Http\Controllers\IlmuPengetahuanController;
 use App\Http\Controllers\SeniController;
 use App\Http\Controllers\TeknologiController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\JejaringMataKuliahController;
 use App\Http\Controllers\PenyusunanKurikulumController;
 use App\Imports\MataKuliahImport;
 use App\Models\MataKuliah;
@@ -202,6 +203,7 @@ Route::middleware(['auth:api'])->group(function () {
 
     /* -------------------------------------Mata Kuliah API -------------------------------------------------- */
     Route::get('/mata-kuliah', [MataKuliahController::class, 'index'])->middleware('role:P2MPP|Penyusun Kurikulum');
+    Route::get('/mata-kuliah/dropdown-by-kurikulum', [MataKuliahController::class, 'dropdownByKurikulum'])->middleware('role:Penyusun Kurikulum');
     Route::post('/mata-kuliah', [MataKuliahController::class, 'store'])->middleware('role:Penyusun Kurikulum');
     Route::put('/mata-kuliah/{id}', [MataKuliahController::class, 'update'])->middleware('role:Penyusun Kurikulum');
     Route::get('mata-kuliah/template', [MataKuliahController::class, 'exportTemplate'])->middleware('role:Penyusun Kurikulum');
@@ -210,6 +212,11 @@ Route::middleware(['auth:api'])->group(function () {
 
 
 
+
+    /* -------------------------------------Jejaring Mata Kuliah API -------------------------------------------------- */
+    Route::get('/jejaring-matakuliah', [JejaringMataKuliahController::class, 'index'])->middleware('role:P2MPP|Penyusun Kurikulum');
+    Route::get('/jejaring-matakuliah/jejaring-prasyarat', [JejaringMataKuliahController::class, 'getJejaringData'])->middleware('role:P2MPP|Penyusun Kurikulum');
+    Route::post('/jejaring-matakuliah/assign/{id}', [JejaringMataKuliahController::class, 'updateJejaringMataKuliah'])->middleware('role:Penyusun Kurikulum');
 
 
     /* -------------------------------------Bentuk Pembelajaran API -------------------------------------------------- */

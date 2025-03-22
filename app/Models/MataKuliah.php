@@ -107,8 +107,15 @@ class MataKuliah extends Model
         )->whereIn('mp_id', $this->matriksPMp()->pluck('mp_p_id'));
     }
 
+    public function prasyaratTo()
+    {
+        return $this->belongsToMany(MataKuliah::class, "prasyarat_matakuliah", "from_id", "to_id");
+    }
 
-
+    public function prasyaratFrom()
+    {
+        return $this->belongsToMany(MataKuliah::class, "prasyarat_matakuliah", "to_id", "from_id");
+    }
 
 
     public function cpls()
