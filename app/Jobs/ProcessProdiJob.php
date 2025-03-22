@@ -35,7 +35,7 @@ class ProcessProdiJob implements ShouldQueue
         $prodiName = Cpl::join('kurikulums', 'cpls.kurikulum_id', '=', 'kurikulums.id')
             ->join('prodis', 'kurikulums.prodi_id', '=', 'prodis.id')
             ->where('cpls.kurikulum_id', $this->kurikulum->id)
-            ->select('prodis.name') // 🔹 Ambil nama prodi
+            ->select('prodis.name', 'prodis.kode') // 🔹 Ambil nama prodi
             ->first()
             ?->name ?? "Unknown_Prodi_{$this->kurikulum->id}";
 
@@ -88,19 +88,6 @@ class ProcessProdiJob implements ShouldQueue
             ->select('id', 'kode', 'deskripsi')
             ->get();
 
-        $visiMisi = VmtJurusan::where('kurikulum_id', $this->kurikulum->id)
-            ->with('misiJurusans')
-            ->first();
-
-        $pengetahuan = Pengetahuan::where('kurikulum_id', $this->kurikulum->id)
-            ->select('id', 'kode_pengetahuan', 'deskripsi')
-            ->get();
-
-        $materiPembelajaran = MateriPembelajaran::with('knowledgeDimension')
-            ->where('kurikulum_id', $this->kurikulum->id)
-            ->select('id', 'code', 'description', 'cognitif_proses')
-            ->get();
-
         // Format hasil dengan key sebagai nama prodi
         $result = [
             $prodiName => [
@@ -111,9 +98,6 @@ class ProcessProdiJob implements ShouldQueue
                 ],
                 'cpls' => $cpls,
                 'ppms' => $ppms,
-                'visi_misi' => $visiMisi,
-                'pengetahuan' => $pengetahuan,
-                'materi_pembelajaran' => $materiPembelajaran,
             ]
         ];
 
