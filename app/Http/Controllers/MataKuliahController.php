@@ -200,8 +200,8 @@ class MataKuliahController extends Controller
         $request->validate([
             'kode' => 'required|string|unique:mata_kuliahs,kode,' . $request->id,
             'nama' => 'required|string',
-            'tujuan' => 'required|string',
-            'kategori' => 'required|string|in:Institusi,Prodi,Nasional',
+            'tujuan' => 'nullable|string',
+            'kategori' => 'nullable|string|in:Institusi,Prodi,Nasional',
             'semester' => 'nullable|integer|min:1',
             'teori_bt' => 'nullable|integer|min:0',
             'teori_pt' => 'nullable|integer|min:0',

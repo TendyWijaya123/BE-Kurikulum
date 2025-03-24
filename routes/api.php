@@ -216,6 +216,7 @@ Route::middleware(['auth:api'])->group(function () {
     /* -------------------------------------Jejaring Mata Kuliah API -------------------------------------------------- */
     Route::get('/jejaring-matakuliah', [JejaringMataKuliahController::class, 'index'])->middleware('role:P2MPP|Penyusun Kurikulum');
     Route::get('/jejaring-matakuliah/jejaring-prasyarat', [JejaringMataKuliahController::class, 'getJejaringData'])->middleware('role:P2MPP|Penyusun Kurikulum');
+    Route::post('/jejaring-matakuliah/upload', [JejaringMataKuliahController::class, 'uploadJejaringMKDiagram'])->middleware('role:Penyusun Kurikulum');
     Route::post('/jejaring-matakuliah/assign/{id}', [JejaringMataKuliahController::class, 'updateJejaringMataKuliah'])->middleware('role:Penyusun Kurikulum');
 
 
