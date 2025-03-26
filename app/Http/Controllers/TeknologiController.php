@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Validator;
 use App\Exports\TeknologiTemplateExport;
+use App\Http\Requests\UpsertTeknologiRequest;
 use App\Imports\TeknologiImport;
 use App\Models\Prodi;
 use Maatwebsite\Excel\Facades\Excel;
@@ -39,7 +40,7 @@ class TeknologiController extends Controller
         ], 200);
     }
 
-    public function store(Request $request)
+    public function store(UpsertTeknologiRequest $request)
     {
         try {
             DB::beginTransaction();
@@ -51,32 +52,25 @@ class TeknologiController extends Controller
                 return response()->json(['error' => 'Kurikulum aktif tidak ditemukan.'], 404);
             }
 
-            $dataList = $request->all();
+            $dataList = $request->validated();
 
+            $savedItems = [];
             foreach ($dataList as $data) {
-                $validator = Validator::make($data, [
-                    'deskripsi' => 'required|string|max:5000',
-                    'link_sumber' => 'nullable|url',
-                ]);
+                $data['kurikulum_id'] = $activeKurikulum->id;
 
-                if ($validator->fails()) {
-                    return response()->json([
-                        'message' => 'Validasi gagal',
-                        'errors' => $validator->errors()
-                    ], 422);
-                }
-
-                $validatedData = $validator->validated();
-                $validatedData['kurikulum_id'] = $activeKurikulum->id;
-
-                IpteksTeknologi::updateOrCreate(
+                $item = IpteksTeknologi::updateOrCreate(
                     ['id' => $data['id'] ?? null],
-                    $validatedData
+                    $data
                 );
+
+                $savedItems[] = $item;
             }
 
             DB::commit();
-            return response()->json(['message' => 'Data berhasil disimpan.'], 200);
+            return response()->json([
+                'message' => 'Data berhasil disimpan.',
+                'data' => $savedItems
+            ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -85,6 +79,7 @@ class TeknologiController extends Controller
             ], 500);
         }
     }
+
 
     public function destroy($id)
     {

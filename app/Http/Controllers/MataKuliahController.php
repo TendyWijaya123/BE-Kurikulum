@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Exports\MataKuliahTemplateExport;
+use App\Http\Requests\StoreMataKuliahRequest;
+use App\Http\Requests\UpdateMataKuliahRequest;
 use App\Imports\MataKuliahImport;
 use App\Models\BukuReferensi;
 use App\Models\MataKuliah;
@@ -186,43 +188,16 @@ class MataKuliahController extends Controller
 
 
 
-    public function store(Request $request)
+    public function store(StoreMataKuliahRequest $request)
     {
-
         $user = JWTAuth::parseToken()->authenticate();
-
         $activeKurikulum = $user->activeKurikulum();
 
         if (!$activeKurikulum) {
             return response()->json(['error' => 'Kurikulum aktif tidak ditemukan untuk prodi user'], 404);
         }
 
-        $request->validate([
-            'kode' => 'required|string|unique:mata_kuliahs,kode,' . $request->id,
-            'nama' => 'required|string',
-            'tujuan' => 'nullable|string',
-            'kategori' => 'nullable|string|in:Institusi,Prodi,Nasional',
-            'semester' => 'nullable|integer|min:1',
-            'teori_bt' => 'nullable|integer|min:0',
-            'teori_pt' => 'nullable|integer|min:0',
-            'teori_m' => 'nullable|integer|min:0',
-            'praktek_bt' => 'nullable|integer|min:0',
-            'praktek_pt' => 'nullable|integer|min:0',
-            'praktek_m' => 'nullable|integer|min:0',
-            'kemampuan_akhirs' => 'array',
-            'kemampuan_akhirs.*.deskripsi' => 'required|string',
-            'kemampuan_akhirs.*.estimasi_beban_belajar' => 'required|numeric',
-            'kemampuan_akhirs.*.metode_pembelajaran_ids' => 'array',
-            'kemampuan_akhirs.*.bentuk_pembelajaran_ids' => 'array',
-            'tujuan_belajar' => 'array',
-            'tujuan_belajar.*.deskripsi' => 'required|string',
-
-
-            'formulasi_cpa_ids' => 'array',
-        ]);
-
         DB::beginTransaction();
-
         try {
             $mataKuliah = MataKuliah::create([
                 'kode' => $request->kode,
@@ -239,37 +214,19 @@ class MataKuliahController extends Controller
                 'kurikulum_id' => $activeKurikulum->id,
             ]);
 
-            foreach ($request->tujuan_belajar as $tujuan) {
-                TujuanBelajar::create([
-                    'deskripsi' => $tujuan['deskripsi'],
-                    'mata_kuliah_id' => $mataKuliah->id,
+            $mataKuliah->tujuanBelajars()->createMany($request->tujuan_belajar);
+
+            foreach ($request->kemampuan_akhirs as $kemampuan) {
+                $kemampuanAkhir = $mataKuliah->kemampuanAkhirs()->create([
+                    'deskripsi' => $kemampuan['deskripsi'],
+                    'estimasi_beban_belajar' => $kemampuan['estimasi_beban_belajar'],
                 ]);
+
+                $kemampuanAkhir->metodePembelajarans()->sync($kemampuan['metode_pembelajaran_ids']);
+                $kemampuanAkhir->bentukPembelajarans()->sync($kemampuan['bentuk_pembelajaran_ids']);
             }
 
-
-            if ($request->has('kemampuan_akhirs')) {
-                foreach ($request->kemampuan_akhirs as $kemampuan) {
-                    $kemampuanAkhir = KemampuanAkhir::create([
-                        'deskripsi' => $kemampuan['deskripsi'],
-                        'estimasi_beban_belajar' => $kemampuan['estimasi_beban_belajar'],
-                        'mata_kuliah_id' => $mataKuliah->id, // Mengaitkan kemampuan akhir dengan MataKuliah
-                    ]);
-
-                    if (isset($kemampuan['metode_pembelajaran_ids'])) {
-                        $kemampuanAkhir->metodePembelajarans()->sync($kemampuan['metode_pembelajaran_ids']);
-                    }
-
-                    if (isset($kemampuan['bentuk_pembelajaran_ids'])) {
-                        $kemampuanAkhir->bentukPembelajarans()->sync($kemampuan['bentuk_pembelajaran_ids']);
-                    }
-                }
-            }
-
-
-
-            if ($request->has('formulasi_cpa_ids')) {
-                $mataKuliah->formulasiCpas()->sync($request->formulasi_cpa_ids);
-            }
+            $mataKuliah->formulasiCpas()->sync($request->formulasi_cpa_ids);
 
             DB::commit();
 
@@ -287,36 +244,15 @@ class MataKuliahController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+
+    public function update(UpdateMataKuliahRequest $request, $id)
     {
         $user = JWTAuth::parseToken()->authenticate();
-
         $activeKurikulum = $user->activeKurikulum();
 
         if (!$activeKurikulum) {
             return response()->json(['error' => 'Kurikulum aktif tidak ditemukan untuk prodi user'], 404);
         }
-        $request->validate([
-            'kode' => 'required|string|unique:mata_kuliahs,kode,' . $request->id,
-            'nama' => 'required|string',
-            'kategori' => 'required|string|in:Institusi,Prodi,Nasional',
-            'tujuan' => 'required|string',
-            'semester' => 'nullable|integer|min:1',
-            'teori_bt' => 'nullable|integer|min:0',
-            'teori_pt' => 'nullable|integer|min:0',
-            'teori_m' => 'nullable|integer|min:0',
-            'praktek_bt' => 'nullable|integer|min:0',
-            'praktek_pt' => 'nullable|integer|min:0',
-            'praktek_m' => 'nullable|integer|min:0',
-            'kemampuan_akhirs' => 'array',
-            'kemampuan_akhirs.*.deskripsi' => 'required|string',
-            'kemampuan_akhirs.*.estimasi_beban_belajar' => 'required|numeric',
-            'kemampuan_akhirs.*.metode_pembelajaran_ids' => 'array',
-            'kemampuan_akhirs.*.bentuk_pembelajaran_ids' => 'array',
-            'formulasi_cpa_ids' => 'array',
-            'tujuan_belajar' => 'array',
-            'tujuan_belajar.*.deskripsi' => 'required|string',
-        ]);
 
         DB::beginTransaction();
 
@@ -339,9 +275,7 @@ class MataKuliahController extends Controller
             ]);
 
             if ($request->has('kemampuan_akhirs')) {
-
                 $mataKuliah->kemampuanAkhirs()->delete();
-
                 foreach ($request->kemampuan_akhirs as $kemampuan) {
                     $kemampuanAkhir = KemampuanAkhir::updateOrCreate(
                         ['id' => $kemampuan['id'] ?? null],
@@ -352,11 +286,11 @@ class MataKuliahController extends Controller
                         ]
                     );
 
-                    if (isset($kemampuan['metode_pembelajaran_ids'])) {
+                    if (!empty($kemampuan['metode_pembelajaran_ids'])) {
                         $kemampuanAkhir->metodePembelajarans()->sync($kemampuan['metode_pembelajaran_ids']);
                     }
 
-                    if (isset($kemampuan['bentuk_pembelajaran_ids'])) {
+                    if (!empty($kemampuan['bentuk_pembelajaran_ids'])) {
                         $kemampuanAkhir->bentukPembelajarans()->sync($kemampuan['bentuk_pembelajaran_ids']);
                     }
                 }
@@ -364,13 +298,17 @@ class MataKuliahController extends Controller
 
             if ($request->has('tujuan_belajar')) {
                 $mataKuliah->tujuanBelajars()->delete();
-
                 foreach ($request->tujuan_belajar as $tujuanBelajar) {
-                    $tujuanBelajar = TujuanBelajar::updateOrCreate(['id' => $tujuanBelajar['id'] ?? null], ['deskripsi' => $tujuanBelajar['deskripsi'],  'mata_kuliah_id' => $mataKuliah->id,]);
+                    TujuanBelajar::updateOrCreate(
+                        ['id' => $tujuanBelajar['id'] ?? null],
+                        [
+                            'deskripsi' => $tujuanBelajar['deskripsi'],
+                            'mata_kuliah_id' => $mataKuliah->id,
+                        ]
+                    );
                 }
             }
 
-            // Menangani formulasi cpas
             if ($request->has('formulasi_cpa_ids')) {
                 $mataKuliah->formulasiCpas()->sync($request->formulasi_cpa_ids);
             }
@@ -390,6 +328,7 @@ class MataKuliahController extends Controller
             ], 500);
         }
     }
+
 
     public function updateDeskripsiSingkat(Request $request, $id)
     {

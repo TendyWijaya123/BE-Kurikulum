@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\PeranIndustriTemplateExport;
+use App\Http\Requests\UpsertPeranIndustriRequest;
 use App\Imports\PeranIndustriImport;
 use App\Models\PeranIndustri;
 use App\Models\Prodi;
@@ -55,41 +56,27 @@ class PeranIndustriController extends Controller
         }
     }
 
-    /**
-     * Upsert Peran Industri data for the active kurikulum of the authenticated user.
-     */
-    public function upsert(Request $request)
+    public function upsert(UpsertPeranIndustriRequest $request)
     {
         try {
-            // Authenticate user using JWT
             $user = JWTAuth::parseToken()->authenticate();
-
-            // Retrieve the active kurikulum for the user
             $activeKurikulum = $user->activeKurikulum();
 
             if (!$activeKurikulum) {
                 return response()->json(['error' => 'Kurikulum aktif tidak ditemukan untuk prodi user'], 404);
             }
 
-            // Validate the incoming request data
-            $validated = $request->validate([
-                'peran_industri' => 'required|array',
-                'peran_industri.*.id' => 'nullable|exists:peran_industris,id', // Validate if id exists when provided
-                'peran_industri.*.jabatan' => 'required|string|max:255',
-                'peran_industri.*.deskripsi' => 'required|string',
-            ]);
-
-            foreach ($validated['peran_industri'] as $peran) {
+            foreach ($request->validated()['peran_industri'] as $peran) {
                 $data = [
                     'jabatan' => $peran['jabatan'],
                     'deskripsi' => $peran['deskripsi'],
-                    'kurikulum_id' => $activeKurikulum->id, // Use the active kurikulum's ID
+                    'kurikulum_id' => $activeKurikulum->id,
                 ];
 
-                if (isset($peran['id'])) {
+                if (!empty($peran['id'])) {
                     $existingPeran = PeranIndustri::find($peran['id']);
                     if ($existingPeran) {
-                        $existingPeran->update($data); // Update the existing Peran Industri
+                        $existingPeran->update($data);
                     }
                 } else {
                     PeranIndustri::create($data);
@@ -97,12 +84,11 @@ class PeranIndustriController extends Controller
             }
 
             return response()->json(['message' => 'Data Peran Industri berhasil disimpan atau diperbarui'], 200);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['error' => 'Validasi gagal', 'messages' => $e->errors()], 422);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Terjadi kesalahan', 'message' => $e->getMessage()], 500);
         }
     }
+
 
     /**
      * Delete Peran Industri by ID for the active kurikulum of the authenticated user.
@@ -144,7 +130,7 @@ class PeranIndustriController extends Controller
         try {
             $validated = $request->validate([
                 'peran_industris_id' => 'array',
-                'peran_industris_id.*' => 'integer|exists:peran_industris,id', // Pastikan setiap ID adalah integer dan ada di database
+                'peran_industris_id.*' => 'integer|exists:peran_industris,id',
             ]);
 
             $peranIndustriIds = $validated['peran_industris_id'];
