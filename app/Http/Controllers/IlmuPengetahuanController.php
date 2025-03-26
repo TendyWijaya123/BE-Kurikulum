@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Exports\IlmuPengetahuanTemplateExport;
+use App\Http\Requests\UpsertIlmuPengetahuanRequest;
 use App\Imports\IlmuPengetahuanImport;
 use App\Models\Prodi;
 use Maatwebsite\Excel\Facades\Excel;
@@ -47,7 +48,7 @@ class IlmuPengetahuanController extends Controller
         }
     }
 
-    public function store(Request $request)
+    public function store(UpsertIlmuPengetahuanRequest $request)
     {
         try {
             DB::beginTransaction();
@@ -59,34 +60,19 @@ class IlmuPengetahuanController extends Controller
                 return response()->json(['error' => 'Kurikulum aktif tidak ditemukan.'], 404);
             }
 
-            $dataList = $request->all();
+            $dataList = $request->validated();
 
-            // Check if data is in correct format
             if (!is_array($dataList) || (is_array($dataList) && !isset($dataList[0]) && !is_array($dataList[0]))) {
-                $dataList = [$dataList]; // Convert to array of items if single item
+                $dataList = [$dataList];
             }
 
             $savedItems = [];
             foreach ($dataList as $data) {
-                $validator = Validator::make($data, [
-                    'deskripsi' => 'required|string|max:5000',
-                    'link_sumber' => 'nullable|url',
-                ]);
-
-                if ($validator->fails()) {
-                    DB::rollBack();
-                    return response()->json([
-                        'message' => 'Validasi gagal',
-                        'errors' => $validator->errors()
-                    ], 422);
-                }
-
-                $validatedData = $validator->validated();
-                $validatedData['kurikulum_id'] = $activeKurikulum->id;
+                $data['kurikulum_id'] = $activeKurikulum->id;
 
                 $item = IpteksPengetahuan::updateOrCreate(
                     ['id' => $data['id'] ?? null],
-                    $validatedData
+                    $data
                 );
 
                 $savedItems[] = $item;
@@ -105,6 +91,7 @@ class IlmuPengetahuanController extends Controller
             ], 500);
         }
     }
+
 
     public function destroy($id)
     {

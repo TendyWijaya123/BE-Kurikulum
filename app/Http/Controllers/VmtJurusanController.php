@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateVmtJurusanRequest;
 use App\Models\Kurikulum;
 use App\Models\Prodi;
 use App\Models\VmtJurusan;
@@ -52,30 +53,26 @@ class VmtJurusanController extends Controller
     }
 
 
-    public function update(Request $request, $id)
+    public function update(UpdateVmtJurusanRequest $request, $id)
     {
         try {
-            $validated = $request->validate([
-                'visi_jurusan' => 'required|string|max:255',
-                'visi_keilmuan_prodi' => 'required|string|max:255',
-            ]);
-
             $vmtJurusan = VmtJurusan::find($id);
 
             if (!$vmtJurusan) {
                 return response()->json(['error' => 'VmtJurusan tidak ditemukan'], 404);
             }
 
-            $vmtJurusan->update([
-                'visi_jurusan' => $validated['visi_jurusan'],
-                'visi_keilmuan_prodi' => $validated['visi_keilmuan_prodi'],
-            ]);
+            $vmtJurusan->update($request->validated());
 
-            return response()->json(['message' => 'Data berhasil diperbarui', 'data' => $vmtJurusan], 200);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['error' => 'Validasi gagal', 'messages' => $e->errors()], 422);
+            return response()->json([
+                'message' => 'Data berhasil diperbarui',
+                'data' => $vmtJurusan
+            ], 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Terjadi kesalahan', 'message' => $e->getMessage()], 500);
+            return response()->json([
+                'error' => 'Terjadi kesalahan',
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 }
