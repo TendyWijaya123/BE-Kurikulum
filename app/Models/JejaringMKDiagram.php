@@ -5,18 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PetaKompetensi extends Model
+class JejaringMkDiagram extends Model
 {
     use HasFactory;
 
-    protected $table = 'peta_kompetensis';
+    protected $table = 'jejaring_mk_diagram';
 
     protected $fillable = [
         'kurikulum_id',
-        'gambar_url'
+        'gambar_url',
     ];
+
     public function kurikulum()
     {
-        return $this->belongsTo(Prodi::class, 'kurikulum_id');
+        return $this->belongsTo(Kurikulum::class);
     }
-};
+}

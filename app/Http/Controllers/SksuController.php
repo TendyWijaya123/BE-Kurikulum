@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\SksuTemplateExport;
+use App\Http\Requests\UpsertSksuRequest;
 use App\Imports\SksuImport;
 use App\Models\Kurikulum;
 use App\Models\Prodi;
@@ -37,25 +38,32 @@ class SksuController extends Controller
         return response()->json($sksus);
     }
 
-    public function store(Request $request)
+    public function store(UpsertSksuRequest $request)
     {
         try {
-
             DB::beginTransaction();
 
-            $dataList = $request->all();
+            $dataList = $request->validated();
+
+            // Pastikan data tidak kosong sebelum mencari `prodiId`
+            if (empty($dataList) || !isset($dataList[0]['prodiId'])) {
+                return response()->json([
+                    'message' => 'Data tidak valid atau prodiId tidak ditemukan dalam request.',
+                ], 400);
+            }
+
             $kurikulumId = Kurikulum::where('prodi_id', $dataList[0]['prodiId'])
                 ->where('is_active', true)
                 ->value('id');
 
             if (!$kurikulumId) {
                 return response()->json([
-                    'message' => "Kurikulum aktif tidak ditemukan untuk prodi_id: {$request[0]['prodiId']}",
+                    'message' => "Kurikulum aktif tidak ditemukan untuk prodi_id: {$dataList[0]['prodiId']}",
                 ], 404);
             }
 
             foreach ($dataList as $data) {
-                $sksu = sksuModel::updateOrCreate(
+                SksuModel::updateOrCreate(
                     ['id' => $data['_id'] ?? null],
                     [
                         'profil_lulusan' => $data['profilLulusan'],
@@ -70,12 +78,14 @@ class SksuController extends Controller
             DB::commit();
 
             return response()->json([
-                'success' => 'Data berhasil disimpan',
+                'success' => true,
+                'message' => 'Data berhasil disimpan',
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
 
             return response()->json([
+                'success' => false,
                 'message' => 'Terjadi kesalahan saat menyimpan data',
                 'error' => $e->getMessage(),
             ], 500);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\BenchKurikulumTemplateExport;
+use App\Http\Requests\UpsertBenchKurikulumRequest;
 use App\Imports\BenchKurikulumImport;
 use Illuminate\Http\Request;
 use App\Models\BenchKurikulum as BenchKurikulumModel;
@@ -37,24 +38,25 @@ class BenchKurikulumsController extends Controller
         return response()->json($benchKurikulums);
     }
 
-    public function store(Request $request)
+    public function store(UpsertBenchKurikulumRequest $request)
     {
         try {
             DB::beginTransaction();
 
-            $dataList = $request->all();
+            $dataList = $request->validated();
+
             $kurikulumId = Kurikulum::where('prodi_id', $dataList[0]['prodiId'])
                 ->where('is_active', true)
                 ->value('id');
 
             if (!$kurikulumId) {
                 return response()->json([
-                    'message' => "Kurikulum aktif tidak ditemukan untuk prodi_id: {$request[0]['prodiId']}",
+                    'message' => "Kurikulum aktif tidak ditemukan untuk prodi_id: {$dataList[0]['prodiId']}",
                 ], 404);
             }
 
             foreach ($dataList as $data) {
-                $benchKurikulums = BenchKurikulumModel::updateOrCreate(
+                BenchKurikulumModel::updateOrCreate(
                     ['id' => $data['_id'] ?? null],
                     [
                         'program_studi' => $data['programStudi'],
@@ -69,17 +71,18 @@ class BenchKurikulumsController extends Controller
             DB::commit();
 
             return response()->json([
-                'success' => 'Data berhasil disimpan',
+                'success' => 'Data berhasil disimpan.',
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
 
             return response()->json([
-                'message' => 'Terjadi kesalahan saat menyimpan data',
+                'message' => 'Terjadi kesalahan saat menyimpan data.',
                 'error' => $e->getMessage(),
             ], 500);
         }
     }
+
 
     public function destroy($id)
     {

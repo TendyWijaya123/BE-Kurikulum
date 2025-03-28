@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\KkniTemplateExport;
+use App\Http\Requests\UpsertKKNIRequest;
 use App\Imports\KkniImport;
 use App\Models\BenchKurikulum;
 use App\Models\Ipteks;
@@ -51,26 +52,29 @@ class KkniController extends Controller
             ]);
     }
 
-    public function store(Request $request)
+    public function store(UpsertKKNIRequest $request)
     {
         try {
             DB::beginTransaction();
-            $dataList = $request->input('dataSource', []);
+
+            $dataList = $request->validated()['dataSource'];
+            $selectedPengetahuan = $request->input('selectedPengetahuan', []);
+            $selectedKemampuanKerja = $request->input('selectedKemampuanKerja', []);
+
             $kurikulumId = Kurikulum::where('prodi_id', $dataList[0]['prodiId'])
                 ->where('is_active', true)
                 ->value('id');
 
-            $selectedPengetahuan = $request['selectedPengetahuan'] ?? null;
-            $selectedKemampuanKerja = $request['selectedKemampuanKerja'] ?? null;
-
             if (!$kurikulumId) {
                 return response()->json([
-                    'message' => "Kurikulum aktif tidak ditemukan untuk prodi_id: {$request[0]['prodiId']}",
+                    'message' => "Kurikulum aktif tidak ditemukan untuk prodi_id: {$dataList[0]['prodiId']}",
                 ], 404);
             }
 
+            $savedItems = [];
+
             foreach ($dataList as $data) {
-                ModelKkni::updateOrCreate(
+                $item = ModelKkni::updateOrCreate(
                     ['id' => $data['_id'] ?? null],
                     [
                         'code' => $data['code'],
@@ -78,12 +82,16 @@ class KkniController extends Controller
                         'kurikulum_id' => $kurikulumId,
                     ]
                 );
+                $savedItems[] = $item;
             }
 
             DB::commit();
 
             return response()->json([
-                'success' => 'Data berhasil disimpan',
+                'message' => 'Data berhasil disimpan.',
+                'data' => $savedItems,
+                'selectedPengetahuan' => $selectedPengetahuan,
+                'selectedKemampuanKerja' => $selectedKemampuanKerja,
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -94,6 +102,7 @@ class KkniController extends Controller
             ], 500);
         }
     }
+
 
     public function destroy($id)
     {

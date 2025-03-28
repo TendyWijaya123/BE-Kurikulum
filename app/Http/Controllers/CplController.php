@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\CplTemplateExport;
+use App\Http\Requests\UpsertCPLRequest;
 use App\Imports\CplImport;
 use App\Models\Cpl;
 use App\Models\Prodi;
@@ -55,12 +56,9 @@ class CplController extends Controller
         }
     }
 
-    public function upsert(Request $request)
+    public function upsert(UpsertCPLRequest $request)
     {
-        // Ambil user yang sedang terautentikasi menggunakan JWT
         $user = JWTAuth::parseToken()->authenticate();
-
-        // Ambil kurikulum aktif yang terkait dengan user
         $activeKurikulum = $user->activeKurikulum();
 
         if (!$activeKurikulum) {
@@ -68,38 +66,30 @@ class CplController extends Controller
         }
 
         try {
-            // Validasi data yang dikirimkan
-            $validated = $request->validate([
-                'cpls' => 'required|array',
-                'cpls.*.id' => 'nullable|integer',  // id boleh kosong, namun jika ada harus berupa integer
-                'cpls.*.keterangan' => 'required',
-            ]);
+            $validated = $request->validated();
 
-            // Loop untuk upsert setiap item dalam cpls
             foreach ($validated['cpls'] as $cpl) {
                 $data = [
                     'keterangan' => $cpl['keterangan'],
                     'kurikulum_id' => $activeKurikulum->id,
                 ];
 
-                if (isset($cpl['id'])) {
-                    // Update jika ada id
+                if (!empty($cpl['id'])) {
                     $existingCpl = Cpl::find($cpl['id']);
                     if ($existingCpl) {
                         $existingCpl->update($data);
                     }
                 } else {
-                    // Buat data baru jika tidak ada id
                     Cpl::create($data);
                 }
             }
 
             return response()->json(['message' => 'Upsert berhasil'], 200);
         } catch (\Exception $e) {
-            // Tangani error jika terjadi
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
 
 
 
@@ -114,7 +104,6 @@ class CplController extends Controller
         }
 
         try {
-            // Cari CPL berdasarkan id dan kurikulum_id aktif
             $cpl = Cpl::where('kurikulum_id', $activeKurikulum->id)
                 ->where('id', $id)
                 ->first();
@@ -123,12 +112,10 @@ class CplController extends Controller
                 return response()->json(['error' => 'CPL tidak ditemukan'], 404);
             }
 
-            // Hapus data CPL
             $cpl->delete();
 
             return response()->json(['message' => 'Data CPL berhasil dihapus'], 200);
         } catch (\Exception $e) {
-            // Menangani error umum
             return response()->json(['error' => 'Terjadi kesalahan', 'message' => $e->getMessage()], 500);
         }
     }
@@ -143,7 +130,11 @@ class CplController extends Controller
 
             $cplIds = $validated['cpls_id'];
 
-            $deleted = Cpl::whereIn('id', $cplIds)->delete();
+            $deleted = Cpl::whereIn('id', $cplIds)->get();
+
+            foreach ($deleted as $delete) {
+                $delete->delete();
+            }
 
             if ($deleted === 0) {
                 return response()->json(['error' => 'Tidak ada CPL yang dihapus'], 404);

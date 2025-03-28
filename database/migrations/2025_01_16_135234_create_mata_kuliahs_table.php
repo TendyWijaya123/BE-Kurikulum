@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('kode')->unique();
             $table->string('nama');
-            $table->enum('kategori', ["Institusi", "Prodi", "Nasional"]);
+            $table->enum('kategori', ["Institusi", "Prodi", "Nasional"])->nullable();
             $table->text('deskripsi_singkat')->nullable();
-            $table->text('tujuan');
+            $table->text('tujuan')->nullable();
             $table->integer('semester')->nullable();
             $table->integer('teori_bt')->nullable()->default(0);
             $table->integer('teori_pt')->nullable()->default(0);

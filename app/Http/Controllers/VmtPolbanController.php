@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateVmtPolbanRequest;
 use App\Models\Prodi;
 use App\Models\VmtPolban;
 use Illuminate\Http\Request;
@@ -42,33 +43,30 @@ class VmtPolbanController extends Controller
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['error' => 'Validasi gagal', 'messages' => $e->errors()], 422);
         } catch (\Exception $e) {
-            // Penanganan kesalahan umum
             return response()->json(['error' => 'Terjadi kesalahan', 'message' => $e->getMessage()], 500);
         }
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateVmtPolbanRequest $request, $id)
     {
         try {
-            $validated = $request->validate([
-                'visi_polban' => 'required|string',
-            ]);
-
             $vmtPolban = VmtPolban::find($id);
 
             if (!$vmtPolban) {
                 return response()->json(['error' => 'VmtPolban tidak ditemukan'], 404);
             }
 
-            $vmtPolban->update([
-                'visi_polban' => $validated['visi_polban'],
-            ]);
+            $vmtPolban->update($request->validated());
 
-            return response()->json(['message' => 'Data berhasil diperbarui', 'data' => $vmtPolban], 200);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['error' => 'Validasi gagal', 'messages' => $e->errors()], 422);
+            return response()->json([
+                'message' => 'Data berhasil diperbarui',
+                'data' => $vmtPolban
+            ], 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Terjadi kesalahan', 'message' => $e->getMessage()], 500);
+            return response()->json([
+                'error' => 'Terjadi kesalahan',
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 }
