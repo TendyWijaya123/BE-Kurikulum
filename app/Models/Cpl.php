@@ -28,12 +28,10 @@ class Cpl extends Model
 
         static::saving(function ($model) {
             if (!$model->kode) {
-                // Get the highest kode for the given kurikulum_id
                 $lastCpl = self::where('kurikulum_id', $model->kurikulum_id)
                     ->orderBy('id', 'desc')
                     ->first();
 
-                // Determine the next number
                 $nextNumber = $lastCpl ? ((int) str_replace('CPL-', '', $lastCpl->kode) + 1) : 1;
 
                 // Set the kode

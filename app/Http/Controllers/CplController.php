@@ -32,10 +32,13 @@ class CplController extends Controller
             }
 
             if (!$activeKurikulum) {
-                return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
+                return response()->json(['status' => 'Tidak ada kurikulum  yang aktif pada prodi ini'], 404);
             }
 
-            $cpl = Cpl::where('kurikulum_id', $activeKurikulum->id)->get(['id', 'kode', 'keterangan']);
+            $cpl = Cpl::where('kurikulum_id', $activeKurikulum->id)
+                ->orderByRaw("CAST(SUBSTRING(kode, 5) AS UNSIGNED) ASC")
+                ->get(['id', 'kode', 'keterangan']);
+
 
             return response()->json([
                 'success' => true,

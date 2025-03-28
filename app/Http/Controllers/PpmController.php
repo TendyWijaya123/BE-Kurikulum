@@ -33,10 +33,11 @@ class PpmController extends Controller
             }
 
             if (!$activeKurikulum) {
-                return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
+                return response()->json(['status' => 'Tidak ada kurikulum  yang aktif pada prodi ini'], 404);
             }
 
-            $ppms = Ppm::where('kurikulum_id', $activeKurikulum->id)->get(['id', 'kode', 'deskripsi']);
+            $ppms = Ppm::where('kurikulum_id', $activeKurikulum->id)->orderByRaw("CAST(SUBSTRING(kode, 5) AS UNSIGNED) ASC")
+                ->get(['id', 'kode', 'deskripsi']);
 
             return response()->json([
                 'success' => true,

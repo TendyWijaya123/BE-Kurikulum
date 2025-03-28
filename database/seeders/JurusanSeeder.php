@@ -20,7 +20,6 @@ class JurusanSeeder extends Seeder
             ['nama' => 'Teknik Komputer dan Informatika', 'kategori' => 'Rekayasa'],
         ];
 
-        // Daftar jurusan yang termasuk dalam kategori Non Rekayasa
         $jurusansNonRekayasa = [
             ['nama' => 'Akuntansi', 'kategori' => 'Non Rekayasa'],
             ['nama' => 'Administrasi Niaga', 'kategori' => 'Non Rekayasa'],
@@ -29,12 +28,10 @@ class JurusanSeeder extends Seeder
 
 
 
-        // Menambahkan jurusan Rekayasa ke dalam tabel Jurusan
         foreach ($jurusansRekayasa as $jurusan) {
             Jurusan::firstOrCreate($jurusan);
         }
 
-        // Menambahkan jurusan Non Rekayasa ke dalam tabel Jurusan
         foreach ($jurusansNonRekayasa as $jurusan) {
             Jurusan::firstOrCreate($jurusan);
         }

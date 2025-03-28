@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateUserRequest;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -11,6 +13,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Mail;
 use App\Mail\UserCreatedMail;
+use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
@@ -22,52 +26,61 @@ class UserController extends Controller
         return response()->json($users);
     }
 
-    public function store(CreateUserRequest $request)
+
+    public function store(StoreUserRequest $request)
     {
+        DB::beginTransaction();
         try {
-            // Validasi input secara eksplisit
-            $validator = Validator::make($request->all(), [
-                'email' => 'required|email|unique:users,email',
-                'name' => 'required|string|max:255',
-                'prodi_id' => 'required|exists:prodis,id',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json(['error' => $validator->errors()], 422);
-            }
-
-            // Generate password random
+            Log:
+            info($request->all());
             $randomPassword = Str::random(10);
 
             $payload = [
                 'email' => $request->email,
                 'name' => $request->name,
                 'prodi_id' => $request->prodi_id,
-                'password' => Hash::make($randomPassword), // Simpan password yang sudah di-hash
+                'password' => Hash::make($randomPassword),
             ];
 
-            // Buat user
             $user = User::create($payload);
 
-            // Kirim email dengan password yang dibuat
+
+
+            $user->assignRole($request->role);
+
             Mail::to($user->email)->send(new UserCreatedMail($user, $randomPassword));
+
+            // Commit transaksi jika semua berhasil
+            DB::commit();
 
             return response()->json(['user' => $user, 'message' => 'User Created Successfully'], 201);
         } catch (\Exception $e) {
+            DB::rollBack();
+
             Log::error('Error in Store Method:', ['message' => $e->getMessage()]);
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Show user by ID.
-     */
+
+
+    public function getRoles()
+    {
+        $roles = Role::where('guard_name', 'user')->pluck('name');
+
+
+        return response()->json(['roles' => $roles]);
+    }
+
+
+
     public function show($id)
     {
         try {
             Log::info('Show method started');
 
             $user = User::findOrFail($id);
+            $user->role = $user->getRoleNames()->first();
 
             Log::info('User fetched:', ['user' => $user]);
 
@@ -78,24 +91,12 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Update an existing user.
-     */
-    public function update(Request $request, $id)
+
+
+    public function update(UpdateUserRequest $request, $id)
     {
         try {
-            Log::info('Update method started');
-
-            $validator = Validator::make($request->all(), [
-                'email' => 'required|email',
-                'name' => 'required|string',
-                'prodi_id' => 'required|exists:prodis,id',
-                'password' => 'nullable|min:8',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json(['error' => $validator->errors()], 400);
-            }
+            Log::info('Update request data:', $request->all());
 
             $user = User::findOrFail($id);
 
@@ -104,13 +105,13 @@ class UserController extends Controller
             $user->prodi_id = $request->prodi_id;
 
             if ($request->password) {
-                $user->password = Hash::make($request->password); // Hash the password if provided
+                $user->password = Hash::make($request->password);
             }
 
-            // Save the updated user
             $user->save();
 
-            Log::info('User updated:', ['user' => $user]);
+            $user->syncRoles($request->role);
+
 
             return response()->json(['user' => $user, 'message' => 'User Updated Successfully']);
         } catch (\Exception $e) {
@@ -119,9 +120,7 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Delete a user.
-     */
+
     public function destroy($id)
     {
         try {

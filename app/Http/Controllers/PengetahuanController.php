@@ -33,8 +33,9 @@ class PengetahuanController extends Controller
             }
 
             $pengetahuan = Pengetahuan::where('kurikulum_id', $activeKurikulum->id)
-                ->orderBy('kode_pengetahuan', 'asc')
+                ->orderByRaw("CAST(SUBSTRING(kode_pengetahuan, 3) AS UNSIGNED) ASC")
                 ->get();
+
 
             return response()->json([
                 'message' => 'Data pengetahuan berhasil diambil',
