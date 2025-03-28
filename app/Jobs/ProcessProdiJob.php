@@ -5,9 +5,6 @@ namespace App\Jobs;
 use Illuminate\Support\Facades\Cache;
 use App\Models\Cpl;
 use App\Models\Ppm;
-use App\Models\VmtJurusan;
-use App\Models\Pengetahuan;
-use App\Models\MateriPembelajaran;
 use App\Providers\PromptProvider;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
@@ -75,7 +72,7 @@ class ProcessProdiJob implements ShouldQueue
             "cpl_texts" => array_values($cplTexts)
         ];
 
-        $flaskResponse = Http::post("http://127.0.0.1:5000/analyze", $formattedData);
+        $flaskResponse = Http::post("http://localhost:5000/analyze", $formattedData);
         $flaskResults = $flaskResponse->json()['results'] ?? [];
 
         foreach ($cpls as $index => $cpl) {
