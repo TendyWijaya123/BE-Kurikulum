@@ -86,6 +86,7 @@ Route::middleware(['auth:api'])->group(function () {
 
 
     /* --------------------------------------Jurusan API--------------------------------------------------- */
+    Route::get('jurusans/dropdown', [JurusanController::class, 'dropdown']);
     Route::get('jurusans', [JurusanController::class, 'index'])->middleware('role:P2MPP');
     Route::get('jurusans/dropdown', [JurusanController::class, 'dropdown']);
     Route::post('jurusans', [JurusanController::class, 'store'])->middleware('role:P2MPP');
@@ -279,7 +280,13 @@ Route::middleware(['auth:api'])->group(function () {
     /* ---------------------------------------Dashboard-----------------------------------------------*/
     Route::get('dashboard/jurusans', [DashboardController::class, 'getJurusans']);
     Route::get('dashboard/prodis', [DashboardController::class, 'getProdis']);
-    Route::get('dashboard/curriculum-data/{id}', [DashboardController::class, 'getCurriculumData']);
+    Route::get('dashboard/proses-curriculum-data', [DashboardController::class, 'getCurriculumData']);
+    Route::get('dashboard/get-curriculum-data', [DashboardController::class, 'getProcessedData']);
+    Route::get('dashboard/refresh-curriculum-data', [DashboardController::class, 'refreshCache']);
+    Route::get('dashboard/progres-curriculum-data', [DashboardController::class, 'getBatchStatus']);
+    Route::get('dashboard/get-matakuliah', [DashboardController::class, 'getMatakuliah']);
+    Route::get('dashboard/get-matakuliah-detail/{id}', [DashboardController::class, 'getMatakuliahDetail']);
+
 
     Route::get('rps/matkul-dropdown/{id}', [RpsController::class, 'dropdownMatkul']);
     Route::get('me', [AuthController::class, 'me']);

@@ -129,7 +129,7 @@ class PromptProvider extends ServiceProvider
         $prompt .= "- **Behavior**: Kemampuan yang dapat didemonstrasikan oleh mahasiswa, dinyatakan dalam bentuk kata kerja yang mendeskripsikan proses kognitif.\n";
         $prompt .= "- **Subject Matters**: Bahan kajian yang berisi pengetahuan disiplin ilmu atau pengetahuan yang dipelajari mahasiswa dan dapat didemonstrasikan oleh mahasiswa.\n";
         $prompt .= "- **Context**: Dalam konteks dan ruang lingkup apa kemampuan tersebut mampu didemonstrasikan oleh mahasiswa pada akhir pembelajaran.\n\n";
-        $prompt .= "**Format Hasil Akhir** : kode CPL, Deskripsi (Behavior + Subject Matters + Context) \n\n output harus singkat padat jelas dan berupa objek json : \n";
+        $prompt .= "**Format Hasil Akhir** : kode CPL, Deskripsi (Behavior + Subject Matters + Context) \n\n output harus singkat jangan panjang padat jelas dan berupa objek json : \n";
         $prompt .= "[{
             kode : CPL-1,
             deskripsi : Behavior(awali dengan kata mampu) + Subject Matters + Context
@@ -138,6 +138,20 @@ class PromptProvider extends ServiceProvider
             deskripsi : Behavior + Subject Matters + Context
         ]";
 
+        return $prompt;
+    }
+
+
+    public static function promptTranslate($cpl){
+        // Ambil hanya data yang diperlukan (keterangan)
+        $data = $cpl->pluck('keterangan')->toArray();
+        
+        // Gabungkan semua keterangan menjadi satu teks dengan pemisah newline
+        $text = implode("\n", $data);
+        
+        // Buat prompt untuk GPT
+        $prompt = "Terjemahkan teks berikut ke dalam bahasa Inggris:\n\n" . $text;
+        
         return $prompt;
     }
 }
