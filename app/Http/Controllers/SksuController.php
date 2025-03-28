@@ -30,7 +30,7 @@ class SksuController extends Controller
         }
 
         if (!$activeKurikulum) {
-            return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
+            return response()->json(['status' => 'Tidak ada kurikulum  yang aktif pada prodi ini'], 404);
         }
 
         $sksus = sksuModel::where('kurikulum_id', $activeKurikulum->id)->get();

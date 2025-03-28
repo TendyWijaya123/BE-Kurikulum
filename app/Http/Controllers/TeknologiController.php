@@ -30,7 +30,7 @@ class TeknologiController extends Controller
         }
 
         if (!$activeKurikulum) {
-            return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
+            return response()->json(['status' => 'Tidak ada kurikulum  yang aktif pada prodi ini'], 404);
         }
         $data = IpteksTeknologi::where("kurikulum_id", $activeKurikulum->id)->get();
 

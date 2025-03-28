@@ -10,7 +10,6 @@ class ProdiSeeder extends Seeder
 {
     public function run()
     {
-        // Teknik Kimia
         $jurusanTeknikKimia = Jurusan::where('nama', 'Teknik Kimia')->first();
         if ($jurusanTeknikKimia) {
             Prodi::firstOrCreate([
@@ -101,7 +100,6 @@ class ProdiSeeder extends Seeder
             ]);
         }
 
-        // Teknik Elektro
         $jurusanTeknikElektro = Jurusan::where('nama', 'Teknik Elektro')->first();
         if ($jurusanTeknikElektro) {
             Prodi::firstOrCreate([
@@ -142,7 +140,6 @@ class ProdiSeeder extends Seeder
             ]);
         }
 
-        // Teknik Sipil
         $jurusanTeknikSipil = Jurusan::where('nama', 'Teknik Sipil')->first();
         if ($jurusanTeknikSipil) {
             Prodi::firstOrCreate([
@@ -190,12 +187,6 @@ class ProdiSeeder extends Seeder
                 'name' => 'D4 Teknik Informatika',
                 'jenjang' => 'D4',
                 'kode' => 'TKI-D4',
-                'jurusan_id' => $jurusanTeknikKomputerInformatika->id,
-            ]);
-            Prodi::firstOrCreate([
-                'name' => 'S2 Rekayasa Komputer',
-                'jenjang' => 'S2',
-                'kode' => 'TKI-S2-RK',
                 'jurusan_id' => $jurusanTeknikKomputerInformatika->id,
             ]);
         }

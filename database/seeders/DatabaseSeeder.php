@@ -22,7 +22,6 @@ class DatabaseSeeder extends Seeder
             KurikulumSeeder::class,
             IeaSeeder::class,
             IpteksSeeder::class,
-            PengetahuanSeeder::class,
             BentukPembelajaranSeeder::class,
             MetodePembelajaranSeeder::class,
             FormulasiCpaSeeder::class,

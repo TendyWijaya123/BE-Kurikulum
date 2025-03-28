@@ -55,21 +55,19 @@ class Pengetahuan extends Model
     {
         parent::boot();
 
-        static::creating(function ($pengetahuan) {
-            $kurikulumId = $pengetahuan->kurikulum_id;
+        static::saving(function ($model) {
+            if (!$model->kode_pengetahuan) {
+                $lastPengetahuan = self::where('kurikulum_id', $model->kurikulum_id)
+                    ->orderBy('id', 'desc')
+                    ->first();
 
-            $lastNumber = self::where('kurikulum_id', $kurikulumId)
-                ->orderBy('kode_pengetahuan', 'desc')
-                ->value('kode_pengetahuan');
+                $nextNumber = $lastPengetahuan ? ((int) str_replace('P-', '', $lastPengetahuan->kode_pengetahuan) + 1) : 1;
 
-            if ($lastNumber) {
-                $number = (int) substr($lastNumber, 2) + 1;
-            } else {
-                $number = 1;
+                $model->kode_pengetahuan = 'P-' . $nextNumber;
             }
-
-            $pengetahuan->kode_pengetahuan = 'P-' . str_pad($number, 2, '0', STR_PAD_LEFT);
         });
+
+
 
         static::deleted(function ($pengetahuan) {
             self::reorderKodePengetahuan($pengetahuan->kurikulum_id);
@@ -86,7 +84,7 @@ class Pengetahuan extends Model
 
             $number = 1;
             foreach ($pengetahuans as $pengetahuan) {
-                $newCode = 'P-' . str_pad($number, 2, '0', STR_PAD_LEFT);
+                $newCode = 'P-' . $number;
                 if ($pengetahuan->kode_pengetahuan !== $newCode) {
                     $pengetahuan->kode_pengetahuan = $newCode;
                     $pengetahuan->save();

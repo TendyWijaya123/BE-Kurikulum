@@ -5,6 +5,8 @@ namespace App\Imports;
 use App\Models\BenchKurikulum;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
@@ -13,17 +15,35 @@ class BenchKurikulumImport implements ToCollection, WithHeadingRow
     private $currentBenchKurikulum = null;
     private $cplList = [];
     private $ppmList = [];
+    public $errors = [];
 
     public function collection(Collection $rows)
     {
         $kurikulum = Auth::user()->activeKurikulum();
+        Log::info('BenchKurikulumImport mulai dijalankan.');
 
-        foreach ($rows as $row) {
+        foreach ($rows as $index => $row) {
+            $validator = Validator::make($row->toArray(), [
+                'program_studi' => 'required|string|max:255',
+                'kategori'      => 'required|string|max:255',
+                'cpl'           => 'required|string|max:1000',
+                'ppm'           => 'nullable|string|max:1000',
+            ]);
+
+            if ($validator->fails()) {
+                $this->errors[] = [
+                    'row' => $index + 2,
+                    'errors' => $validator->errors()->all(),
+                ];
+                continue;
+            }
+
             if (!empty($row['program_studi'])) {
                 $this->saveAndReset($kurikulum);
-                $this->currentBenchKurikulum = $row->only(['program_studi', 'kategori'])->toArray();
+                $this->currentBenchKurikulum = collect($row)->only(['program_studi', 'kategori'])->toArray();
             }
-            $this->cplList[] = $row['cpl'] ?? null;
+
+            $this->cplList[] = $row['cpl'];
             $this->ppmList[] = $row['ppm'] ?? null;
         }
 

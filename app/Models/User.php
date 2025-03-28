@@ -12,14 +12,8 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasRoles;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    protected $guard_name = ['user'];
     protected $fillable = [
         'name',
         'email',
@@ -27,11 +21,7 @@ class User extends Authenticatable implements JWTSubject
         'prodi_id',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
+
     protected $hidden = [
         'password',
         'remember_token',

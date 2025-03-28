@@ -62,6 +62,7 @@ Route::middleware(['auth:api'])->group(function () {
 
     /* ------------------------------------ Users API ------------------------------------------------------- */
     Route::get('users', [UserController::class, 'index'])->middleware('role:P2MPP');
+    Route::get('users/roles-dropdown', [UserController::class, 'getRoles'])->middleware('role:P2MPP');
     Route::get('users/{id}', [UserController::class, 'show'])->middleware('role:P2MPP');
     Route::post('users', [UserController::class, 'store'])->middleware('role:P2MPP');
     Route::put('users/{id}', [UserController::class, 'update'])->middleware('role:P2MPP');
@@ -86,12 +87,12 @@ Route::middleware(['auth:api'])->group(function () {
 
     /* --------------------------------------Jurusan API--------------------------------------------------- */
     Route::get('jurusans', [JurusanController::class, 'index'])->middleware('role:P2MPP');
+    Route::get('jurusans/dropdown', [JurusanController::class, 'dropdown']);
     Route::post('jurusans', [JurusanController::class, 'store'])->middleware('role:P2MPP');
     Route::get('jurusans/{id}', [JurusanController::class, 'show'])->middleware('role:P2MPP');
     Route::put('jurusans/{id}', [JurusanController::class, 'update'])->middleware('role:P2MPP');
     Route::delete('jurusans/{id}', [JurusanController::class, 'destroy'])->middleware('role:P2MPP');
 
-    Route::get('jurusans/dropdown', [JurusanController::class, 'dropdown']);
 
 
     /* ---------------------------------------SKSU API --------------------------------------------------*/
