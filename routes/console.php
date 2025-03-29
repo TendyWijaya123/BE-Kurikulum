@@ -8,20 +8,21 @@ use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Bus;
 
+
+
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote')->hourly();
 
+
 Schedule::call(function () {
-    $kurikulums = Kurikulum::active()->with('prodi')->get();
+    $kurikulums = Kurikulum::active()->get();
 
-        // Jalankan batch baru
-        $batch = Bus::batch([])->dispatch();
+    $batch = Bus::batch([])->dispatch();
 
-        foreach ($kurikulums as $kurikulum) {
-            $batch->add(new ProcessProdiJob($kurikulum));
-        }
+    foreach ($kurikulums as $kurikulum) {
+        $batch->add(new ProcessProdiJob($kurikulum->id));
+    }
 
-        // Simpan Batch ID ke cache selama 1 jam
-        Cache::put('current_batch_id', $batch->id, now()->addHour());
-})->hourly(); 
+    Cache::put('current_batch_id', $batch->id, 600);
+})->everyThirtyMinutes();
