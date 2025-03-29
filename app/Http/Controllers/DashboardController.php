@@ -24,50 +24,50 @@ class DashboardController extends Controller
         $prodis = Prodi::all();
         return response()->json($prodis);
     }
+
+
     public function getCurriculumData()
     {
-        $kurikulums = Kurikulum::active()->with('prodi')->get();
+        $kurikulums = Kurikulum::active()->get();
 
-        // Jalankan batch baru
+        if ($kurikulums->isEmpty()) {
+            return response()->json(['message' => 'Tidak ada kurikulum aktif untuk diproses'], 404);
+        }
+
         $batch = Bus::batch([])->dispatch();
 
         foreach ($kurikulums as $kurikulum) {
-            $batch->add(new ProcessProdiJob($kurikulum));
+            $batch->add(new ProcessProdiJob($kurikulum->id));
         }
 
-        // Simpan Batch ID ke cache selama 1 jam
-        Cache::put('current_batch_id', $batch->id, now()->addHour());
+        Cache::put('current_batch_id', $batch->id, now()->addHours(1));
 
         return response()->json([
-            'message' => 'Batch processing started!',
+            'message' => 'Batch processing started',
             'batch_id' => $batch->id
         ]);
     }
+
 
     public function getProcessedData()
     {
         $kurikulums = Kurikulum::active()->get();
         $results = [];
-    
+
         foreach ($kurikulums as $kurikulum) {
             $cacheKey = "processed_kurikulum_{$kurikulum->id}";
             $cachedData = Cache::get($cacheKey);
-    
+
             if ($cachedData) {
                 $results[$kurikulum->id] = $cachedData;
             }
         }
-    
-        if (empty($results)) {
-            return response()->json([], 404);
-        }
-    
+
         return response()->json($results);
     }
 
     public function refreshCache()
     {
-        // Hapus semua cache yang berhubungan dengan kurikulum
         $kurikulums = Kurikulum::active()->get();
 
         foreach ($kurikulums as $kurikulum) {
@@ -83,7 +83,6 @@ class DashboardController extends Controller
             }
         }
 
-        // Hapus cache batch processing
         Cache::forget('current_batch_id');
 
         return response()->json([
@@ -94,25 +93,23 @@ class DashboardController extends Controller
 
     public function getBatchStatus()
     {
-        // Ambil Batch ID dari cache
         $batchId = Cache::get('current_batch_id');
 
         if (!$batchId) {
-            return response()->json(['status' => 'Tidak ada proses berjalan'], 404);
+            return response()->json(['status' => 'Tidak ada proses berjalan'], 200);
         }
 
-        // Cek status batch di Laravel
         $batch = Bus::findBatch($batchId);
 
         if (!$batch) {
-            return response()->json(['status' => 'Batch tidak ditemukan atau sudah selesai'], 404);
+            return response()->json(['status' => 'Batch tidak ditemukan atau sudah selesai'], 200);
         }
 
         return response()->json([
             'status' => $batch->finished() ? 'Selesai' : 'Sedang diproses',
-            'progress' => $batch->progress() ,
-            'pending_jobs' => $batch->pendingJobs,
-            'failed_jobs' => $batch->failedJobs
+            'progress' => method_exists($batch, 'progress') ? $batch->progress() : 0,
+            'pending_jobs' => property_exists($batch, 'pendingJobs') ? $batch->pendingJobs : 0,
+            'failed_jobs' => property_exists($batch, 'failedJobs') ? $batch->failedJobs : 0
         ]);
     }
 
@@ -139,7 +136,7 @@ class DashboardController extends Controller
                 ->map(function ($kurikulums) {
                     return $kurikulums->map(function ($kurikulum) {
                         $countByCategory = $kurikulum->mataKuliahs->groupBy('kategori')->map->sum('total');
-                        
+
                         return [
                             'Nasional' => $countByCategory['Nasional'] ?? 0,
                             'Institusi' => $countByCategory['Institusi'] ?? 0,
@@ -158,7 +155,8 @@ class DashboardController extends Controller
         return response()->json(['data' => $data]);
     }
 
-    public function getMatakuliahDetail($prodi_id){
+    public function getMatakuliahDetail($prodi_id)
+    {
         $cacheKey = 'matakuliah_detail_prodi_' . $prodi_id;
 
         $data = Cache::remember($cacheKey, 600, function () use ($prodi_id) {
