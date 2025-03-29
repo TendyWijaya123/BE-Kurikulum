@@ -41,51 +41,51 @@ class ProcessProdiJob implements ShouldQueue
             ->select('id', 'kode', 'keterangan')
             ->orderBy('id', 'asc')
             ->get();
-
-        if ($cpls->isEmpty()) {
-            return; // Lewati jika tidak ada CPL
-        }
-
-        // Generate prompt untuk API AI
-        $prompt = PromptProvider::promptTranslate($cpls);
-        $geminiApiKey = env('GEMINI_API_KEY');
-
-        $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$geminiApiKey}", [
-            "contents" => [
-                [
-                    "parts" => [
-                        ["text" => $prompt]
-                    ]
-                ]
-            ]
-        ]);
-
-        $translatedText = $response->json();
-        $cplTexts = [];
-
-        if (isset($translatedText['candidates'][0]['content']['parts'][0]['text'])) {
-            $rawText = $translatedText['candidates'][0]['content']['parts'][0]['text'];
-            $cplTexts = array_filter(array_map('trim', explode("\n\n", $rawText)));
-        }
-
-        $formattedData = [
-            "cpl_texts" => array_values($cplTexts)
-        ];
-
-        $flaskResponse = Http::post("http://localhost:5000/analyze", $formattedData);
-        $flaskResults = $flaskResponse->json()['results'] ?? [];
-
-        foreach ($cpls as $index => $cpl) {
-            $issues = $flaskResults[$index]['issues'] ?? [];
-            $cpl->issues = is_array($issues) ? implode(', ', $issues) : $issues;
-        }
-
+        
         // Ambil data lainnya
         $ppms = Ppm::where('kurikulum_id', $this->kurikulum->id)
             ->select('id', 'kode', 'deskripsi')
             ->get();
+        
+        if ($cpls->isEmpty() && $ppms->isEmpty()){
+            return;
+        }
 
-        // Format hasil dengan key sebagai nama prodi
+        if ($cpls->isNotEmpty()) {
+            $prompt = PromptProvider::promptTranslate($cpls);
+            $geminiApiKey = env('GEMINI_API_KEY');
+    
+            $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$geminiApiKey}", [
+                "contents" => [
+                    [
+                        "parts" => [
+                            ["text" => $prompt]
+                        ]
+                    ]
+                ]
+            ]);
+    
+            $translatedText = $response->json();
+            $cplTexts = [];
+    
+            if (isset($translatedText['candidates'][0]['content']['parts'][0]['text'])) {
+                $rawText = $translatedText['candidates'][0]['content']['parts'][0]['text'];
+                $cplTexts = array_filter(array_map('trim', explode("\n\n", $rawText)));
+            }
+    
+            $formattedData = [
+                "cpl_texts" => array_values($cplTexts)
+            ];
+    
+            $flaskResponse = Http::post("http://localhost:5000/analyze", $formattedData);
+            $flaskResults = $flaskResponse->json()['results'] ?? [];
+    
+            foreach ($cpls as $index => $cpl) {
+                $issues = $flaskResults[$index]['issues'] ?? [];
+                $cpl->issues = is_array($issues) ? implode(', ', $issues) : $issues;
+            }
+        }
+        
         $result = [
             $prodiName => [
                 'kurikulum' => [
@@ -99,6 +99,6 @@ class ProcessProdiJob implements ShouldQueue
         ];
 
         // Simpan ke cache
-        Cache::put("processed_kurikulum_{$this->kurikulum->id}", $result, now()->addMinutes(30));
+        Cache::put("processed_kurikulum_{$this->kurikulum->id}", $result, now()->addMinutes(60));
     }
 }
