@@ -116,23 +116,6 @@ class DashboardController extends Controller
         ]);
     }
 
-    // public function getMatakuliah(){
-    //     $kurikulums = Kurikulum::active()->with('prodi')->get();
-    //     $data = [];
-    //     foreach($kurikulums as $kurikulum){
-    //         $prodiName = $kurikulum->prodi->name;
-    //         $mataKuliah = MataKuliah::where('kurikulum_id', $kurikulum->id)->get();
-
-    //         $data[$prodiName] = $mataKuliah;
-    //     }
-
-    //     return response()->json(
-    //         [
-    //             'data'=> $data
-    //         ]
-    //         );
-    // }
-
     public function getMatakuliah(Request $request)
     {
         $jurusanId = $request->query('jurusan_id'); // Ambil filter jurusan dari request
