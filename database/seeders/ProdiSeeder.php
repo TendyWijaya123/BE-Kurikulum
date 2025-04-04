@@ -27,7 +27,7 @@ class ProdiSeeder extends Seeder
             Prodi::firstOrCreate([
                 'name' => 'D4 Teknik Kimia Produksi Bersih',
                 'jenjang' => 'D4',
-                'kode' => 'TK-D4-TKPB',
+                'kode' => 'PB',
                 'jurusan_id' => $jurusanTeknikKimia->id,
             ]);
         }
@@ -66,13 +66,13 @@ class ProdiSeeder extends Seeder
             Prodi::firstOrCreate([
                 'name' => 'D3 Teknik Pendingin dan Tata Udara',
                 'jenjang' => 'D3',
-                'kode' => 'TRTU-D3-PTU',
+                'kode' => 'RF',
                 'jurusan_id' => $jurusanTeknikRefrigerasi->id,
             ]);
             Prodi::firstOrCreate([
                 'name' => 'D4 Teknik Pendingin dan Tata Udara',
                 'jenjang' => 'D4',
-                'kode' => 'TRTU-D4-PTU',
+                'kode' => 'RT',
                 'jurusan_id' => $jurusanTeknikRefrigerasi->id,
             ]);
         }
@@ -89,13 +89,13 @@ class ProdiSeeder extends Seeder
             Prodi::firstOrCreate([
                 'name' => 'D4 Teknologi Pembangkit Tenaga Listrik',
                 'jenjang' => 'D4',
-                'kode' => 'TKE-D4-TPKL',
+                'kode' => 'PL',
                 'jurusan_id' => $jurusanTeknikKonversiEnergi->id,
             ]);
             Prodi::firstOrCreate([
                 'name' => 'D4 Teknik Konservasi Energi',
                 'jenjang' => 'D4',
-                'kode' => 'TKE-D4-TKE',
+                'kode' => 'KE',
                 'jurusan_id' => $jurusanTeknikKonversiEnergi->id,
             ]);
         }
@@ -123,19 +123,19 @@ class ProdiSeeder extends Seeder
             Prodi::firstOrCreate([
                 'name' => 'D4 Teknik Elektronika',
                 'jenjang' => 'D4',
-                'kode' => 'TE-D4-TE',
+                'kode' => 'EK',
                 'jurusan_id' => $jurusanTeknikElektro->id,
             ]);
             Prodi::firstOrCreate([
                 'name' => 'D4 Teknik Otomasi Industri',
                 'jenjang' => 'D4',
-                'kode' => 'TE-D4-TOI',
+                'kode' => 'OI',
                 'jurusan_id' => $jurusanTeknikElektro->id,
             ]);
             Prodi::firstOrCreate([
                 'name' => 'D4 Teknik Telekomunikasi',
                 'jenjang' => 'D4',
-                'kode' => 'TE-D4-TKT',
+                'kode' => 'NK',
                 'jurusan_id' => $jurusanTeknikElektro->id,
             ]);
         }
@@ -174,7 +174,6 @@ class ProdiSeeder extends Seeder
             ]);
         }
 
-        // Teknik Komputer dan Informatika
         $jurusanTeknikKomputerInformatika = Jurusan::where('nama', 'Teknik Komputer dan Informatika')->first();
         if ($jurusanTeknikKomputerInformatika) {
             Prodi::firstOrCreate([
@@ -186,8 +185,126 @@ class ProdiSeeder extends Seeder
             Prodi::firstOrCreate([
                 'name' => 'D4 Teknik Informatika',
                 'jenjang' => 'D4',
-                'kode' => 'TKI-D4',
+                'kode' => 'TI',
                 'jurusan_id' => $jurusanTeknikKomputerInformatika->id,
+            ]);
+        }
+
+
+        $jurusanAkuntansi = Jurusan::where('nama', 'Akuntansi')->first();
+
+        if ($jurusanAkuntansi) {
+            Prodi::firstOrCreate([
+                'name' => 'D3 Akuntansi',
+                'jenjang' => 'D3',
+                'kode' => 'AK',
+                'jurusan_id' => $jurusanAkuntansi->id,
+            ]);
+
+            Prodi::firstOrCreate([
+                'name' => 'D3 Keuangan Perbankan',
+                'jenjang' => 'D3',
+                'kode' => 'KP',
+                'jurusan_id' => $jurusanAkuntansi->id,
+            ]);
+
+            Prodi::firstOrCreate([
+                'name' => 'D4 Akuntansi',
+                'jenjang' => 'D4',
+                'kode' => 'AC',
+                'jurusan_id' => $jurusanAkuntansi->id,
+            ]);
+
+            Prodi::firstOrCreate([
+                'name' => 'D4 Akuntansi Manajemen Pemerintahan',
+                'jenjang' => 'D4',
+                'kode' => 'AP',
+                'jurusan_id' => $jurusanAkuntansi->id,
+            ]);
+
+            Prodi::firstOrCreate([
+                'name' => 'D4 Keuangan Syariah',
+                'jenjang' => 'D4',
+                'kode' => 'SY',
+                'jurusan_id' => $jurusanAkuntansi->id,
+            ]);
+
+            Prodi::firstOrCreate([
+                'name' => 'S-2 Keuangan & Perbankan Syariah',
+                'jenjang' => 'S2',
+                'kode' => 'KPS2',
+                'jurusan_id' => $jurusanAkuntansi->id,
+            ]);
+        }
+
+        $jurusanAdministrasiNiaga = Jurusan::where('nama', 'Administrasi Niaga')->first();
+        if ($jurusanAdministrasiNiaga) {
+            Prodi::firstOrCreate([
+                'name' => 'D3 Administrasi Bisnis',
+                'jenjang' => 'D3',
+                'kode' => 'AB',
+                'jurusan_id' => $jurusanAdministrasiNiaga->id,
+            ]);
+
+            Prodi::firstOrCreate([
+                'name' => 'D3 Manajemen Pemasaran',
+                'jenjang' => 'D3',
+                'kode' => 'MP',
+                'jurusan_id' => $jurusanAdministrasiNiaga->id,
+            ]);
+
+            Prodi::firstOrCreate([
+                'name' => 'D3 Usaha Perjalanan Wisata',
+                'jenjang' => 'D3',
+                'kode' => 'UP',
+                'jurusan_id' => $jurusanAdministrasiNiaga->id,
+            ]);
+
+            Prodi::firstOrCreate([
+                'name' => 'D4 Administrasi Bisnis',
+                'jenjang' => 'D4',
+                'kode' => 'BA',
+                'jurusan_id' => $jurusanAdministrasiNiaga->id,
+            ]);
+
+            Prodi::firstOrCreate([
+                'name' => 'D4 Manajemen Aset',
+                'jenjang' => 'D4',
+                'kode' => 'MA',
+                'jurusan_id' => $jurusanAdministrasiNiaga->id,
+            ]);
+
+            Prodi::firstOrCreate([
+                'name' => 'D4 Manajemen Pemasaran',
+                'jenjang' => 'D4',
+                'kode' => 'MM',
+                'jurusan_id' => $jurusanAdministrasiNiaga->id,
+            ]);
+
+            Prodi::firstOrCreate([
+                'name' => 'D4 Destinasi Pariwisata',
+                'jenjang' => 'D4',
+                'kode' => 'DP',
+                'jurusan_id' => $jurusanAdministrasiNiaga->id,
+            ]);
+
+            Prodi::firstOrCreate([
+                'name' => 'S2 Pemasaran, Inovasi, dan Teknologi',
+                'jenjang' => 'S2',
+                'kode' => 'PIT',
+                'jurusan_id' => $jurusanAdministrasiNiaga->id,
+            ]);
+        }
+
+
+
+        $jurusanBahasaInggris = Jurusan::where('nama', 'Bahasa Inggris')->first();
+        if ($jurusanBahasaInggris) {
+            Prodi::firstOrCreate([
+                'name' => 'D3 Bahasa Inggris',
+                'jenjang' => 'D3',
+                'kode' => 'IG',
+                'jurusan_id' => $jurusanBahasaInggris->id,
             ]);
         }
     }

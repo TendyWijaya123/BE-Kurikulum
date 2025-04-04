@@ -29,4 +29,25 @@ class UpdateUserRequest extends FormRequest
             'role' => 'required|exists:roles,name',
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email sudah digunakan, silakan gunakan email lain.',
+
+            'name.required' => 'Nama wajib diisi.',
+            'name.string' => 'Nama harus berupa teks.',
+            'name.max' => 'Nama tidak boleh lebih dari 255 karakter.',
+
+            'prodi_id.required' => 'Prodi wajib dipilih.',
+            'prodi_id.exists' => 'Prodi yang dipilih tidak valid.',
+
+            'password.min' => 'Password harus memiliki minimal 8 karakter.',
+
+            'role.required' => 'Role wajib dipilih.',
+            'role.exists' => 'Role yang dipilih tidak valid.',
+        ];
+    }
 }
