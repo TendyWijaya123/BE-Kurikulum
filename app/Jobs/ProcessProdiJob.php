@@ -77,7 +77,7 @@ class ProcessProdiJob implements ShouldQueue
                 "cpl_texts" => array_values($cplTexts)
             ];
     
-            $flaskResponse = Http::post("http://localhost:5000/analyze", $formattedData);
+            $flaskResponse = Http::post("http://flask:5000/analyze", $formattedData);
             $flaskResults = $flaskResponse->json()['results'] ?? [];
     
             foreach ($cpls as $index => $cpl) {
