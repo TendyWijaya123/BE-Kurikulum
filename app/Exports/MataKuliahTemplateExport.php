@@ -44,8 +44,12 @@ class TemplateMataKuliahSheet implements WithHeadings, WithStyles, ShouldAutoSiz
         return [
             'Kode',
             'Nama',
-            'Kategori',
             'Tujuan',
+            'Deskripsi Kemampuan Akhir',
+            'Estimasi Beban Belajar',
+            'Bentuk Pembelajaran',
+            'Metode Pembelajaran',
+            'Kategori',
             'Semester',
             'Teori BT',
             'Teori PT',
@@ -55,10 +59,7 @@ class TemplateMataKuliahSheet implements WithHeadings, WithStyles, ShouldAutoSiz
             'Praktek M',
             'Formulasi CPA',
             'Tujuan Belajar',
-            'Deskripsi Kemampuan Akhir',
-            'Estimasi Beban Belajar',
-            'Bentuk Pembelajaran',
-            'Metode Pembelajaran',
+
 
         ];
     }

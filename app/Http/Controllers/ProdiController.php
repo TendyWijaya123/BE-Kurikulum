@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreProdiRequest;
 use App\Models\Prodi;
 use Illuminate\Http\Request;
 
@@ -15,19 +16,10 @@ class ProdiController extends Controller
 
         return response()->json($prodis);
     }
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'jenjang' => 'required|in:D3,D4,S1,S2,S3',
-            'kode' => 'required|string|max:50|unique:prodis',
-            'jurusan_id' => 'required|exists:jurusans,id',
-        ]);
 
-        $prodi = Prodi::create($validated);
+    public function store(StoreProdiRequest $request)
+    {
+        $prodi = Prodi::create($request->validated());
 
         return response()->json([
             'message' => 'Prodi created successfully.',
@@ -35,9 +27,8 @@ class ProdiController extends Controller
         ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
+
+
     public function show($id)
     {
         $prodi = Prodi::with('jurusan')->find($id);

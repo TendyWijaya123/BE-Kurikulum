@@ -33,6 +33,7 @@ class MatrixCplPController extends Controller
 
             $cpls = Cpl::with('pengetahuans:id')
                 ->where('kurikulum_id', $activeKurikulum->id)
+                ->orderByRaw("CAST(SUBSTRING(kode, 5) AS UNSIGNED) ASC")
                 ->get(['id', 'kode', 'keterangan']);
 
             $pengetahuans = Pengetahuan::where('kurikulum_id', $activeKurikulum->id)
