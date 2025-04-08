@@ -39,6 +39,7 @@ class MatrixCplMkController extends Controller
                 ->withPivot('kategori');
         }])
             ->where('kurikulum_id', $activeKurikulum->id)
+            ->orderByRaw("CAST(SUBSTRING(kode, 5) AS UNSIGNED) ASC")
             ->get(['id', 'kode', 'keterangan']);
 
         $mataKuliahs = MataKuliah::where('kurikulum_id', $activeKurikulum->id)
@@ -66,12 +67,7 @@ class MatrixCplMkController extends Controller
         ]);
     }
 
-    /**
-     * Update the CPL-MK matrix with categories in bulk.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
+
     public function update(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
