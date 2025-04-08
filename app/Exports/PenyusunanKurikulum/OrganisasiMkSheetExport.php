@@ -71,10 +71,6 @@ class OrganisasiMkSheetExport implements FromView
         $this->mataKuliahBySemester = $mataKuliahBySemester;
         $this->maxPerKategori = $maxPerKategori;
         $this->totalKeseluruhan = $totalKeseluruhan;
-
-        Log::info("Mata Kuliah per Semester:\n" . json_encode($this->mataKuliahBySemester, JSON_PRETTY_PRINT));
-        Log::info("Jumlah Terbesar per Kategori:\n" . json_encode($this->maxPerKategori, JSON_PRETTY_PRINT));
-        Log::info("Total Keseluruhan:\n" . json_encode($this->totalKeseluruhan, JSON_PRETTY_PRINT));
     }
 
     public function view(): View

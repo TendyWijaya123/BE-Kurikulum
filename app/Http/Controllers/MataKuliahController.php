@@ -39,63 +39,82 @@ class MataKuliahController extends Controller
             return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
         }
 
-        $data = MataKuliah::with([
+        $query = MataKuliah::with([
             'kemampuanAkhirs' => function ($query) {
                 $query->with(['bentukPembelajarans:id', 'metodePembelajarans:id']);
             },
             'formulasiCpas:id',
-            'tujuanBelajars:id,kode,deskripsi,mata_kuliah_id' // Tambahkan relasi tujuan belajar
-        ])
-            ->where('kurikulum_id', $activeKurikulum->id)
-            ->get()
-            ->map(function ($mataKuliah) {
-                return [
-                    'id' => $mataKuliah->id,
-                    'nama' => $mataKuliah->nama,
-                    'kategori' => $mataKuliah->kategori,
-                    'tujuan' => $mataKuliah->tujuan,
-                    'kode' => $mataKuliah->kode,
-                    'sks' => $mataKuliah->sks,
-                    'total_beban_belajar' => $mataKuliah->total_beban_belajar,
-                    'semester' => $mataKuliah->semester,
-                    'teori_bt' => $mataKuliah->teori_bt,
-                    'teori_pt' => $mataKuliah->teori_pt,
-                    'teori_m' => $mataKuliah->teori_m,
-                    'total_teori' => $mataKuliah->total_teori,
+            'tujuanBelajars:id,kode,deskripsi,mata_kuliah_id'
+        ])->where('kurikulum_id', $activeKurikulum->id);
 
-                    'praktek_bt' => $mataKuliah->praktek_bt,
-                    'praktek_pt' => $mataKuliah->praktek_pt,
-                    'praktek_m' => $mataKuliah->praktek_m,
-                    'total_praktek' => $mataKuliah->total_praktek,
+        if ($request->filled('nama')) {
+            $query->whereRaw('LOWER(nama) LIKE ?', ['%' . strtolower($request->nama) . '%']);
+        }
 
+        if ($request->has('kategori')) {
+            if ($request->kategori === 'null') {
+                $query->whereNull('kategori');
+            } else {
+                $query->where('kategori', $request->kategori);
+            }
+        }
 
-                    'kemampuan_akhir' => $mataKuliah->kemampuanAkhirs->map(function ($kemampuan) {
-                        return [
-                            'id' => $kemampuan->id,
-                            'deskripsi' => $kemampuan->deskripsi,
-                            'estimasi_beban_belajar' => $kemampuan->estimasi_beban_belajar,
-                            'bentuk_pembelajaran' => $kemampuan->bentukPembelajarans->pluck('id'),
-                            'metode_pembelajaran' => $kemampuan->metodePembelajarans->pluck('id'),
-                        ];
-                    }),
+        if ($request->has('semester')) {
+            if ($request->semester === 'null') {
+                $query->whereNull('semester');
+            } else {
+                $query->where('semester', $request->semester);
+            }
+        }
 
-                    'formulasi_cpas' => $mataKuliah->formulasiCpas->pluck('id'),
+        $data = $query->get()->map(function ($mataKuliah) {
+            return [
+                'id' => $mataKuliah->id,
+                'nama' => $mataKuliah->nama,
+                'kategori' => $mataKuliah->kategori,
+                'tujuan' => $mataKuliah->tujuan,
+                'kode' => $mataKuliah->kode,
+                'sks' => $mataKuliah->sks,
+                'total_beban_belajar' => $mataKuliah->total_beban_belajar,
+                'semester' => $mataKuliah->semester,
+                'teori_bt' => $mataKuliah->teori_bt,
+                'teori_pt' => $mataKuliah->teori_pt,
+                'teori_m' => $mataKuliah->teori_m,
+                'total_teori' => $mataKuliah->total_teori,
 
-                    'tujuan_belajar' => $mataKuliah->tujuanBelajars->map(function ($tujuan) {
-                        return [
-                            'id' => $tujuan->id,
-                            'kode' => $tujuan->kode,
-                            'deskripsi' => $tujuan->deskripsi,
-                        ];
-                    }),
-                ];
-            });
+                'praktek_bt' => $mataKuliah->praktek_bt,
+                'praktek_pt' => $mataKuliah->praktek_pt,
+                'praktek_m' => $mataKuliah->praktek_m,
+                'total_praktek' => $mataKuliah->total_praktek,
+
+                'kemampuan_akhir' => $mataKuliah->kemampuanAkhirs->map(function ($kemampuan) {
+                    return [
+                        'id' => $kemampuan->id,
+                        'deskripsi' => $kemampuan->deskripsi,
+                        'estimasi_beban_belajar' => $kemampuan->estimasi_beban_belajar,
+                        'bentuk_pembelajaran' => $kemampuan->bentukPembelajarans->pluck('id'),
+                        'metode_pembelajaran' => $kemampuan->metodePembelajarans->pluck('id'),
+                    ];
+                }),
+
+                'formulasi_cpas' => $mataKuliah->formulasiCpas->pluck('id'),
+
+                'tujuan_belajar' => $mataKuliah->tujuanBelajars->map(function ($tujuan) {
+                    return [
+                        'id' => $tujuan->id,
+                        'kode' => $tujuan->kode,
+                        'deskripsi' => $tujuan->deskripsi,
+                    ];
+                }),
+            ];
+        });
 
         return response()->json([
             'success' => true,
             'data' => $data,
         ]);
     }
+
 
     public function showMataKuliahByDosenPengampu()
     {

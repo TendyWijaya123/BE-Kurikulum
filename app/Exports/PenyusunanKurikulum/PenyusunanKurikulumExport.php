@@ -44,7 +44,8 @@ class PenyusunanKurikulumExport implements WithMultipleSheets
             new MKBebanSKSSheetExport($this->kurikulum->id),
             new OrganisasiMkSheetExport($this->kurikulum->id),
             new JejaringMKSheetExport($this->kurikulum->id),
-
+            new SebaranMatakuliahSheetExport($this->kurikulum->id),
+            new PemilahanMataKuliahSheetExport($this->kurikulum->id),
 
         ];
     }

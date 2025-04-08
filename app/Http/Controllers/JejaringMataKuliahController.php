@@ -41,6 +41,7 @@ class JejaringMataKuliahController extends Controller
                         'id' => $mataKuliah->id,
                         'nama' => $mataKuliah->nama,
                         'kode' => $mataKuliah->kode,
+                        'kategori' => $mataKuliah->kategori,
                         'semester' => $mataKuliah->semester,
                         'prasyaratIds' => $mataKuliah->prasyaratFrom->pluck('id')->toArray(),
                     ];
@@ -76,11 +77,11 @@ class JejaringMataKuliahController extends Controller
 
             $mataKuliahBySemester = MataKuliah::where('kurikulum_id', $activeKurikulum->id)
                 ->orderBy('semester')
-                ->select('id', 'nama', 'sks', 'kategori', 'semester') // Pilih hanya kolom yang diperlukan
+                ->select('id', 'nama', 'sks', 'kategori', 'semester')
                 ->get()
                 ->groupBy('semester');
 
-            $mataKuliahIds = $mataKuliahBySemester->flatten()->pluck('id'); // Ambil semua ID mata kuliah
+            $mataKuliahIds = $mataKuliahBySemester->flatten()->pluck('id');
 
             $jejaringPrasyarat = PrasyaratMatakuliah::whereIn('from_id', $mataKuliahIds)
                 ->orWhereIn('to_id', $mataKuliahIds)->orderBy('to_id')

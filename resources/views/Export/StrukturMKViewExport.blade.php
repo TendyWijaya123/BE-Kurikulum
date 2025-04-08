@@ -11,13 +11,19 @@
             <table border="1">
                 <thead>
                     <tr>
-                        <th>No</th>
-                        <th>Nama Mata Kuliah</th>
-                        <th>Tujuan Belajar</th>
-                        <th>Kemampuan Akhir yang Direncanakan</th>
-                        <th>Estimasi Beban Waktu Belajar</th>
-                        <th>Bentuk Pembelajaran</th>
-                        <th>Metode Pembelajaran</th>
+                        <th style="border: 1px solid  black; background-color:gray; font-weight:bold">No</th>
+                        <th style="border: 1px solid  black; background-color:gray; font-weight:bold">Nama Mata Kuliah
+                        </th>
+                        <th style="border: 1px solid  black; background-color:gray; font-weight:bold">Tujuan Belajar</th>
+                        <th style="border: 1px solid  black; background-color:gray; font-weight:bold">Kemampuan Akhir
+                            yang Direncanakan
+                        </th>
+                        <th style="border: 1px solid  black; background-color:gray; font-weight:bold">Estimasi Beban
+                            Waktu Belajar</th>
+                        <th style="border: 1px solid  black; background-color:gray; font-weight:bold">Bentuk Pembelajaran
+                        </th>
+                        <th style="border: 1px solid  black; background-color:gray; font-weight:bold">Metode Pembelajaran
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -30,19 +36,22 @@
                         @foreach ($mk->kemampuanAkhirs as $index => $ka)
                             <tr>
                                 @if ($index === 0)
-                                    <td rowspan="{{ $totalKemampuan + 2 }}">{{ $mkIndex + 1 }}</td>
-                                    <td rowspan="{{ $totalKemampuan + 2 }}">{{ $mk->nama }}</td>
-                                    <td rowspan="{{ $totalKemampuan + 2 }}">{{ $mk->tujuan }}</td>
+                                    <td style="border: 1px solid black;" rowspan="{{ $totalKemampuan + 2 }}">
+                                        {{ $mkIndex + 1 }}</td>
+                                    <td style="border: 1px solid black;" rowspan="{{ $totalKemampuan + 2 }}">
+                                        {{ $mk->nama }}</td>
+                                    <td style="border: 1px solid black;" rowspan="{{ $totalKemampuan + 2 }}">
+                                        {{ $mk->tujuan }}</td>
                                 @endif
 
-                                <td>{{ $ka->deskripsi }}</td>
-                                <td>{{ $ka->estimasi_beban_belajar }}</td>
-                                <td>
+                                <td style="border: 1px solid  black">{{ $ka->deskripsi }}</td>
+                                <td style="border: 1px solid  black">{{ $ka->estimasi_beban_belajar }}</td>
+                                <td style="border: 1px solid  black">
                                     @foreach ($ka->bentukPembelajarans as $bp)
                                         {{ $bp->nama }}{{ !$loop->last ? ', ' : '' }}
                                     @endforeach
                                 </td>
-                                <td>
+                                <td style="border: 1px solid black;">
                                     @foreach ($ka->metodePembelajarans as $mp)
                                         {{ $mp->nama }}{{ !$loop->last ? ', ' : '' }}
                                     @endforeach
@@ -52,24 +61,25 @@
 
                         {{-- Baris Total Kebutuhan Waktu Belajar --}}
                         <tr>
-                            <td><strong>Total Kebutuhan Waktu Belajar</strong></td>
-                            <td><strong>{{ $totalBebanBelajar }}</strong></td>
-                            <td>Proses Pembelajaran</td>
-                            <td>Strategi Pembelajaran</td>
+                            <td style="border: 1px solid black;"><strong>Total Kebutuhan Waktu Belajar</strong></td>
+                            <td style="border: 1px solid black;"><strong>{{ $totalBebanBelajar }}</strong></td>
+                            <td style="border: 1px solid black;">Proses Pembelajaran</td>
+                            <td style="border: 1px solid black;">Strategi Pembelajaran</td>
                         </tr>
 
                         <tr>
-                            <td><strong>Beban Belajar (SKS)</strong></td>
-                            <td><strong>{{ $mk->sks }}</strong></td>
-                            <td>{{ $mk->kategori }}</td>
-                            <td>Elaborasi</td>
+                            <td style="border: 1px solid black;"><strong>Beban Belajar (SKS)</strong></td>
+                            <td style="border: 1px solid black;"><strong>{{ $mk->sks }}</strong></td>
+                            <td style="border: 1px solid black;">{{ $mk->kategori }}</td>
+                            <td style="border: 1px solid black;">Elaborasi</td>
                         </tr>
                     @else
                         <tr>
-                            <td>{{ $mkIndex + 1 }}</td>
-                            <td>{{ $mk->nama }}</td>
-                            <td>{{ $mk->tujuan }}</td>
-                            <td colspan="4" style="text-align: center;">Tidak ada data kemampuan akhir</td>
+                            <td style="border: 1px solid black">{{ $mkIndex + 1 }}</td>
+                            <td style="border: 1px solid black">{{ $mk->nama }}</td>
+                            <td style="border: 1px solid black">{{ $mk->tujuan }}</td>
+                            <td colspan="4" style="text-align: center; border:1px solid black;">Tidak ada data
+                                kemampuan akhir</td>
                         </tr>
                     @endif
                 </tbody>
