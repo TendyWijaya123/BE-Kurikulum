@@ -36,6 +36,7 @@ class MatrixCplPpmController extends Controller
 
         $cpls = Cpl::with('ppms:id')
             ->where('kurikulum_id', $activeKurikulum->id)
+            ->orderByRaw("CAST(SUBSTRING(kode, 5) AS UNSIGNED) ASC")
             ->get(['id', 'kode', 'keterangan']);
         $ppms = Ppm::where('kurikulum_id', $activeKurikulum->id)
             ->get(['id', 'kode', 'deskripsi']);

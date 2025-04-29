@@ -23,6 +23,4 @@ Schedule::call(function () {
     foreach ($kurikulums as $kurikulum) {
         $batch->add(new ProcessProdiJob($kurikulum->id));
     }
-
-    Cache::put('current_batch_id', $batch->id, 600);
 })->everyThirtyMinutes();

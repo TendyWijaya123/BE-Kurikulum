@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreJurusanRequest;
+use App\Http\Requests\UpdateJurusanRequest;
 use App\Models\Jurusan;
 use Illuminate\Http\Request;
 
@@ -17,17 +19,12 @@ class JurusanController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreJurusanRequest $request)
     {
-        $validated = $request->validate([
-            'nama' => 'required|string|max:255',
-            'kategori' => 'required|in:Rekayasa,Non Rekayasa',
-        ]);
-
-        $jurusan = Jurusan::create($validated);
+        $jurusan = Jurusan::create($request->validated());
 
         return response()->json([
-            'message' => 'Jurusan created successfully.',
+            'message' => 'Jurusan berhasil dibuat.',
             'data' => $jurusan,
         ], 201);
     }
@@ -48,35 +45,26 @@ class JurusanController extends Controller
         return response()->json(['data' => $jurusan], 200);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
+
+    public function update(UpdateJurusanRequest $request, $id)
     {
         $jurusan = Jurusan::find($id);
 
         if (!$jurusan) {
             return response()->json([
-                'message' => 'Jurusan not found.',
+                'message' => 'Jurusan tidak ditemukan.',
             ], 404);
         }
 
-        $validated = $request->validate([
-            'nama' => 'required|string|max:255',
-            'kategori' => 'required|in:Rekayasa,Non Rekayasa',
-        ]);
-
-        $jurusan->update($validated);
+        $jurusan->update($request->validated());
 
         return response()->json([
-            'message' => 'Jurusan updated successfully.',
+            'message' => 'Jurusan berhasil diperbarui.',
             'data' => $jurusan,
         ], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+
     public function destroy($id)
     {
         $jurusan = Jurusan::find($id);

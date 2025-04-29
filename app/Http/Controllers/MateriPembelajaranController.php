@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\KnowledgeDimension;
 use App\Exports\MateriPembelajaranTemplateExport;
+use App\Http\Requests\UpsertMateriPembelajaranRequest;
 use App\Imports\MateriPembelajaranImport;
 use App\Models\Kurikulum;
 use Illuminate\Http\Request;
@@ -40,7 +41,7 @@ class MateriPembelajaranController extends Controller
         return response()->json(['data' => $mp, 'knowledge' => $knowledgeDimensions]);
     }
 
-    public function store(Request $request)
+    public function store(UpsertMateriPembelajaranRequest $request)
     {
         try {
 

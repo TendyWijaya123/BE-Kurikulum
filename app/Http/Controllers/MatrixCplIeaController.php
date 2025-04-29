@@ -40,6 +40,7 @@ class MatrixCplIeaController extends Controller
         // Ambil semua data CPL dan IEA
         $ieas = ModelIea::where('jenjang', $jenjangFilter)->get();
         $cpls = ModelCpl::where("kurikulum_id", $activeKurikulum->id)
+            ->orderByRaw("CAST(SUBSTRING(kode, 5) AS UNSIGNED) ASC")
             ->get();
 
         // Bangun matriks CPL-IEA
