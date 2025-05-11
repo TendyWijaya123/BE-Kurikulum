@@ -43,6 +43,7 @@ use App\Http\Controllers\TeknologiController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JejaringMataKuliahController;
 use App\Http\Controllers\PenyusunanKurikulumController;
+use App\Http\Controllers\ProfileController;
 use App\Imports\MataKuliahImport;
 use App\Models\MataKuliah;
 use App\Http\Controllers\PetaKompetensiController;
@@ -296,6 +297,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/peta-kompetensi', [PetaKompetensiController::class, 'uploadGambar']);
     Route::delete('/peta-kompetensi/{id}', [PetaKompetensiController::class, 'deleteGambar']);
 });
+
 Route::middleware(['auth:dosen'])->group(function () {
     /* ---------------------------------------Dosen API ------------------------------------------------*/
 
@@ -335,3 +337,10 @@ Route::middleware(['auth:dosen'])->group(function () {
         Route::delete('/{id}', [RpsMataKuliahController::class, 'destroy']);
     });
 });
+
+/* --------------------------------------- Profile API ------------------------------------------------*/
+Route::group(['middleware' => ['auth:api,dosen']], function () {
+    Route::get('profile', [ProfileController::class, 'getProfile']);
+    Route::post('profile/update-password', [ProfileController::class, 'updatePassword']);
+});
+
