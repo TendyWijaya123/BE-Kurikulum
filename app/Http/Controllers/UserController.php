@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Mail;
+use Illuminate\Support\Facades\Mail;
 use App\Mail\UserCreatedMail;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
@@ -33,7 +33,8 @@ class UserController extends Controller
         try {
             Log:
             info($request->all());
-            $randomPassword = Str::random(10);
+            // $randomPassword = Str::random(10);
+            $randomPassword = '12345678'; // Ganti dengan password yang diinginkan"
 
             $payload = [
                 'email' => $request->email,

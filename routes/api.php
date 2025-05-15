@@ -14,6 +14,7 @@ use App\Http\Controllers\IeaController;
 use App\Http\Controllers\JurusanController;
 use App\Http\Controllers\matriksMpPMkController;
 use App\Http\Controllers\MatrixPengetahuanMateriPembelajaranController;
+use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\RpsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\KkniController;
@@ -47,6 +48,7 @@ use App\Imports\MataKuliahImport;
 use App\Models\MataKuliah;
 use App\Http\Controllers\PetaKompetensiController;
 use Illuminate\Support\Facades\Route;
+use Mockery\Matcher\Not;
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
 Route::post('login-dosen', [DosenAuthController::class, 'login'])->name('login_dosen');
@@ -286,6 +288,13 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('dashboard/progres-curriculum-data', [DashboardController::class, 'getBatchStatus']);
     Route::get('dashboard/get-matakuliah', [DashboardController::class, 'getMatakuliah']);
     Route::get('dashboard/get-matakuliah-detail/{id}', [DashboardController::class, 'getMatakuliahDetail']);
+
+    /* ---------------------------------------------Notifikasi------------------------------------------------------*/
+    // Route::get('notifikasi',[NotifikasiController::class, 'index']);
+    Route::get('notifikasi',[NotifikasiController::class, 'show']);
+    Route::post('notifikasi',[NotifikasiController::class, 'store']);
+    Route::put('notifikasi/{id}',[NotifikasiController::class, 'changeStatus']);
+    Route::put('notifikasi/change-status',[NotifikasiController::class, 'changeStatus']);
 
 
     Route::get('rps/matkul-dropdown/{id}', [RpsController::class, 'dropdownMatkul']);

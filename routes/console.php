@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\Artisan;
 use App\Jobs\ProcessProdiJob;
 use App\Models\Kurikulum;
 use Illuminate\Support\Facades\Schedule;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Bus;
 
 
