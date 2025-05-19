@@ -297,6 +297,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::put('notifikasi/{id}',[NotifikasiController::class, 'changeStatus']);
     Route::put('notifikasi/change-status',[NotifikasiController::class, 'changeStatus']);
 
+    Route::post('chat/send', [NotifikasiController::class, 'sendChat']);
+
 
     Route::get('rps/matkul-dropdown/{id}', [RpsController::class, 'dropdownMatkul']);
     Route::get('me', [AuthController::class, 'me']);

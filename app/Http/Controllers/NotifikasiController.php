@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
+use App\Helpers\FirebaseHelper;
 
 class NotifikasiController extends Controller
 {
@@ -118,4 +119,36 @@ class NotifikasiController extends Controller
 
         return response()->json(['message' => 'Status updated successfully', 'notifikasi' => $notifikasi]);
     }
+
+    public function sendChat(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        $prodi = Prodi::where('id', $request->roomId)->first();
+
+        $request->validate([
+            'text' => 'required|string',
+        ]);
+
+        try {
+            $chatData = [
+                'text' => $request->text,
+                'createdAt' => now()->timestamp * 1000,
+                'sender_id' => $user->id,
+                'sender_name' => $user->name,
+                'email' => $user->email,
+                'readBy' => [],
+            ];
+
+            FirebaseHelper::createRoom($request->roomId, $prodi->name);
+            FirebaseHelper::addMessageToRoom($request->roomId, $chatData);
+
+            return response()->json(['message' => 'Chat sent successfully']);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Failed to send chat',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 }
