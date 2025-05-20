@@ -13,10 +13,13 @@ return new class extends Migration
     {
         Schema::create('mata_kuliahs', function (Blueprint $table) {
             $table->id();
-            $table->string('kode')->unique();
+            $table->string('kode');
             $table->string('nama');
+            $table->string('nama_inggris')->nullable();
             $table->enum('kategori', ["Institusi", "Prodi", "Nasional"])->nullable();
             $table->text('deskripsi_singkat')->nullable();
+            $table->text('deskripsi_singkat_inggris')->nullable();
+            $table->text('materi_pembelajaran_inggris')->nullable();
             $table->text('tujuan')->nullable();
             $table->integer('semester')->nullable();
             $table->integer('teori_bt')->nullable()->default(0);
@@ -31,6 +34,8 @@ return new class extends Migration
             $table->integer('total_beban_belajar')->default(0);
             $table->foreignId('kurikulum_id')->constrained('kurikulums')->onDelete('cascade');
             $table->timestamps();
+
+            $table->unique(['kode', 'kurikulum_id']);
         });
     }
 

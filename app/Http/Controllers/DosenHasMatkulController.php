@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\MataKuliah;
 use App\Models\Dosen;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 
@@ -13,16 +14,40 @@ class DosenHasMatkulController extends Controller
     public function index(Request $request)
     {
         try {
-            $prodiId = $request->query('id');
-            $dosens = Dosen::all();
+            $dosen = Auth::guard('dosen')->user();
 
-            $mataKuliah = MataKuliah::whereHas('kurikulum', function ($query) use ($prodiId) {
-                $query->where('prodi_id', $prodiId)->where('is_active', true);
-            })->with('dosens')
-                ->get();
+            if (!$dosen) {
+                return response()->json(['message' => 'Dosen tidak ditemukan'], 404);
+            }
+
+            $dosens = Dosen::where('jurusan_id', $dosen->jurusan_id)->get();
+
+            $query = MataKuliah::with(['dosens', 'kurikulum.prodi'])
+                ->whereRelation('kurikulum', 'is_active', true)
+                ->whereRelation('kurikulum.prodi', 'is_active', true)
+                ->whereRelation('kurikulum.prodi.jurusan', 'id', $dosen->jurusan_id);
+
+
+            if ($request->filled('nama')) {
+                $query->where('nama', 'like', '%' . $request->nama . '%');
+            }
+
+            if ($request->filled('kode')) {
+                $query->where('kode', 'like', '%' . $request->kode . '%');
+            }
+
+            if ($request->filled('prodi_id')) {
+                $query->whereRelation('kurikulum.prodi', 'id', $request->prodi_id);
+            }
+
+            $mataKuliahs = $query->select('id', 'kode', 'nama', 'semester', 'kurikulum_id')->paginate(10);
+
+
+
+
 
             return response()->json([
-                'mata_kuliahs' => $mataKuliah,
+                'mata_kuliahs' => $mataKuliahs,
                 'dosens' => $dosens
             ]);
         } catch (\Exception $e) {
@@ -37,15 +62,11 @@ class DosenHasMatkulController extends Controller
         DB::beginTransaction();
         try {
             foreach ($data as $item) {
-                // Pastikan dosen_id ada dan valid
                 if (!isset($item['dosen_id']) || !is_array($item['dosen_id']) || count($item['dosen_id']) === 0) {
                     throw new \Exception("Dosen untuk mata kuliah ID {$item['mata_kuliah_id']} tidak boleh kosong.");
                 }
-
-                // Ambil data mata kuliah
                 $mataKuliah = MataKuliah::findOrFail($item['mata_kuliah_id']);
 
-                // Perbarui relasi dosen dengan sync
                 $mataKuliah->dosens()->sync($item['dosen_id']);
             }
 

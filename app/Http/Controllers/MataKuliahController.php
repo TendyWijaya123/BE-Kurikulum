@@ -116,7 +116,7 @@ class MataKuliahController extends Controller
     }
 
 
-    public function showMataKuliahByDosenPengampu()
+    public function showMataKuliahByDosenPengampu(Request $request)
     {
         $dosen = Auth::guard('dosen')->user();
 
@@ -124,20 +124,38 @@ class MataKuliahController extends Controller
             return response()->json(['message' => 'Dosen tidak ditemukan'], 404);
         }
 
-        $matkul = MataKuliah::whereHas('dosens', function ($query) use ($dosen) {
-            $query->where('dosen_id', $dosen->id);
-        })
-            ->whereHas('kurikulum', function ($query) {
-                $query->where('is_active', true);
-            })
-            ->select('id', 'kode', 'nama', 'deskripsi_singkat')
-            ->get();
+        $query = MataKuliah::with([
+            'materiPembelajarans',
+            'kurikulum.prodi'
+        ])
+            ->whereRelation('kurikulum', 'is_active', true)
+            ->whereRelation('kurikulum.prodi', 'is_active', true)
+            ->whereRelation('kurikulum.prodi.jurusan', 'id', $dosen->jurusan_id);
 
-        return response()->json($matkul);
+        if ($request->filled('nama')) {
+            $query->where('nama', 'like', '%' . $request->nama . '%');
+        }
+
+        if ($request->filled('kode')) {
+            $query->where('kode', 'like', '%' . $request->kode . '%');
+        }
+
+        if ($request->filled('prodi_id')) {
+            $query->whereRelation('kurikulum.prodi', 'id', $request->prodi_id);
+        }
+
+        $mataKuliahs = $query
+            ->select('id', 'kurikulum_id', 'kode', 'nama', 'nama_inggris', 'deskripsi_singkat', 'deskripsi_singkat_inggris', 'materi_pembelajaran_inggris')
+            ->paginate(10);
+
+
+
+        return response()->json($mataKuliahs);
     }
 
 
-    public function showMataKuliahByJurusan()
+
+    public function showMataKuliahByJurusan(Request $request)
     {
         try {
             $user = Auth::guard('dosen')->user();
@@ -148,18 +166,30 @@ class MataKuliahController extends Controller
                 ], 401);
             }
 
-            $mataKuliahs = MataKuliah::with('bukuReferensis:id,judul')
+            $query = MataKuliah::with(['bukuReferensis:id,judul', 'kurikulum.prodi'])
                 ->whereRelation('kurikulum', 'is_active', true)
-                ->whereRelation('kurikulum.prodi', 'is_active', true)
-                ->whereRelation('kurikulum.prodi.jurusan', 'id', $user->jurusan_id)
-                ->select('id', 'kode', 'nama', 'semester')
-                ->get();
+                ->whereRelation('kurikulum.prodi', function ($q) use ($user) {
+                    $q->where('is_active', true)
+                        ->where('jurusan_id', $user->jurusan_id);
+                });
 
-            return response()->json([
-                'mata_kuliahs' => $mataKuliahs,
-            ], 200);
+            if ($request->filled('nama')) {
+                $query->where('nama', 'like', '%' . $request->nama . '%');
+            }
+
+            if ($request->filled('kode')) {
+                $query->where('kode', 'like', '%' . $request->kode . '%');
+            }
+
+            if ($request->filled('prodi_id')) {
+                $query->whereRelation('kurikulum.prodi', 'id', $request->prodi_id);
+            }
+            $mataKuliahs = $query->select('id', 'kode', 'nama', 'semester', 'kurikulum_id')->paginate(10);
+
+            return response()->json($mataKuliahs, 200);
         } catch (\Exception $e) {
             Log::error('Error fetching Mata Kuliah by Jurusan: ' . $e->getMessage());
+
             return response()->json([
                 'error' => 'Terjadi kesalahan saat mengambil data',
                 'message' => $e->getMessage(),
@@ -168,9 +198,7 @@ class MataKuliahController extends Controller
     }
 
 
-    /**
-     * Assign buku referensi ke mata kuliah
-     */
+
     public function assignReferensiKeMataKuliah(Request $request)
     {
         Log::info($request->all());
@@ -352,8 +380,12 @@ class MataKuliahController extends Controller
     public function updateDeskripsiSingkat(Request $request, $id)
     {
         $request->validate([
-            'deskripsi_singkat' => 'string',
+            'deskripsi_singkat' => 'nullable|string',
+            'deskripsi_singkat_inggris' => 'nullable|string',
+            'nama_inggris' => 'nullable|string',
+            'materi_pembelajaran_inggris' => 'nullable|string',
         ]);
+
 
         DB::beginTransaction();
 
@@ -361,6 +393,9 @@ class MataKuliahController extends Controller
             $mataKuliah = MataKuliah::findOrFail($id);
             $mataKuliah->update([
                 'deskripsi_singkat' => $request->deskripsi_singkat,
+                'deskripsi_singkat_inggris' => $request->deskripsi_singkat_inggris,
+                'nama_inggris' => $request->nama_inggris,
+                'materi_pembelajaran_inggris' => $request->materi_pembelajaran_inggris,
             ]);
 
             DB::commit();

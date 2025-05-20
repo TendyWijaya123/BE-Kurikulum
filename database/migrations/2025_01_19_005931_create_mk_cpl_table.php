@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('mk_cpl', function (Blueprint $table) {
             $table->id();
-            $table->enum('kategori', ['I', 'R', 'M', 'A']);
+            $table->string('kategori');
             $table->foreignId('cpl_id')->constrained('cpls')->onDelete('cascade');
             $table->foreignId('mk_id')->constrained('mata_kuliahs')->onDelete('cascade');
             $table->timestamps();

@@ -54,7 +54,7 @@ class MatrixCplMkController extends Controller
                     return [
                         'mk_id' => $mataKuliah->id,
                         'exists' => (bool) $pivotData,
-                        'kategori' => $pivotData ? $pivotData->pivot->kategori : null,
+                        'kategori' => $pivotData ? explode(',', $pivotData->pivot->kategori) : [],
                     ];
                 }),
             ];
@@ -72,7 +72,6 @@ class MatrixCplMkController extends Controller
     {
         $user = JWTAuth::parseToken()->authenticate();
 
-        // Ambil kurikulum aktif
         $activeKurikulum = $user->activeKurikulum();
         if (!$activeKurikulum) {
             return response()->json(['error' => 'Kurikulum aktif tidak ditemukan untuk prodi user'], 404);
@@ -83,7 +82,8 @@ class MatrixCplMkController extends Controller
             'matrix.*.cpl_id' => 'required|exists:cpls,id',
             'matrix.*.mk_ids' => 'nullable|array',
             'matrix.*.mk_ids.*.mk_id' => 'required|exists:mata_kuliahs,id',
-            'matrix.*.mk_ids.*.kategori' => 'required|in:I,R,M,A',
+            'matrix.*.mk_ids.*.kategori' => 'required|array',
+            'matrix.*.mk_ids.*.kategori.*' => 'required|in:I,R,M,A',
         ]);
 
         DB::beginTransaction();
@@ -93,9 +93,9 @@ class MatrixCplMkController extends Controller
                 $cpl = Cpl::where('kurikulum_id', $activeKurikulum->id)
                     ->findOrFail($entry['cpl_id']);
 
-                // Data untuk sinkronisasi
                 $syncData = collect($entry['mk_ids'])->mapWithKeys(function ($mk) {
-                    return [$mk['mk_id'] => ['kategori' => $mk['kategori']]];
+                    $kategoriString = implode(',', $mk['kategori']);
+                    return [$mk['mk_id'] => ['kategori' => $kategoriString]];
                 })->toArray();
 
                 $cpl->mataKuliahs()->sync($syncData);
