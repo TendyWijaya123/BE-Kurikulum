@@ -14,7 +14,14 @@ class RpsMataKuliahController extends Controller
 {
     public function showRpsMataKuliah($id)
     {
-        $mataKuliah = MataKuliah::with(['materiPembelajarans', 'cpls', 'tujuanBelajars', 'dosens:id,nama', 'bukuReferensis:id,judul', 'kemampuanAkhirs'])->find($id);
+        $mataKuliah = MataKuliah::with([
+            'materiPembelajarans',
+            'cpls',
+            'tujuanBelajars',
+            'dosens:id,nama',
+            'bukuReferensis:id,judul',
+            'kemampuanAkhirs'
+        ])->find($id);
 
         if (!$mataKuliah) {
             return response()->json([
@@ -22,6 +29,18 @@ class RpsMataKuliahController extends Controller
                 'message' => 'Mata Kuliah tidak ditemukan'
             ], 404);
         }
+
+        $kategoriOrder = ['I', 'R', 'M', 'A'];
+
+        $mataKuliah->cpls->each(function ($cpl) use ($kategoriOrder) {
+            if (isset($cpl->pivot->kategori)) {
+                $kategoriArray = explode(',', $cpl->pivot->kategori);
+
+                $sortedKategori = array_intersect($kategoriOrder, $kategoriArray);
+
+                $cpl->pivot->kategori = implode(',', $sortedKategori);
+            }
+        });
 
         $rps = RpsMatakuliah::where('mata_kuliah_id', $id)
             ->with(['tujuanBelajar', 'kemampuanAkhir', 'cpl'])
@@ -37,6 +56,7 @@ class RpsMataKuliahController extends Controller
             'data' => $data
         ]);
     }
+
 
     /**
      * Menyimpan data RPS Mata Kuliah
@@ -169,5 +189,13 @@ class RpsMataKuliahController extends Controller
             'success' => true,
             'message' => 'Data RPS Mata Kuliah berhasil dihapus'
         ]);
+    }
+
+    public function generateRPSPDF($mataKuliahId)
+    {
+        $mataKuliah = MataKuliah::where('id', $mataKuliahId)->get();
+        $pdf = PDF::loadView('pdf.template', $data);
+
+        return $pdf->download('contoh-pdf.pdf');
     }
 }

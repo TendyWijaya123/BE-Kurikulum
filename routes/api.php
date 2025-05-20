@@ -54,8 +54,6 @@ Route::post('login-dosen', [DosenAuthController::class, 'login'])->name('login_d
 Route::get('rps/template/{mataKuliahId}', [RpsMataKuliahController::class, 'exportTemplate']);
 Route::post('rps/import/{mataKuliahId}', [RpsMataKuliahController::class, 'import']);
 Route::get('penyusunan-kurikulum/export/{kurikulumId}', [PenyusunanKurikulumController::class, 'export']);
-
-
 Route::get('prodi/dropdown', [ProdiController::class, 'getProdiDropdown']);
 
 
@@ -243,8 +241,7 @@ Route::middleware(['auth:api'])->group(function () {
 
     /* ---------------------------------------Dosen Has Makul API ------------------------------------------------*/
 
-    Route::get('dosen-has-matkul', [DosenHasMatkulController::class, 'index'])->middleware('role:P2MPP|Penyusun Kurikulum');
-    Route::post('dosen-has-matkul', [DosenHasMatkulController::class, 'store'])->middleware('role:P2MPP|Penyusun Kurikulum');
+
     // Route::delete('dosen/{id}', [DosenController::class, 'destroy']);
     // Route::delete('dosen', [DosenController::class, 'destroyDosens']);
 
@@ -307,7 +304,9 @@ Route::middleware(['auth:dosen'])->group(function () {
     Route::delete('dosen/{id}', [DosenController::class, 'destroy']);
     Route::delete('dosen', [DosenController::class, 'destroyDosens']);
 
+    Route::get('rps/prodi-dropdown/jurusan-dosen', [ProdiController::class, 'getProdiDropdownByJurusanDosen']);
     Route::get('rps/prodi-dropdown/{id}', [ProdiController::class, 'show']);
+
     /* --------------------------------------- Buku referensi(Dosen) API ------------------------------------------------*/
     Route::prefix('buku-referensi')->group(function () {
         Route::get('/', [BukuReferensiController::class, 'index']);
@@ -336,6 +335,10 @@ Route::middleware(['auth:dosen'])->group(function () {
         Route::put('/{id}', [RpsMataKuliahController::class, 'update']);
         Route::delete('/{id}', [RpsMataKuliahController::class, 'destroy']);
     });
+
+
+    Route::get('dosen-has-matkul', [DosenHasMatkulController::class, 'index']);
+    Route::post('dosen-has-matkul', [DosenHasMatkulController::class, 'store']);
 });
 
 /* --------------------------------------- Profile API ------------------------------------------------*/
@@ -343,4 +346,3 @@ Route::group(['middleware' => ['auth:api,dosen']], function () {
     Route::get('profile', [ProfileController::class, 'getProfile']);
     Route::post('profile/update-password', [ProfileController::class, 'updatePassword']);
 });
-

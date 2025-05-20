@@ -5,14 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreProdiRequest;
 use App\Models\Prodi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProdiController extends Controller
 {
     public function index()
     {
-        $prodis = Prodi::query()
-            ->with('jurusan')
-            ->paginate(10);
+        $prodis = Prodi::with('jurusan')->paginate(10);
 
         return response()->json($prodis);
     }
@@ -27,16 +26,12 @@ class ProdiController extends Controller
         ], 201);
     }
 
-
-
     public function show($id)
     {
         $prodi = Prodi::with('jurusan')->find($id);
 
         if (!$prodi) {
-            return response()->json([
-                'message' => 'Prodi not found.',
-            ], 404);
+            return response()->json(['message' => 'Prodi not found.'], 404);
         }
 
         return response()->json(['data' => $prodi], 200);
@@ -47,16 +42,13 @@ class ProdiController extends Controller
         $prodi = Prodi::find($id);
 
         if (!$prodi) {
-            return response()->json([
-                'message' => 'Prodi not found.',
-            ], 404);
+            return response()->json(['message' => 'Prodi not found.'], 404);
         }
 
-        // Menambahkan pengecualian pada validasi unique untuk kode
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'jenjang' => 'required|in:D3,D4,S1,S2,S3',
-            'kode' => 'required|string|max:50|unique:prodis,kode,' . $prodi->id, // Menambahkan pengecualian untuk kode
+            'kode' => 'required|string|max:50|unique:prodis,kode,' . $prodi->id,
             'jurusan_id' => 'required|exists:jurusans,id',
             'is_active' => 'nullable|boolean',
         ]);
@@ -69,31 +61,22 @@ class ProdiController extends Controller
         ], 200);
     }
 
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id)
     {
         $prodi = Prodi::find($id);
 
         if (!$prodi) {
-            return response()->json([
-                'message' => 'Prodi not found.',
-            ], 404);
+            return response()->json(['message' => 'Prodi not found.'], 404);
         }
 
         $prodi->delete();
 
-        return response()->json([
-            'message' => 'Prodi deleted successfully.',
-        ], 200);
+        return response()->json(['message' => 'Prodi deleted successfully.'], 200);
     }
 
     public function getProdiDropdown()
     {
-        $prodis = Prodi::with('jurusan:id,name')
-            ->get(['id', 'name']);
+        $prodis = Prodi::with('jurusan:id,name')->get(['id', 'name']);
 
         return response()->json($prodis);
     }
@@ -101,6 +84,20 @@ class ProdiController extends Controller
     public function getProdiWithKurikulumDropdown()
     {
         $prodis = Prodi::with('kurikulums')->get(['id', 'name']);
+
+        return response()->json($prodis);
+    }
+
+    public function getProdiDropdownByJurusanDosen()
+    {
+        $dosen = Auth::guard('dosen')->user();
+
+        if (!$dosen) {
+            return response()->json(['message' => 'Dosen tidak ditemukan'], 404);
+        }
+
+        $prodis = Prodi::where('jurusan_id', $dosen->jurusan_id)->get(['id', 'name']);
+
         return response()->json($prodis);
     }
 }

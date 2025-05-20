@@ -25,6 +25,6 @@ class CreateIpteksPengetahuanTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ipteks_pengetahuans');
+        Schema::dropIfExists('ilmu_pengetahuans');
     }
 }
