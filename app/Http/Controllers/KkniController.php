@@ -57,10 +57,9 @@ class KkniController extends Controller
         try {
             DB::beginTransaction();
 
-            $dataList = $request->validated()['dataSource'];
-            $selectedPengetahuan = $request->input('selectedPengetahuan', []);
-            $selectedKemampuanKerja = $request->input('selectedKemampuanKerja', []);
-
+            $validated = $request->validated();
+            $dataList = $validated['dataSource'];
+            
             $kurikulumId = Kurikulum::where('prodi_id', $dataList[0]['prodiId'])
                 ->where('is_active', true)
                 ->value('id');
@@ -79,7 +78,7 @@ class KkniController extends Controller
                     [
                         'code' => $data['code'],
                         'description' => $data['description'],
-                        'kurikulum_id' => $kurikulumId,
+                        'kurikulum_id' => $kurikulumId
                     ]
                 );
                 $savedItems[] = $item;
@@ -89,20 +88,16 @@ class KkniController extends Controller
 
             return response()->json([
                 'message' => 'Data berhasil disimpan.',
-                'data' => $savedItems,
-                'selectedPengetahuan' => $selectedPengetahuan,
-                'selectedKemampuanKerja' => $selectedKemampuanKerja,
+                'data' => $savedItems
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-
             return response()->json([
                 'message' => 'Terjadi kesalahan saat menyimpan data',
                 'error' => $e->getMessage(),
             ], 500);
         }
     }
-
 
     public function destroy($id)
     {

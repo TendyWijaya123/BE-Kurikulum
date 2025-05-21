@@ -15,8 +15,11 @@ class MataKuliah extends Model
     protected $fillable = [
         'kode',
         'nama',
+        'nama_inggris',
         'kategori',
         'deskripsi_singkat',
+        'deskripsi_singkat_inggris',
+        'materi_pembelajaran_inggris',
         'tujuan',
         'semester',
         'teori_bt',

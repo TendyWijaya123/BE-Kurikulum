@@ -25,6 +25,6 @@ class CreateIpteksTeknologiTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('tekonologis');
+        Schema::dropIfExists('teknologis');
     }
 }

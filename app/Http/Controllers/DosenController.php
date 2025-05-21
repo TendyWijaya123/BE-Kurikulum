@@ -11,22 +11,30 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\DosenCreatedMail;
+use Illuminate\Support\Facades\Auth;
 
 class DosenController extends Controller
 {
     public function index()
     {
-        $jurusan = Jurusan::all(['id', 'nama']);
-        $prodi = Prodi::all(['id', 'name', 'jurusan_id']);
-        $dosen = Dosen::with([
+        $dosen = Auth::guard('dosen')->user();
+
+        if (!$dosen) {
+            return response()->json(['message' => 'Dosen tidak ditemukan'], 404);
+        }
+
+        $jurusan = Jurusan::where('id', $dosen->jurusan_id)->get(['id', 'nama']);
+        $prodi = Prodi::where('jurusan_id', $dosen->jurusan_id)->get(['id', 'name', 'jurusan_id']);
+
+        $dosens = Dosen::with([
             'prodi' => function ($query) {
                 $query->select('prodis.id', 'prodis.name');
             }
-        ])->with('jurusan')->get();
+        ])->with('jurusan')->where('jurusan_id', $dosen->jurusan_id)->get();
 
         return response()->json([
             'prodis' => $prodi,
-            'dosens' => $dosen,
+            'dosens' => $dosens,
             'jurusans' => $jurusan
         ]);
     }
@@ -37,10 +45,21 @@ class DosenController extends Controller
         try {
             DB::beginTransaction();
 
-            $data = $request->all();
-            $password = Str::random(8); // Generate random password
+            $validated = $request->validate([
+                'kode' => 'required|string|max:10|unique:dosens,kode',
+                'nip' => 'required|string|max:20|unique:dosens,nip',
+                'nama' => 'required|string|max:255',
+                'email' => 'required|email|unique:dosens,email',
+                'jenisKelamin' => 'required|in:L,P',
+                'jurusan' => 'required|exists:jurusans,id',
+                'prodi' => 'required|array',
+                'prodi.*' => 'exists:prodis,id',
+            ]);
 
-            $dosen = Dosen::Create([
+            $data = $validated;
+            $password = Str::random(8);
+
+            $dosen = Dosen::create([
                 'kode' => $data['kode'],
                 'nip' => $data['nip'],
                 'nama' => $data['nama'],
@@ -48,12 +67,11 @@ class DosenController extends Controller
                 'password' => Hash::make($password),
                 'jenis_kelamin' => $data['jenisKelamin'],
                 'is_active' => true,
-                'jurusan_id' => $data['jurusan']
+                'jurusan_id' => $data['jurusan'],
             ]);
 
             $dosen->prodi()->syncWithoutDetaching($data['prodi']);
 
-            // Send email
             Mail::to($dosen->email)->send(new DosenCreatedMail($dosen, $password));
 
             DB::commit();
@@ -69,6 +87,7 @@ class DosenController extends Controller
             ], 500);
         }
     }
+
 
     public function edit(Request $request)
     {

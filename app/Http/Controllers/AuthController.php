@@ -29,10 +29,18 @@ class AuthController extends Controller
             'roles' => $user->getRoleNames(),
         ];
 
-        if ($user->prodi) {
+        if ($user->hasRole('P2MPP')) {
+            $customClaims += [
+                'isActiveProdi' => 1,
+                'isActiveKurikulum' => 1,
+            ];
+        } elseif ($user->prodi) {
+            $activeKurikulum = $user->prodi->activeKurikulum();
+
             $customClaims += [
                 'prodiId' => $user->prodi_id,
                 'isActiveProdi' => $user->prodi->is_active,
+                'isActiveKurikulum' => $activeKurikulum ? 1 : 0,
             ];
         }
 
