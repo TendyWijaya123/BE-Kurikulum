@@ -79,8 +79,10 @@ class ProcessProdiJob implements ShouldQueue
             $formattedData = [
                 "cpl_texts" => array_values($cplTexts)
             ];
-
-            $flaskResponse = Http::post("http://127.0.0.1:5000/analyze", $formattedData);
+            $flaskUrl = env('FLASK_URL');
+    
+            //api untuk pengecekan cpl menggunakan dependency parsing menggunakan framework flask
+            $flaskResponse = Http::post($flaskUrl, $formattedData);
             $flaskResults = $flaskResponse->json()['results'] ?? [];
 
             foreach ($cpls as $index => $cpl) {
@@ -104,7 +106,7 @@ class ProcessProdiJob implements ShouldQueue
                 ]
             ];
 
-            Cache::put($cacheKey, $result, now()->addMinutes(30));
+            Cache::put($cacheKey, $result, now()->addMinutes(60));
         } catch (\Exception $e) {
             Log::error("Error di ProcessProdiJob untuk Kurikulum ID {$this->kurikulumId}: " . $e->getMessage());
             $this->fail($e);
