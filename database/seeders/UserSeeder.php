@@ -20,6 +20,7 @@ class UserSeeder extends Seeder
                 $user = User::create([
                     'name' => 'Admin ' . $prodi->name,
                     'email' => strtolower(str_replace(' ', '', $prodi->name)) . '@polban.ac.id',
+                    'username' => strtolower(str_replace(' ', '', $prodi->name)),
                     'password' => Hash::make('password123'),
                     'prodi_id' => $prodi->id,
                 ]);
@@ -27,9 +28,9 @@ class UserSeeder extends Seeder
             }
 
             $usersWithoutProdi = [
-                ['name' => 'P2MPP', 'email' => 'admin.p2mpp@polban.ac.id'],
-                ['name' => 'WD 1', 'email' => 'admin.wd1@polban.ac.id'],
-                ['name' => 'Admin', 'email' => 'admin@polban.ac.id'],
+                ['name' => 'P2MPP', 'email' => 'admin.p2mpp@polban.ac.id', 'username' => 'p2mpp'],
+                ['name' => 'WD 1', 'email' => 'admin.wd1@polban.ac.id', ],
+                ['name' => 'Admin', 'email' => 'admin@polban.ac.id', 'username' => 'admin'],
             ];
 
             $prodiTeknikKimia = Prodi::where('name', "D3 Teknik Kimia")->first();
@@ -37,6 +38,7 @@ class UserSeeder extends Seeder
                 $user = User::create([
                     'name' => $userData['name'],
                     'email' => $userData['email'],
+                    'username' => $userData['username'] ?? Str::lower(str_replace(' ', '', $userData['name'])),
                     'password' => Hash::make('password123'),
                     'prodi_id' => $prodiTeknikKimia->id,
                 ]);

@@ -74,6 +74,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('kurikulum', [KurikulumController::class, 'index'])->middleware('role:P2MPP');
     Route::post('kurikulum', [KurikulumController::class, 'store'])->middleware('role:P2MPP');
     Route::put('kurikulum/{id}', [KurikulumController::class, 'update'])->middleware('role:P2MPP');
+    Route::post('kurikulum/progres', [KurikulumController::class, 'updateStatusProgress'])->middleware('role:Penyusun Kurikulum');
+    Route::get('kurikulum/get-current-kurikulum', [KurikulumController::class, 'getCurrentKurikulum'])->middleware('role:Penyusun Kurikulum');
 
 
     /* ---------------------------------------Prodi API ------------------------------------------------*/

@@ -10,7 +10,7 @@ class DosenAuthController extends Controller
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
+            'username' => 'required',
             'password' => 'required',
         ]);
 
@@ -19,7 +19,7 @@ class DosenAuthController extends Controller
         }
 
         // Gunakan guard 'dosen' untuk login
-        if (!$token = auth('dosen')->attempt($request->only('email', 'password'))) {
+        if (!$token = auth('dosen')->attempt($request->only('username', 'password'))) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 

@@ -17,6 +17,7 @@ class Dosen extends Authenticatable implements JWTSubject
         'nip',
         'nama',
         'email',
+        'username',
         'password',
         'jenis_kelamin',
         'is_active',
