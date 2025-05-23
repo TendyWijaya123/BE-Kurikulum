@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\UserCreatedMail;
+use App\Mail\UserUpdatedMail;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 
@@ -31,33 +32,26 @@ class UserController extends Controller
     {
         DB::beginTransaction();
         try {
-            Log:
-            info($request->all());
-            // $randomPassword = Str::random(10);
-            $randomPassword = '12345678'; // Ganti dengan password yang diinginkan"
+            $data = $request->validated();
+            $randomPassword = Str::random(10);
 
             $payload = [
-                'email' => $request->email,
-                'name' => $request->name,
-                'prodi_id' => $request->prodi_id,
+                'email' => $data['email'],
+                'name' => $data['name'],
+                'prodi_id' => $data['prodi_id'],
                 'password' => Hash::make($randomPassword),
             ];
 
             $user = User::create($payload);
-
-
-
-            $user->assignRole($request->role);
+            $user->assignRole($data['role']);
 
             Mail::to($user->email)->send(new UserCreatedMail($user, $randomPassword));
 
-            // Commit transaksi jika semua berhasil
             DB::commit();
 
             return response()->json(['user' => $user, 'message' => 'User Created Successfully'], 201);
         } catch (\Exception $e) {
             DB::rollBack();
-
             Log::error('Error in Store Method:', ['message' => $e->getMessage()]);
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -96,31 +90,64 @@ class UserController extends Controller
 
     public function update(UpdateUserRequest $request, $id)
     {
+        DB::beginTransaction();
         try {
-            Log::info('Update request data:', $request->all());
+            $data = $request->validated();
 
             $user = User::findOrFail($id);
 
-            $user->email = $request->email;
-            $user->name = $request->name;
-            $user->prodi_id = $request->prodi_id;
+            $user->email = $data['email'];
+            $user->name = $data['name'];
+            $user->prodi_id = $data['prodi_id'];
 
-            if ($request->password) {
-                $user->password = Hash::make($request->password);
+            $newPassword = null;
+            $passwordChanged = false;
+
+            // Hanya update password jika field password diisi
+            if (!empty($data['password'])) {
+                if (Hash::check($data['password'], $user->password)) {
+                    return response()->json(['error' => 'Password baru tidak boleh sama dengan password sebelumnya.'], 422);
+                }
+                $newPassword = $data['password'];
+                $user->password = Hash::make($newPassword);
+                $passwordChanged = true;
             }
 
             $user->save();
+            $user->syncRoles($data['role']);
 
-            $user->syncRoles($request->role);
+            // Kirim email jika password diubah
+            if ($passwordChanged && $newPassword) {
+                try {
+                    Mail::to($user->email)->send(new UserUpdatedMail($user, $newPassword));
+                } catch (\Exception $emailException) {
+                    Log::error('Failed to send password update email: ' . $emailException->getMessage());
+                    Log::error('Email error trace: ' . $emailException->getTraceAsString());
+                }
+            }
 
+            DB::commit();
 
-            return response()->json(['user' => $user, 'message' => 'User Updated Successfully']);
+            $message = 'User Updated Successfully';
+            if ($passwordChanged) {
+                $message .= ' and password update email has been sent';
+            }
+
+            return response()->json([
+                'user' => $user->fresh(),
+                'message' => $message,
+                'password_changed' => $passwordChanged
+            ]);
+
         } catch (\Exception $e) {
-            Log::error('Error in Update Method:', ['message' => $e->getMessage()]);
+            DB::rollBack();
+            Log::error('Error in Update Method:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
 
     public function destroy($id)
     {

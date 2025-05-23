@@ -349,6 +349,10 @@ Route::middleware(['auth:dosen'])->group(function () {
         Route::delete('/{id}', [RpsMataKuliahController::class, 'destroy']);
     });
 
+    Route::get('rps-pdf/{matakuliahId}', [RpsMataKuliahController::class, 'generateRPSPDF']);
+
+
+
 
     Route::get('dosen-has-matkul', [DosenHasMatkulController::class, 'index']);
     Route::post('dosen-has-matkul', [DosenHasMatkulController::class, 'store']);

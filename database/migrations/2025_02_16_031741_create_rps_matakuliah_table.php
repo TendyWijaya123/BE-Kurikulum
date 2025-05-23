@@ -16,13 +16,21 @@ return new class extends Migration
             $table->foreignId('mata_kuliah_id')->nullable()->constrained('mata_kuliahs')->onDelete('cascade');
             $table->foreignId('kemampuan_akhir_id')->nullable()->constrained('kemampuan_akhirs')->onDelete('set null');
             $table->integer('minggu');
+            $table->enum('kategori', ['ETS', 'EAS', 'Reguler'])->default('Reguler');
             $table->text('pokok_bahasan')->nullable();
             $table->text('modalitas_bentuk_strategi_metodepembelajaran')->nullable();
             $table->text('instrumen_penilaian')->nullable();
             $table->text('hasil_belajar')->nullable();
             $table->foreignId('tujuan_belajar_id')->nullable()->constrained('tujuan_belajars')->onDelete('set null');
             $table->foreignId('cpl_id')->nullable()->constrained('cpls')->onDelete('set null');
-            $table->integer('bobot_penilaian')->nullable();
+            $table->integer('bobot_penilaian')->nullable()->default(0);
+            $table->text('modalitas_pembelajaran')->nullable();
+            $table->text('strategi_pembelajaran')->nullable();
+            $table->text('bentuk_pembelajaran')->nullable();
+            $table->text('metode_pembelajaran')->nullable();
+            $table->text('media_pembelajaran')->nullable();
+            $table->text('sumber_belajar')->nullable();
+
             $table->timestamps();
 
             $table->unique(['mata_kuliah_id', 'minggu']);
