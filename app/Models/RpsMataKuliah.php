@@ -17,6 +17,7 @@ class RpsMatakuliah extends Model
         'mata_kuliah_id',
         'kemampuan_akhir_id',
         'minggu',
+        'kategori',
         'pokok_bahasan',
         'modalitas_bentuk_strategi_metodepembelajaran',
         'instrumen_penilaian',
@@ -77,6 +78,12 @@ class RpsMatakuliah extends Model
     public function tujuanBelajar()
     {
         return $this->belongsTo(TujuanBelajar::class, 'tujuan_belajar_id');
+    }
+
+
+    public function instrumenPenilaians()
+    {
+        return $this->hasMany(InstrumenPenilaianRps::class, 'rps_id');
     }
 
     /**
