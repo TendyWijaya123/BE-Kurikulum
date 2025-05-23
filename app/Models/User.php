@@ -64,4 +64,9 @@ class User extends Authenticatable implements JWTSubject
             ->orderBy('tahun_awal', 'desc')
             ->first();
     }
+
+    public function notifications()
+    {
+        return $this->belongsToMany(Notifikasi::class);
+    }
 }

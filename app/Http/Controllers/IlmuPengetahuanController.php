@@ -178,7 +178,7 @@ class IlmuPengetahuanController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'file' => 'required|mimes:xlsx,xls',
+                'file' => 'required|mimes:xlsx,xls,clv',
             ]);
 
             if ($validator->fails()) {
