@@ -45,4 +45,20 @@ class Prodi extends Model
     {
         return $this->kurikulums()->where('is_active', true)->first();
     }
+
+    public function getStatusProgressAttribute()
+    {
+        $activeKurikulum = $this->activeKurikulum();
+
+        if (!$activeKurikulum) {
+            return [];
+        }
+
+        // Ambil semua atribut yang diawali dengan 'is_'
+        return collect($activeKurikulum->getAttributes())
+            ->filter(function ($value, $key) {
+                return str_starts_with($key, 'is_');
+            })
+            ->toArray();
+    }
 }

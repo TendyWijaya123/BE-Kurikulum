@@ -24,8 +24,8 @@ class BenchKurikulumImport implements ToCollection, WithHeadingRow
 
         foreach ($rows as $index => $row) {
             $validator = Validator::make($row->toArray(), [
-                'program_studi' => 'required|string|max:255',
-                'kategori'      => 'required|string|max:255',
+                'program_studi' => 'nullable|string|max:255',
+                'kategori'      => 'nullable|string|max:255',
                 'cpl'           => 'required|string|max:1000',
                 'ppm'           => 'nullable|string|max:1000',
             ]);

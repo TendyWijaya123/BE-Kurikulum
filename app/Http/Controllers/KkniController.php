@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Facades\Excel;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Str;
 
 class KkniController extends Controller
 {
@@ -189,18 +190,17 @@ class KkniController extends Controller
 
     public function autoCpl(Request $request)
     {
-        // dd($request);
         $prodiId = $request->query('prodiId');
 
         $prompt = PromptProvider::generatePrompt($prodiId, $request->query('pengatahuanId'), $request->query('kemampuanKerjaId'));
-        if ($prompt == "analisis konsideran belum lengkap") {
+        if (Str::startsWith($prompt, 'Analisis konsideran belum lengkap')) {
             return response()->json([
-                'warning' => 'analisis konsideran belum lengkap'
+                'warning' => $prompt
             ]);
-        };
+        }
 
         $geminiApiKey = env('GEMINI_API_KEY'); // Simpan API Key di .env
-        $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$geminiApiKey}", [
+        $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$geminiApiKey}", [
             "contents" => [
                 [
                     "parts" => [

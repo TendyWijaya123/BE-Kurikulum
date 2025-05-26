@@ -61,16 +61,21 @@ class PromptProvider extends ServiceProvider
             $query->where('prodi_id', $prodiId)->where('is_active', true);
         })->get();
 
-        if (
-            $siapKerja->isEmpty() || 
-            $siapUsaha->isEmpty() || 
-            $benchCurriculum->isEmpty() || 
-            $ipteksPengetahuan->isEmpty() || 
-            $ipteksSeni->isEmpty() || 
-            $ipteksTeknologi->isEmpty()
-        ) {
-            return "analisis konsideran belum lengkap";
-        } 
+        // Cek yang kosong
+        $kosong = [];
+
+        if ($siapKerja->isEmpty() && $siapUsaha->isEmpty()) {
+            $kosong[] = 'Siap Kerja & Siap Usaha (keduanya kosong)';
+        }
+        if ($benchCurriculum->isEmpty()) $kosong[] = 'Benchmark Kurikulum';
+        if ($ipteksPengetahuan->isEmpty()) $kosong[] = 'Ipteks Pengetahuan';
+        if ($ipteksTeknologi->isEmpty()) $kosong[] = 'Ipteks Teknologi';
+        if ($ipteksSeni->isEmpty()) $kosong[] = 'Ipteks Seni';
+
+
+        if (!empty($kosong)) {
+            return 'Analisis konsideran belum lengkap: ' . implode(', ', $kosong);
+        }
 
         // Ambil nama prodi untuk prompt
         $prodi = Prodi::find($prodiId);
@@ -132,10 +137,10 @@ class PromptProvider extends ServiceProvider
         $prompt .= "**Format Hasil Akhir** : kode CPL, Deskripsi (Behavior + Subject Matters + Context) \n\n output harus singkat jangan panjang padat jelas dan berupa objek json : \n";
         $prompt .= "[{
             kode : CPL-1,
-            deskripsi : Behavior(awali dengan kata mampu) + Subject Matters + Context
+            deskripsi : Behavior : teks + Subject Matters : teks + Context : teks
         },
             kode : CPL-2,
-            deskripsi : Behavior + Subject Matters + Context
+            deskripsi : Behavior : teks + Subject Matters : teks + Context : teks
         ]";
 
         return $prompt;

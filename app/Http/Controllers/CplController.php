@@ -7,6 +7,7 @@ use App\Http\Requests\UpsertCPLRequest;
 use App\Imports\CplImport;
 use App\Models\Cpl;
 use App\Models\Prodi;
+use App\Providers\PromptCekCPLProvider;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -39,6 +40,9 @@ class CplController extends Controller
                 ->orderByRaw("CAST(SUBSTRING(kode, 5) AS UNSIGNED) ASC")
                 ->get(['id', 'kode', 'keterangan']);
 
+            // $cplList = $cpl->pluck('keterangan')->toArray();
+            // $prompt = PromptCekCPLProvider::generatePrompt($cplList);
+            // dd($prompt);
 
             return response()->json([
                 'success' => true,

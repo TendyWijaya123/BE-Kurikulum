@@ -16,7 +16,8 @@ return new class extends Migration
             $table->string('kode', 6)->unique();
             $table->string('nip', 18)->unique();
             $table->string('nama', 50);
-            $table->string('email', 50)->unique();
+            $table->string('email', 50);
+            $table->string('username', 50)->unique();
             $table->string('password');
             $table->enum('jenis_kelamin', ['L', 'P']);
             $table->boolean('is_active')->default(true);

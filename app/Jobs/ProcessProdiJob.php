@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Cache;
 use App\Models\Cpl;
 use App\Models\Ppm;
 use App\Models\Kurikulum;
+use App\Providers\PromptCekCPLProvider;
 use App\Providers\PromptProvider;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
@@ -40,9 +41,6 @@ class ProcessProdiJob implements ShouldQueue
             }
 
             $cacheKey = "processed_kurikulum_{$kurikulum->id}";
-            if (Cache::has($cacheKey)) {
-                return;
-            }
 
             $prodiName = $kurikulum->prodi->name ?? "Unknown_Prodi_{$kurikulum->id}";
 
@@ -55,10 +53,12 @@ class ProcessProdiJob implements ShouldQueue
                 return;
             }
 
-            $prompt = PromptProvider::promptTranslate($cpls);
+            $cplList = $cpls->pluck('keterangan')->toArray();
+
+            $prompt = PromptCekCPLProvider::generatePrompt($cplList);
             $geminiApiKey = env('GEMINI_API_KEY');
 
-            $response = Http::retry(3, 2000)->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$geminiApiKey}", [
+            $response = Http::retry(3, 2000)->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$geminiApiKey}", [
                 "contents" => [
                     [
                         "parts" => [
@@ -68,33 +68,57 @@ class ProcessProdiJob implements ShouldQueue
                 ]
             ]);
 
-            $translatedText = $response->json();
+
+            $result = $response->json();
             $cplTexts = [];
 
-            if (isset($translatedText['candidates'][0]['content']['parts'][0]['text'])) {
-                $rawText = $translatedText['candidates'][0]['content']['parts'][0]['text'];
-                $cplTexts = array_filter(array_map('trim', explode("\n\n", $rawText)));
+            if (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
+                $rawText = $result['candidates'][0]['content']['parts'][0]['text'];
+
+                // Hapus blok kode ```json ... ```
+                $cleaned = preg_replace('/^```json\s*|\s*```$/', '', trim($rawText));
+
+                // Decode JSON ke array
+                $parsed = json_decode($cleaned, true);
+
+                if (json_last_error() === JSON_ERROR_NONE && is_array($parsed)) {
+                    $structuredCPLs = [];
+
+                    foreach ($parsed as $item) {
+                        $structuredCPLs[] = [
+                            'keterangan' => $item['cpl_text'] ?? '',
+                            'behavior' => [
+                                'verbs' => $item['behavior']['verbs'] ?? [],
+                                'classification' => $item['behavior']['classification'] ?? []
+                            ],
+                            'subject_matters' => $item['subject_matters'] ?? [],
+                            'context' => $item['context'] ?? [],
+                            'issues' => $item['issues'],
+                            'saran_perbaikan' => $item['saran_perbaikan'] ?? []
+                        ];
+                    }
+
+                    // Sekarang $structuredCPLs sudah siap dipakai
+                } else {
+                    // Tangani kesalahan decoding JSON
+                    Log::error('Gagal decode CPL response dari Gemini:', ['raw' => $cleaned]);
+                }
             }
 
-            $formattedData = [
-                "cpl_texts" => array_values($cplTexts)
-            ];
-            $flaskUrl = env('FLASK_URL');
-    
-            //api untuk pengecekan cpl menggunakan dependency parsing menggunakan framework flask
-            $flaskResponse = Http::post($flaskUrl, $formattedData);
-            $flaskResults = $flaskResponse->json()['results'] ?? [];
-
             foreach ($cpls as $index => $cpl) {
-                $issues = $flaskResults[$index]['issues'] ?? [];
+                $issues = $structuredCPLs[$index]['issues'] ?? [];
                 $cpl->issues = is_array($issues) ? implode(', ', $issues) : $issues;
+                $keterangans = $structuredCPLs[$index]['keterangan'] ?? [];
+                $cpl->keterangan = is_array($keterangans) ? implode(', ', $keterangans) : $keterangans;
+                $saran_perbaikans = $structuredCPLs[$index]['saran_perbaikan'] ?? [];
+                $cpl->saran_perbaikan = is_array($saran_perbaikans) ? implode(', ', $saran_perbaikans) : $saran_perbaikans;
             }
 
             $ppms = Ppm::where('kurikulum_id', $kurikulum->id)
                 ->select('id', 'kode', 'deskripsi')
                 ->get();
 
-            $result = [
+            $resultFormat = [
                 $prodiName => [
                     'kurikulum' => [
                         'id' => $kurikulum->id,
@@ -102,11 +126,11 @@ class ProcessProdiJob implements ShouldQueue
                         'tahun_akhir' => $kurikulum->tahun_akhir,
                     ],
                     'cpls' => $cpls,
-                    'ppms' => $ppms,
+                    'ppms' => $ppms
                 ]
             ];
 
-            Cache::put($cacheKey, $result, now()->addMinutes(60));
+            Cache::put($cacheKey, $resultFormat, now()->addMinutes(60));
         } catch (\Exception $e) {
             Log::error("Error di ProcessProdiJob untuk Kurikulum ID {$this->kurikulumId}: " . $e->getMessage());
             $this->fail($e);

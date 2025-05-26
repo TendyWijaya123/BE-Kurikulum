@@ -21,9 +21,9 @@ class SksuImport implements ToCollection, WithHeadingRow
 
         foreach ($rows as $index => $row) {
             $validator = Validator::make($row->toArray(), [
-                'profil_lulusan'   => 'required|string|max:255',
-                'kualifikasi'      => 'required|string|max:255',
-                'kategori'         => 'required|string|max:255',
+                'profil_lulusan'   => 'nullable|string|max:255',
+                'kualifikasi'      => 'nullable|string|max:255',
+                'kategori'         => 'nullable|string|max:255',
                 'kompetensi_kerja' => 'required|string|max:1000',
             ]);
 
@@ -35,27 +35,40 @@ class SksuImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            if (!empty($row['profil_lulusan'])) {
-                $this->saveProfile($currentProfile, $kompetensiList, $kurikulum);
+            // Ambil kompetensi saat ini
+            $currentKompetensi = trim($row['kompetensi_kerja']);
+
+            if ($row['profil_lulusan'] !== null) {
+                // Jika profil lulusan baru, simpan yang sebelumnya dulu (jika ada)
+                if ($currentProfile && count($kompetensiList) > 0) {
+                    $this->saveProfile($currentProfile, $kompetensiList, $kurikulum);
+                }
+
+                // Perbarui profil dan reset kompetensi
                 $currentProfile = collect($row)->only(['profil_lulusan', 'kualifikasi', 'kategori'])->toArray();
-                $kompetensiList = array_filter([$row['kompetensi_kerja']]);
+                $kompetensiList = [$currentKompetensi];
+
             } else {
-                $kompetensiList[] = $row['kompetensi_kerja'];
+                // Tambahkan kompetensi ke daftar yang ada
+                $kompetensiList[] = $currentKompetensi;
             }
         }
 
-        $this->saveProfile($currentProfile, $kompetensiList, $kurikulum);
+        // Simpan sisa terakhir (jika ada)
+        if ($currentProfile && count($kompetensiList) > 0) {
+            $this->saveProfile($currentProfile, $kompetensiList, $kurikulum);
+        }
     }
 
     private function saveProfile($profile, $kompetensi, $kurikulum)
     {
         if ($profile && !empty($kompetensi)) {
             Sksu::create([
-                'profil_lulusan' => $profile['profil_lulusan'],
-                'kualifikasi' => $profile['kualifikasi'],
-                'kategori' => $profile['kategori'],
-                'kompetensi_kerja' => implode("\n", $kompetensi),
-                'kurikulum_id' => $kurikulum->id,
+                'profil_lulusan'     => $profile['profil_lulusan'],
+                'kualifikasi'        => $profile['kualifikasi'],
+                'kategori'           => $profile['kategori'],
+                'kompetensi_kerja'   => implode("\n", $kompetensi),
+                'kurikulum_id'       => $kurikulum->id,
             ]);
         }
     }

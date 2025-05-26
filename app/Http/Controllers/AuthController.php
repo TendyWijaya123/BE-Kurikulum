@@ -14,7 +14,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => 'required|email',
+            'username' => 'required',
             'password' => 'required',
         ]);
 
@@ -43,6 +43,7 @@ class AuthController extends Controller
                 'isActiveKurikulum' => $activeKurikulum ? 1 : 0,
             ];
         }
+
 
         $token = JWTAuth::customClaims($customClaims)->attempt($credentials);
 
