@@ -56,7 +56,7 @@ Route::post('login-dosen', [DosenAuthController::class, 'login'])->name('login_d
 Route::get('rps/template/{mataKuliahId}', [RpsMataKuliahController::class, 'exportTemplate']);
 Route::post('rps/import/{mataKuliahId}', [RpsMataKuliahController::class, 'import']);
 Route::get('penyusunan-kurikulum/export/{kurikulumId}', [PenyusunanKurikulumController::class, 'export']);
-Route::get('prodi/dropdown', [ProdiController::class, 'getProdiDropdown']);
+
 
 
 Route::middleware(['auth:api'])->group(function () {
@@ -86,12 +86,12 @@ Route::middleware(['auth:api'])->group(function () {
     Route::put('prodis/{id}', [ProdiController::class, 'update'])->middleware('role:P2MPP');
     Route::delete('prodis/{id}', [ProdiController::class, 'destroy'])->middleware('role:P2MPP');
     Route::get('prodi/dropdown-prodi-kurikulum', [ProdiController::class, 'getProdiWithKurikulumDropdown']);
+    Route::get('prodi/dropdown', [ProdiController::class, 'getProdiDropdown']);
 
 
     /* --------------------------------------Jurusan API--------------------------------------------------- */
     Route::get('jurusans/dropdown', [JurusanController::class, 'dropdown']);
     Route::get('jurusans', [JurusanController::class, 'index'])->middleware('role:P2MPP');
-    Route::get('jurusans/dropdown', [JurusanController::class, 'dropdown']);
     Route::post('jurusans', [JurusanController::class, 'store'])->middleware('role:P2MPP');
     Route::get('jurusans/{id}', [JurusanController::class, 'show'])->middleware('role:P2MPP');
     Route::put('jurusans/{id}', [JurusanController::class, 'update'])->middleware('role:P2MPP');
@@ -282,8 +282,8 @@ Route::middleware(['auth:api'])->group(function () {
     /* ---------------------------------------Dashboard-----------------------------------------------*/
     Route::get('dashboard/jurusans', [DashboardController::class, 'getJurusans']);
     Route::get('dashboard/prodis', [DashboardController::class, 'getProdis']);
-    Route::get('dashboard/proses-curriculum-data', [DashboardController::class, 'getCurriculumData']);
-    Route::get('dashboard/get-curriculum-data', [DashboardController::class, 'getProcessedData']);
+    Route::get('dashboard/get-curriculum-data', [DashboardController::class, 'getCurriculumData']);
+    Route::get('dashboard/proses-curriculum-data', [DashboardController::class, 'getProcessedData']);
     Route::get('dashboard/refresh-curriculum-data', [DashboardController::class, 'refreshCache']);
     Route::get('dashboard/progres-curriculum-data', [DashboardController::class, 'getBatchStatus']);
     Route::get('dashboard/get-matakuliah', [DashboardController::class, 'getMatakuliah']);

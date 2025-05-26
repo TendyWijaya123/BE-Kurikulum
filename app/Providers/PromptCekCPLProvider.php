@@ -25,7 +25,7 @@ class PromptCekCPLProvider extends ServiceProvider
     {
         $cplItems = '';
         foreach ($cplList as $index => $cpl) {
-            $cplItems .= ($index + 1) . ". " . $cpl . "\n ";
+            $cplItems .= ($index + 1) . ". " . $cpl . "\n";
         }
         return <<<EOT
 
@@ -40,7 +40,7 @@ class PromptCekCPLProvider extends ServiceProvider
 
             {$cplItems}
 
-            Gunakan daftar kata kerja dari taksonomi Bloom untuk mengklasifikasikan *Behavior* ke dalam kategori proses kognitif:  
+            Gunakan daftar kata kerja dari taksonomi Bloom untuk mengklasifikasikan *Behavior* ke dalam kategori proses kognitif (translate dulu ke bahasa inggris agar sesuai jangan langsung dibandingkan):  
             "{
                 "remember": "C1 (Remember)",
                 "identify": "C1 (Remember)",
@@ -116,7 +116,7 @@ class PromptCekCPLProvider extends ServiceProvider
 
             ```json
             {
-            "cpl_text": "...",
+            "cpl_text": "CPL yang diberikan, dengan menandai secara eksplisit bagian behavior, subject matters, dan context menggunakan format: (Behavior: [kata kerja]) (Subject Matters: [bahan kajian]) (Context: [konteks])",
             "behavior": {
                 "verbs": [list of verbs],
                 "classification": [
@@ -128,7 +128,10 @@ class PromptCekCPLProvider extends ServiceProvider
             },
             "subject_matters": [list of subject matters],
             "context": [list of contexts],
-            "issues": [daftar masalah yang ditemukan jika ada, atau tulis: "CPL sesuai dengan standar."]
+            "issues": [daftar masalah yang ditemukan jika ada antara behavior, subject matters, atau context tidak memenuhi standar, atau tulis: "CPL sesuai dengan standar. jika tidak ada masalah atau masalah masih bisa di toleransi (sebutkan alasan)"],
+            "saran_perbaikan": "kalimat cpl (saran perbaikan cpl jika ada sesuai dengan issues nya, atau "tidak ada saran perbaikan" jika tidak ada masalah)"
+            }
+            ```
             }
 
             Pastikan Anda memberikan satu array JSON besar berisi evaluasi untuk setiap CPL.

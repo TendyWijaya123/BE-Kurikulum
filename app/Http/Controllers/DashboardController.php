@@ -29,6 +29,24 @@ class DashboardController extends Controller
     public function getCurriculumData()
     {
         $kurikulums = Kurikulum::active()->get();
+        $results = [];
+
+        foreach ($kurikulums as $kurikulum) {
+            $cacheKey = "processed_kurikulum_{$kurikulum->id}";
+            $cachedData = Cache::get($cacheKey);
+
+            if ($cachedData) {
+                $results[$kurikulum->id] = $cachedData;
+            }
+        }
+
+        return response()->json($results);
+    }
+
+
+    public function getProcessedData()
+    {
+        $kurikulums = Kurikulum::active()->get();
 
         if ($kurikulums->isEmpty()) {
             return response()->json(['message' => 'Tidak ada kurikulum aktif untuk diproses'], 404);
@@ -46,24 +64,6 @@ class DashboardController extends Controller
             'message' => 'Batch processing started',
             'batch_id' => $batch->id
         ]);
-    }
-
-
-    public function getProcessedData()
-    {
-        $kurikulums = Kurikulum::active()->get();
-        $results = [];
-
-        foreach ($kurikulums as $kurikulum) {
-            $cacheKey = "processed_kurikulum_{$kurikulum->id}";
-            $cachedData = Cache::get($cacheKey);
-
-            if ($cachedData) {
-                $results[$kurikulum->id] = $cachedData;
-            }
-        }
-
-        return response()->json($results);
     }
 
     public function refreshCache()

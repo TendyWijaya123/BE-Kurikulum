@@ -41,9 +41,6 @@ class ProcessProdiJob implements ShouldQueue
             }
 
             $cacheKey = "processed_kurikulum_{$kurikulum->id}";
-            if (Cache::has($cacheKey)) {
-                return;
-            }
 
             $prodiName = $kurikulum->prodi->name ?? "Unknown_Prodi_{$kurikulum->id}";
 
@@ -89,14 +86,15 @@ class ProcessProdiJob implements ShouldQueue
 
                     foreach ($parsed as $item) {
                         $structuredCPLs[] = [
-                            'cpl_text' => $item['cpl_text'] ?? '',
+                            'keterangan' => $item['cpl_text'] ?? '',
                             'behavior' => [
                                 'verbs' => $item['behavior']['verbs'] ?? [],
                                 'classification' => $item['behavior']['classification'] ?? []
                             ],
                             'subject_matters' => $item['subject_matters'] ?? [],
                             'context' => $item['context'] ?? [],
-                            'issues' => $item['issues'] ?? ["CPL sesuai dengan standar."]
+                            'issues' => $item['issues'],
+                            'saran_perbaikan' => $item['saran_perbaikan'] ?? []
                         ];
                     }
 
@@ -107,16 +105,13 @@ class ProcessProdiJob implements ShouldQueue
                 }
             }
 
-
-            // $flaskUrl = env('FLASK_URL');
-    
-            // //api untuk pengecekan cpl menggunakan dependency parsing menggunakan framework flask
-            // $flaskResponse = Http::post($flaskUrl, $formattedData);
-            // $flaskResults = $flaskResponse->json()['results'] ?? [];
-
             foreach ($cpls as $index => $cpl) {
                 $issues = $structuredCPLs[$index]['issues'] ?? [];
                 $cpl->issues = is_array($issues) ? implode(', ', $issues) : $issues;
+                $keterangans = $structuredCPLs[$index]['keterangan'] ?? [];
+                $cpl->keterangan = is_array($keterangans) ? implode(', ', $keterangans) : $keterangans;
+                $saran_perbaikans = $structuredCPLs[$index]['saran_perbaikan'] ?? [];
+                $cpl->saran_perbaikan = is_array($saran_perbaikans) ? implode(', ', $saran_perbaikans) : $saran_perbaikans;
             }
 
             $ppms = Ppm::where('kurikulum_id', $kurikulum->id)
@@ -131,8 +126,7 @@ class ProcessProdiJob implements ShouldQueue
                         'tahun_akhir' => $kurikulum->tahun_akhir,
                     ],
                     'cpls' => $cpls,
-                    'ppms' => $ppms,
-                    'prompt' => $prompt
+                    'ppms' => $ppms
                 ]
             ];
 

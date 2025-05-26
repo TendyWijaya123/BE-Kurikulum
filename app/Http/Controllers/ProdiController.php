@@ -76,7 +76,7 @@ class ProdiController extends Controller
 
     public function getProdiDropdown()
     {
-        $prodis = Prodi::with('jurusan:id,name')->get(['id', 'name']);
+        $prodis = Prodi::with('jurusan:id,nama')->get(['id', 'name', 'kode', 'jurusan_id']);
 
         return response()->json($prodis);
     }
