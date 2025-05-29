@@ -19,6 +19,7 @@ class MataKuliah extends Model
         'kategori',
         'deskripsi_singkat',
         'deskripsi_singkat_inggris',
+        'materi_pembelajaran',
         'materi_pembelajaran_inggris',
         'tujuan',
         'semester',
@@ -57,9 +58,7 @@ class MataKuliah extends Model
     public function generateRpsMinggu()
     {
         $rpsData = [];
-        for ($i = 1; $i <= 14; $i++) {
-            $rpsData[] = ['minggu' => $i];
-        }
+        $rpsData[] = ['minggu' => 1];
         $this->rpss()->createMany($rpsData);
     }
 
@@ -138,6 +137,7 @@ class MataKuliah extends Model
         return $this->hasMany(TujuanBelajar::class, 'mata_kuliah_id');
     }
 
+
     public function bukuReferensis()
     {
         return $this->belongsToMany(BukuReferensi::class, 'mata_kuliah_has_buku_referensi');
@@ -146,5 +146,9 @@ class MataKuliah extends Model
     public function rpss()
     {
         return $this->hasMany(RpsMatakuliah::class, 'mata_kuliah_id');
+    }
+
+    public function tujuanBelajarRps(){
+        return $this->hasMany(TujuanBelajarRPS::class, 'mata_kuliah_id');
     }
 }

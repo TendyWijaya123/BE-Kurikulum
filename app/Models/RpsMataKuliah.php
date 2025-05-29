@@ -15,11 +15,16 @@ class RpsMatakuliah extends Model
 
     protected $fillable = [
         'mata_kuliah_id',
-        'kemampuan_akhir_id',
+        'kemampuan_akhir',
         'minggu',
         'kategori',
         'pokok_bahasan',
-        'modalitas_bentuk_strategi_metodepembelajaran',
+        'modalitas_pembelajaran',
+        'bentuk_pembelajaran',
+        'strategi_pembelajaran',
+        'metode_pembelajaran',
+        'media_pembelajaran',
+        'sumber_belajar',
         'instrumen_penilaian',
         'hasil_belajar',
         'tujuan_belajar_id',
@@ -38,10 +43,10 @@ class RpsMatakuliah extends Model
     /**
      * Relasi ke tabel KemampuanAkhir
      */
-    public function kemampuanAkhir()
-    {
-        return $this->belongsTo(KemampuanAkhir::class, 'kemampuan_akhir_id');
-    }
+    // public function kemampuanAkhir()
+    // {
+    //     return $this->belongsTo(KemampuanAkhir::class, 'kemampuan_akhir_id');
+    // }
 
     protected static function boot()
     {
@@ -78,6 +83,11 @@ class RpsMatakuliah extends Model
     public function tujuanBelajar()
     {
         return $this->belongsTo(TujuanBelajar::class, 'tujuan_belajar_id');
+    }
+
+    public function tujuanBelajarRps()
+    {
+        return $this->belongsTo(TujuanBelajarRPS::class, 'tujuan_belajar_id');
     }
 
 

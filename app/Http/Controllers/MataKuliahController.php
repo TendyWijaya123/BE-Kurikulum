@@ -145,7 +145,7 @@ class MataKuliahController extends Controller
         }
 
         $mataKuliahs = $query
-            ->select('id', 'kurikulum_id', 'kode', 'nama', 'nama_inggris', 'deskripsi_singkat', 'deskripsi_singkat_inggris', 'materi_pembelajaran_inggris')
+            ->select('id', 'kurikulum_id', 'kode', 'nama', 'nama_inggris', 'deskripsi_singkat', 'deskripsi_singkat_inggris','materi_pembelajaran', 'materi_pembelajaran_inggris')
             ->paginate(10);
 
 

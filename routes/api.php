@@ -344,9 +344,12 @@ Route::middleware(['auth:dosen'])->group(function () {
     Route::prefix('rps')->group(function () {
         Route::get('/{id}', [RpsMataKuliahController::class, 'showRpsMataKuliah']);
         Route::post('', [RpsMataKuliahController::class, 'store']);
-        Route::put('/bulk-update', [RpsMataKuliahController::class, 'bulkUpdate']);
+        Route::post('/bulk-update', [RpsMataKuliahController::class, 'bulkCreateOrUpdate']);
         Route::put('/{id}', [RpsMataKuliahController::class, 'update']);
         Route::delete('/{id}', [RpsMataKuliahController::class, 'destroy']);
+        Route::post('/detail-mk', [RpsMataKuliahController::class, 'storeDetailMatakuliahRps']);
+        Route::post('/tujuan-belajar', [RpsMataKuliahController::class, 'storeTujuanBelajar']);
+        Route::delete('/remove-tujuan-belajar/{id}', [RpsMataKuliahController::class, 'removeTujuanBelajar']);
     });
 
     Route::get('rps-pdf/{matakuliahId}', [RpsMataKuliahController::class, 'generateRPSPDF']);

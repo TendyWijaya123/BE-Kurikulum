@@ -122,8 +122,8 @@
                 <td colspan="4" style="border: 1px solid black; text-align: center; width: 80%;">Deskripsi</td>
             </tr>
 
-            @if (!empty($mataKuliah->tujuanBelajars) && count($mataKuliah->tujuanBelajars) > 0)
-                @foreach ($mataKuliah->tujuanBelajars as $tb)
+            @if (!empty($mataKuliah->tujuanBelajarRps) && count($mataKuliah->tujuanBelajarRps) > 0)
+                @foreach ($mataKuliah->tujuanBelajarRps as $tb)
                     <tr>
                         <td style="border: 1px solid black; text-align: center;">{{ $tb->kode }}</td>
                         <td colspan="4" style="border: 1px solid black;">{{ $tb->deskripsi }}</td>
@@ -151,11 +151,7 @@
 
         <h1 style="font-size: 14px">Materi Pembelajaran</h1>
         <p style="font-size: 12px">
-            @if (!empty($mataKuliah['materiPembelajarans']) && count($mataKuliah['materiPembelajarans']) > 0)
-                {{ collect($mataKuliah['materiPembelajarans'])->pluck('description')->implode('; ') }}
-            @else
-                -
-            @endif
+            {{ $mataKuliah->materi_pembelajaran ?? '-' }}
         </p>
         <p style="font-size: 12px">
             <i>{{ $mataKuliah->materi_pembelajaran_inggris }}</i>
@@ -225,7 +221,7 @@
                     @else
                         <tr>
                             <td style="border: 1px solid black;">{{ $rps['minggu'] }}</td>
-                            <td style="border: 1px solid black;">{{ $rps->kemampuanAkhir->deskripsi ?? '-' }}</td>
+                            <td style="border: 1px solid black;">{{ $rps['kemampuan_akhir'] ?? '-' }}</td>
                             <td style="border: 1px solid black;">{{ $rps['pokok_bahasan'] }}</td>
                             <td style="border: 1px solid black;">
                                 {{ $rps['modalitas_bentuk_strategi_metodepembelajaran'] }}
@@ -247,19 +243,10 @@
                                 M: 1 x 1 x {{ $mataKuliah['praktek_m'] ?? 0 }}'
                             </td>
                             <td style="border: 1px solid black; padding: 5px;">
-                                @if (isset($rps['instrumenPenilaians']) && count($rps['instrumenPenilaians']) > 0)
-                                    @foreach ($rps['instrumenPenilaians'] as $penilaian)
-                                        <strong>{{ $penilaian['jenis_evaluasi'] }}
-                                            ({{ $penilaian['bobot_penilaian'] }}%)
-                                        </strong><br>
-                                        {{ $penilaian['deskripsi'] ?? '-' }}<br><br>
-                                    @endforeach
-                                @else
-                                    -
-                                @endif
+                                {{ $rps['instrumen_penilaian'] }}
                             </td>
                             <td style="border: 1px solid black;">{{ $rps['hasil_belajar'] }}</td>
-                            <td style="border: 1px solid black;">{{ $rps['tujuanBelajar']['kode'] ?? '-' }}</td>
+                            <td style="border: 1px solid black;">{{ $rps['tujuanBelajarRps']['kode'] ?? '-' }}</td>
                             <td style="border: 1px solid black;">{{ $rps['cpl']['kode'] ?? '-' }}</td>
                             <td style="border: 1px solid black;">{{ $rps['bobot_penilaian'] }}</td>
                         </tr>

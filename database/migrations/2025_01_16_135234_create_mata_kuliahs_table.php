@@ -19,6 +19,7 @@ return new class extends Migration
             $table->enum('kategori', ["Institusi", "Prodi", "Nasional"])->nullable();
             $table->text('deskripsi_singkat')->nullable();
             $table->text('deskripsi_singkat_inggris')->nullable();
+            $table->text('materi_pembelajaran')->nullable();
             $table->text('materi_pembelajaran_inggris')->nullable();
             $table->text('tujuan')->nullable();
             $table->integer('semester')->nullable();
