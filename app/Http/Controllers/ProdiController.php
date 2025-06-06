@@ -6,6 +6,7 @@ use App\Http\Requests\StoreProdiRequest;
 use App\Models\Prodi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ProdiController extends Controller
 {
@@ -48,7 +49,7 @@ class ProdiController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'jenjang' => 'required|in:D3,D4,S1,S2,S3',
-            'kode' => 'required|string|max:50|unique:prodis,kode,' . $prodi->id,
+            'kode' => 'required|string|size:2|unique:prodis,kode,' . $prodi->id,
             'jurusan_id' => 'required|exists:jurusans,id',
             'is_active' => 'nullable|boolean',
         ]);
@@ -83,10 +84,29 @@ class ProdiController extends Controller
 
     public function getProdiWithKurikulumDropdown()
     {
-        $prodis = Prodi::with('kurikulums')->get(['id', 'name']);
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if ($user->hasRole('P2MPP')) {
+            $prodis = Prodi::with('kurikulums')->get(['id', 'name']);
+        } else {
+            if (!$user->prodi_id) {
+                return response()->json(['error' => 'User tidak memiliki Prodi ID'], 400);
+            }
+
+            $prodi = Prodi::with('kurikulums')
+                ->where('id', $user->prodi_id)
+                ->first(['id', 'name']);
+
+            if (!$prodi) {
+                return response()->json(['error' => 'Prodi tidak ditemukan'], 404);
+            }
+
+            $prodis = collect([$prodi]);
+        }
 
         return response()->json($prodis);
     }
+
 
     public function getProdiDropdownByJurusanDosen()
     {

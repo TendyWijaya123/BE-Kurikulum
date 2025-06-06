@@ -40,8 +40,13 @@ class MataKuliahSheetImport implements ToCollection, WithHeadingRow
     public function __construct()
     {
         $this->formulasiCpa = FormulasiCpa::pluck('id', 'kode')->toArray();
-        $this->bentukPembelajaran = BentukPembelajaran::pluck('id', 'nama')->toArray();
-        $this->metodePembelajaran = MetodePembelajaran::pluck('id', 'nama')->toArray();
+        $this->bentukPembelajaran = BentukPembelajaran::all()->pluck('id', 'nama')->mapWithKeys(function ($id, $nama) {
+            return [strtolower(trim($nama)) => $id];
+        })->toArray();
+
+        $this->metodePembelajaran = MetodePembelajaran::all()->pluck('id', 'nama')->mapWithKeys(function ($id, $nama) {
+            return [strtolower(trim($nama)) => $id];
+        })->toArray();
     }
 
 
@@ -105,18 +110,35 @@ class MataKuliahSheetImport implements ToCollection, WithHeadingRow
 
                     if (!empty($row['deskripsi_kemampuan_akhir'])) {
                         $bentukPembelajaranIds = collect(explode(',', $row['bentuk_pembelajaran'] ?? ''))
-                            ->map(fn($nama) => trim($nama)) // Trim setiap elemen
+                            ->map(fn($nama) => strtolower(trim($nama)))
                             ->map(fn($nama) => $this->bentukPembelajaran[$nama] ?? null)
                             ->filter()
                             ->values()
                             ->toArray();
 
+                        Log::info('Bentuk Pembelajaran:', [
+                            'input' => $row['bentuk_pembelajaran'] ?? '',
+                            'ids' => $bentukPembelajaranIds,
+                        ]);
+
+
                         $metodePembelajaranIds = collect(explode(',', $row['metode_pembelajaran'] ?? ''))
-                            ->map(fn($nama) => trim($nama)) // Trim setiap elemen
+                            ->map(fn($nama) => strtolower(trim($nama)))
                             ->map(fn($nama) => $this->metodePembelajaran[$nama] ?? null)
                             ->filter()
                             ->values()
                             ->toArray();
+
+                        Log::info('Metode Pembelajaran:', [
+                            'input' => $row['metode_pembelajaran'] ?? '',
+                            'ids' => $metodePembelajaranIds,
+                        ]);
+
+                        Log::info('Mapping bentuk pembelajaran', $this->bentukPembelajaran);
+                        Log::info('Mapping metode pembelajaran', $this->metodePembelajaran);
+
+
+
 
                         $kemampuanAkhir = KemampuanAkhir::create([
                             'mata_kuliah_id' => $mataKuliah->id,

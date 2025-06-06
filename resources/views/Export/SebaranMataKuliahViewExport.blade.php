@@ -226,17 +226,29 @@
                             </tr>
                             <tr>
                                 <td style="border: 1px solid black">
-                                    {{ round(($totalKeseluruhan['total_teori_sks'] / $totalKeseluruhan['total_sks']) * 100) }}%
+                                    {{ $totalKeseluruhan['total_sks'] != 0
+                                        ? round(($totalKeseluruhan['total_teori_sks'] / $totalKeseluruhan['total_sks']) * 100) . '%'
+                                        : '0%' }}
                                 </td>
                                 <td style="border: 1px solid black">
-                                    {{ round(($totalKeseluruhan['total_praktek_sks'] / $totalKeseluruhan['total_sks']) * 100) }}%
+                                    {{ $totalKeseluruhan['total_sks'] != 0
+                                        ? round(($totalKeseluruhan['total_praktek_sks'] / $totalKeseluruhan['total_sks']) * 100) . '%'
+                                        : '0%' }}
                                 </td>
                                 <td style="border: 1px solid black">100%</td>
                                 <td style="border: 1px solid black">
-                                    {{ round(($totalKeseluruhan['total_teori_menit'] / $totalKeseluruhan['total_menit']) * 100) }}%
+                                    @if ($totalKeseluruhan['total_menit'] > 0)
+                                        {{ round(($totalKeseluruhan['total_teori_menit'] / $totalKeseluruhan['total_menit']) * 100) }}%
+                                    @else
+                                        0%
+                                    @endif
                                 </td>
                                 <td style="border: 1px solid black">
-                                    {{ round(($totalKeseluruhan['total_praktek_menit'] / $totalKeseluruhan['total_menit']) * 100) }}%
+                                    @if ($totalKeseluruhan['total_menit'] > 0)
+                                        {{ round(($totalKeseluruhan['total_praktek_menit'] / $totalKeseluruhan['total_menit']) * 100) }}%
+                                    @else
+                                        0%
+                                    @endif
                                 </td>
                                 <td style="border: 1px solid black">100%</td>
                             </tr>

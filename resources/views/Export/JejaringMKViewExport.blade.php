@@ -4,12 +4,12 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>12B_MK_BebanSKS</title>
+        <title>13B_Jejaring MK</title>
     </head>
 
     <body>
         @php
-            $colLength = 10;
+            $colLength = 16;
             $totalRatio = 7;
             $leftColspan = floor((4 / $totalRatio) * $colLength);
             $middleColspan = floor((2 / $totalRatio) * $colLength);
@@ -17,7 +17,7 @@
         @endphp
 
         <tr>
-            <td align="center" colspan={{ $colLength }} style="font-weight: bold; font-size:13px">LAMPIRAN 12 B</td>
+            <td align="center" colspan={{ $colLength }} style="font-weight: bold; font-size:13px">LAMPIRAN 15</td>
         </tr>
         <tr></tr>
 
@@ -25,7 +25,7 @@
             <tr>
                 <td colspan="{{ $leftColspan }}" rowspan="2" align="center"
                     style="border: 1px solid  black; font-weight:bold; font-size:13px">
-                    {{ 'DAFTAR MATA KULIAH DAN BEBAN SKS' }}
+                    {{ 'Sebaran Mata Kuliah per Semester' }}
                 </td>
                 <td colspan="{{ $middleColspan }}" align="center" style="border: 1px  solid black;">KODE PRODI</td>
                 <td colspan="{{ $rightColspan }}" rowspan="3" align="center" style="border: 1px solid black;"></td>
@@ -59,51 +59,33 @@
                 <td></td>
                 <td>
                     {{-- KONTEN START --}}
-
-
-
-                    <table style="border-collapse: collapse; width: 100%;">
-                        <thead>
-                            <tr>
-                                <th style="border: 1px solid black; background-color: gray; font-weight: bold;">No</th>
-                                <th style="border: 1px solid black; background-color: gray; font-weight: bold;">Kode
-                                </th>
-                                <th style="border: 1px solid black; background-color: gray; font-weight: bold;">Nama
-                                    Mata Kuliah</th>
-                                <th style="border: 1px solid black; background-color: gray; font-weight: bold;">Tujuan
-                                    Belajar</th>
-                                <th style="border: 1px solid black; background-color: gray; font-weight: bold;">
-                                    Formulasi (C, P, A)</th>
-                                <th style="border: 1px solid black; background-color: gray; font-weight: bold;">Beban
-                                    Belajar Mahasiswa (jam/smt)</th>
-                                <th style="border: 1px solid black; background-color: gray; font-weight: bold;">SKS</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($mataKuliah as $index => $mk)
-                                <tr>
-                                    <td style="border: 1px solid black;">{{ $index + 1 }}</td>
-                                    <td style="border: 1px solid black;">{{ $mk->kode }}</td>
-                                    <td style="border: 1px solid black;">{{ $mk->nama }}</td>
-                                    <td style="border: 1px solid black;">{{ $mk->tujuan }}</td>
-                                    <td style="border: 1px solid black;">
-                                        @if (!empty($mk->formulasiCpas) && is_iterable($mk->formulasiCpas))
-                                            {{ implode(', ', array_column($mk->formulasiCpas->toArray(), 'kode')) }}
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
-                                    <td style="border: 1px solid black;">
-                                        {{ $mk->kemampuan_akhirs_sum_estimasi_beban_belajar ?? '0' }}</td>
-                                    <td style="border: 1px solid black;">{{ $mk->sks }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
+                    <table>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr></tr>
                     </table>
-
-
-
-
                     {{-- KONTEN END --}}
                 </td>
             </tr>
@@ -130,6 +112,7 @@
 
             {{-- FOOTER END --}}
         </table>
+
 
     </body>
 

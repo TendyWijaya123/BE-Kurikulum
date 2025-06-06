@@ -4,6 +4,7 @@ namespace App\Exports\PenyusunanKurikulum;
 
 use App\Models\Kurikulum;
 use App\Models\PetaKompetensi;
+use App\Models\Prodi;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
@@ -13,12 +14,14 @@ class PenyusunanKurikulumExport implements WithMultipleSheets
 
     protected $kurikulum;
     protected $kurikulumId;
+    protected $prodi;
 
 
     public function __construct($kurikulumId)
     {
         $this->kurikulum = Kurikulum::find($kurikulumId);
         $this->kurikulumId = $kurikulumId;
+        $this->prodi = Prodi::find($this->kurikulum->prodi_id);
     }
 
     public function sheets(): array
@@ -42,11 +45,11 @@ class PenyusunanKurikulumExport implements WithMultipleSheets
             new MatriksPMPMKSheetExport($this->kurikulum->id),
             new StrukturMKSheetExport($this->kurikulum->id),
             new MKBebanSKSSheetExport($this->kurikulum->id),
-            new OrganisasiMkSheetExport($this->kurikulum->id),
+            new OrganisasiMkSheetExport($this->kurikulum->id, $this->prodi),
             new JejaringMKSheetExport($this->kurikulum->id),
+            new MatriksCPLMKSheetExport($this->kurikulum->id),
             new SebaranMatakuliahSheetExport($this->kurikulum->id),
             new PemilahanMataKuliahSheetExport($this->kurikulum->id),
-
         ];
     }
 }
