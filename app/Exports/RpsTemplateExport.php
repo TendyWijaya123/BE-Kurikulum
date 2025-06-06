@@ -32,7 +32,6 @@ class RpsTemplateExport implements WithMultipleSheets
         $this->cpl = Cpl::whereHas('mataKuliahs', function ($query) use ($mataKuliahId) {
             $query->where('mk_id', $mataKuliahId);
         })->get(['id', 'kode', 'keterangan']);
-        Log::info($this->cpl);
     }
 
 

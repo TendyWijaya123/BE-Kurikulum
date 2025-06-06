@@ -17,7 +17,7 @@
         @endphp
 
         <tr>
-            <td align="center" colspan={{ $colLength }} style="font-weight: bold; font-size:13px">LAMPIRAN 4-a</td>
+            <td align="center" colspan={{ $colLength }} style="font-weight: bold; font-size:13px">LAMPIRAN 6</td>
         </tr>
         <tr></tr>
 
@@ -25,7 +25,7 @@
             <tr>
                 <td colspan="{{ $leftColspan }}" rowspan="2" align="center"
                     style="border: 1px solid  black; font-weight:bold; font-size:13px">
-                    {{ 'Analisis Konsideran (Siap Kerja & Siap Usaha)' }}
+                    {{ 'Rumusan CPL dan PPM' }}
                 </td>
                 <td colspan="{{ $middleColspan }}" align="center" style="border: 1px  solid black;">KODE PRODI</td>
                 <td colspan="{{ $rightColspan }}" rowspan="3" align="center" style="border: 1px solid black;"></td>

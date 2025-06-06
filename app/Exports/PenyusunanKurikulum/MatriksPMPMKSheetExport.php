@@ -24,7 +24,6 @@ class MatriksPMPMKSheetExport implements FromView
             ->get();
         $this->materiPembelajarans = MateriPembelajaran::where('kurikulum_id', $kurikulumId)->get();
 
-        Log::info("Detail Pengetahuan: " . json_encode($this->pengetahuans->toArray(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
     }
     public function view(): View
     {

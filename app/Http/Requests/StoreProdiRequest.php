@@ -24,7 +24,7 @@ class StoreProdiRequest extends FormRequest
         return [
             'name' => 'required|string|regex:/^[a-zA-Z\s]+$/|max:255',
             'jenjang' => 'required|in:D3,D4,S1,S2,S3',
-            'kode' => 'required|string|max:50|unique:prodis',
+            'kode' => 'required|string|size:2|unique:prodis',
             'jurusan_id' => 'required|exists:jurusans,id',
         ];
     }
@@ -47,6 +47,7 @@ class StoreProdiRequest extends FormRequest
             'kode.string' => 'Kode harus berupa string.',
             'kode.max' => 'Kode maksimal 50 karakter.',
             'kode.unique' => 'Kode sudah digunakan.',
+            'kode.size' => 'Kode tidak boleh lebih dari dua karakter.',
             'jurusan_id.required' => 'Jurusan wajib diisi.',
             'jurusan_id.exists' => 'Jurusan tidak valid.',
         ];

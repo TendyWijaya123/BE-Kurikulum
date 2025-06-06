@@ -12,8 +12,9 @@ class OrganisasiMkSheetExport implements FromView
     protected $mataKuliahBySemester;
     protected $totalKeseluruhan;
     protected $maxPerKategori;
+    protected $prodi;
 
-    public function __construct($kurikulumId)
+    public function __construct($kurikulumId, $prodi)
     {
         $mataKuliah = MataKuliah::where('kurikulum_id', $kurikulumId)
             ->get(['nama', 'sks', 'semester', 'kategori']);
@@ -71,14 +72,17 @@ class OrganisasiMkSheetExport implements FromView
         $this->mataKuliahBySemester = $mataKuliahBySemester;
         $this->maxPerKategori = $maxPerKategori;
         $this->totalKeseluruhan = $totalKeseluruhan;
+        $this->prodi = $prodi;
     }
 
     public function view(): View
     {
+
         return view('Export.OrganisasiMKViewExport', [
             'mataKuliahBySemester' => $this->mataKuliahBySemester,
             'totalKeseluruhan' => $this->totalKeseluruhan,
             'maxPerKategori' => $this->maxPerKategori,
+            'prodi' => $this->prodi,
         ]);
     }
 }

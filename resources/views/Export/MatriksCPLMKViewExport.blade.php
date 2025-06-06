@@ -4,12 +4,12 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>11_Matriks P-MP-MK</title>
+        <title>14_Matriks CPL-MK</title>
     </head>
 
     <body>
         @php
-            $colLength = count($pengetahuans) + 4;
+            $colLength = count($cpls) + 4;
             $totalRatio = 7;
             $leftColspan = floor((4 / $totalRatio) * $colLength);
             $middleColspan = floor((2 / $totalRatio) * $colLength);
@@ -17,7 +17,7 @@
         @endphp
 
         <tr>
-            <td align="center" colspan={{ $colLength }} style="font-weight: bold; font-size:13px">LAMPIRAN 11</td>
+            <td align="center" colspan={{ $colLength }} style="font-weight: bold; font-size:13px">LAMPIRAN 14</td>
         </tr>
         <tr></tr>
 
@@ -25,7 +25,7 @@
             <tr>
                 <td colspan="{{ $leftColspan }}" rowspan="2" align="center"
                     style="border: 1px solid  black; font-weight:bold; font-size:13px">
-                    {{ 'Matriks Materi Pembelajaran dengan Pengetahuan penunjang CPL terhadap Mata Kuliah' }}
+                    {{ 'Peta Mata Kuliah berdasarkan CPL' }}
                 </td>
                 <td colspan="{{ $middleColspan }}" align="center" style="border: 1px  solid black;">KODE PRODI</td>
                 <td colspan="{{ $rightColspan }}" rowspan="3" align="center" style="border: 1px solid black;"></td>
@@ -61,56 +61,42 @@
                     {{-- KONTEN START --}}
 
 
-                    <table style="border-collapse: collapse; width: 100%;">
+                    <table style="border-collapse: collapse; border: 1px solid black; width: 100%;">
                         <thead>
                             <tr>
-                                <th rowspan="2"
-                                    style="border: 1px solid black; background-color: gray; font-weight: bold;">No</th>
-                                <th colspan="2"
-                                    style="border: 1px solid black; background-color: gray; font-weight: bold;">Materi
-                                    Pembelajaran (MP)</th>
-                                <th colspan="{{ count($pengetahuans) }}"
-                                    style="border: 1px solid black; background-color: gray; font-weight: bold;">
-                                    Pengetahuan (P)</th>
-                            </tr>
-                            <tr>
-                                <th style="border: 1px solid black; background-color: gray; font-weight: bold;">Materi
-                                    Pembelajaran (MP)</th>
-                                <th style="border: 1px solid black; background-color: gray; font-weight: bold;">Cognitif
-                                    Process Dimensions</th>
-                                @foreach ($pengetahuans as $pengetahuan)
-                                    <th style="border: 1px solid black; background-color: gray; font-weight: bold;">
-                                        {{ $pengetahuan->kode_pengetahuan }}
+                                <th style="background-color: gray; border: 1px solid black; padding: 5px;">Mata Kuliah
+                                </th>
+                                @foreach ($cpls as $cpl)
+                                    <th style="background-color: gray; border: 1px solid black; padding: 5px;">
+                                        {{ $cpl->kode }}
                                     </th>
                                 @endforeach
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($materiPembelajarans as $index => $materiPembelajaran)
+                            @foreach ($matakuliahs as $mk)
                                 <tr>
-                                    <td style="border: 1px solid black;">{{ $index + 1 }}</td>
-                                    <td style="border: 1px solid black;">{{ $materiPembelajaran->description }}</td>
-                                    <td style="border: 1px solid black;">{{ $materiPembelajaran->cognitif_proses }}
+                                    <td style="border: 1px solid black; padding: 5px;">
+                                        {{ $mk->nama }}
                                     </td>
-
-                                    @foreach ($pengetahuans as $pengetahuan)
-                                        <td style="border: 1px solid black;">
+                                    @foreach ($cpls as $cpl)
+                                        <td style="border: 1px solid black; text-align: center; padding: 5px;">
                                             @php
-                                                $mp = $pengetahuan->mps->firstWhere('mp_id', $materiPembelajaran->id);
+                                                // Cek apakah $mk ada di mataKuliahs $cpl dengan pivot kategori
+                                                $pivotKategori = null;
+                                                // Karena $cpl->mataKuliahs ada, cari $mk yang id-nya sama
+                                                $mkInCpl = $cpl->mataKuliahs->firstWhere('id', $mk->id);
+                                                if ($mkInCpl) {
+                                                    $pivotKategori = $mkInCpl->pivot->kategori ?? '';
+                                                }
                                             @endphp
-
-                                            @if ($mp && isset($mp->mataKuliahs))
-                                                {!! $mp->mataKuliahs->pluck('nama')->implode('<br>') !!}
-                                            @else
-                                                -
-                                            @endif
+                                            {{ $pivotKategori }}
                                         </td>
                                     @endforeach
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
-
 
 
                     {{-- KONTEN END --}}
