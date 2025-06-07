@@ -51,6 +51,11 @@ class TujuanBelajarRPS extends Model
         return $this->hasMany(RpsMatakuliah::class, 'tujuan_belajar_id');
     }
 
+    public function instrumenPenilaian()
+    {
+        return $this->hasMany(InstrumenPenilaianRps::class, 'tujuan_belajar_id');
+    }
+
     /**
      * Reindex kode untuk TujuanBelajar dalam satu mata_kuliah_id.
      *

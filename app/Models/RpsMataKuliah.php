@@ -25,11 +25,7 @@ class RpsMatakuliah extends Model
         'metode_pembelajaran',
         'media_pembelajaran',
         'sumber_belajar',
-        'instrumen_penilaian',
         'hasil_belajar',
-        'tujuan_belajar_id',
-        'cpl_id',
-        'bobot_penilaian',
     ];
 
     /**
@@ -48,34 +44,34 @@ class RpsMatakuliah extends Model
     //     return $this->belongsTo(KemampuanAkhir::class, 'kemampuan_akhir_id');
     // }
 
-    protected static function boot()
-    {
-        parent::boot();
+    // protected static function boot()
+    // {
+    //     parent::boot();
 
-        static::creating(function ($model) {
-            $model->validateTotalBobot();
-        });
+    //     static::creating(function ($model) {
+    //         $model->validateTotalBobot();
+    //     });
 
-        static::updating(function ($model) {
-            $model->validateTotalBobot();
-        });
-    }
+    //     static::updating(function ($model) {
+    //         $model->validateTotalBobot();
+    //     });
+    // }
 
     /**
      * Validasi total bobot_penilaian agar tidak melebihi 100 per mata_kuliah_id
      */
-    public function validateTotalBobot()
-    {
-        $totalBobot = DB::table('rps_matakuliah')
-            ->where('mata_kuliah_id', $this->mata_kuliah_id)
-            ->sum('bobot_penilaian');
+    // public function validateTotalBobot()
+    // {
+    //     $totalBobot = DB::table('rps_matakuliah')
+    //         ->where('mata_kuliah_id', $this->mata_kuliah_id)
+    //         ->sum('bobot_penilaian');
 
-        if (($totalBobot + $this->bobot_penilaian) > 100) {
-            throw ValidationException::withMessages([
-                'bobot_penilaian' => 'Total bobot penilaian untuk mata kuliah ini tidak boleh melebihi 100.',
-            ]);
-        }
-    }
+    //     if (($totalBobot + $this->bobot_penilaian) > 100) {
+    //         throw ValidationException::withMessages([
+    //             'bobot_penilaian' => 'Total bobot penilaian untuk mata kuliah ini tidak boleh melebihi 100.',
+    //         ]);
+    //     }
+    // }
 
     /**
      * Relasi ke tabel TujuanBelajar

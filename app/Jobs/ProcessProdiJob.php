@@ -53,11 +53,29 @@ class ProcessProdiJob implements ShouldQueue
                 return;
             }
 
-            $cplList = $cpls->pluck('keterangan')->toArray();
-
-            $prompt = PromptCekCPLProvider::generatePrompt($cplList);
+            $cplListIndo = $cpls->pluck('keterangan')->toArray();
+            $prompt = PromptProvider::promptTranslate($cpls);
             $geminiApiKey = env('GEMINI_API_KEY');
 
+            $response = Http::retry(3, 2000)->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$geminiApiKey}", [
+                "contents" => [
+                    [
+                        "parts" => [
+                            ["text" => $prompt]
+                        ]
+                    ]
+                ]
+            ]);
+
+            $translatedText = $response->json();
+            $cplTexts = [];
+
+            if (isset($translatedText['candidates'][0]['content']['parts'][0]['text'])) {
+                $rawText = $translatedText['candidates'][0]['content']['parts'][0]['text'];
+                $cplTexts = array_filter(array_map('trim', explode("\n\n", $rawText)));
+            }
+
+            $prompt = PromptCekCPLProvider::generatePrompt($cplTexts, $cplListIndo);
             $response = Http::retry(3, 2000)->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$geminiApiKey}", [
                 "contents" => [
                     [
@@ -126,7 +144,8 @@ class ProcessProdiJob implements ShouldQueue
                         'tahun_akhir' => $kurikulum->tahun_akhir,
                     ],
                     'cpls' => $cpls,
-                    'ppms' => $ppms
+                    'ppms' => $ppms,
+                    'prompt' => $prompt
                 ]
             ];
 

@@ -83,9 +83,9 @@ class RpsSheetImport implements ToCollection, WithHeadingRow
                             'modalitas_bentuk_strategi_metodepembelajaran' => $row['modalitas_bentuk_strategi_dan_metode_pembelajaran_media_dan_sumber_belajar'],
                             'instrumen_penilaian' => $row['instrumen_penilaian'],
                             'hasil_belajar' => $row['hasil_belajar'],
-                            'tujuan_belajar_id' => $tujuanBelajarId ?: null,
-                            'cpl_id' => $cplId,
-                            'bobot_penilaian' => $row['bobot_penilaian'],
+                            // 'tujuan_belajar_id' => $tujuanBelajarId ?: null,
+                            // 'cpl_id' => $cplId,
+                            // 'bobot_penilaian' => $row['bobot_penilaian'],
                         ]
                     );
                 }

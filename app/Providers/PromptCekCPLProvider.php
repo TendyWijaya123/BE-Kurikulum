@@ -21,11 +21,16 @@ class PromptCekCPLProvider extends ServiceProvider
         //
     }
 
-    public static function generatePrompt(array $cplList)
+    public static function generatePrompt(array $cplList, array $cplIndo)
     {
         $cplItems = '';
         foreach ($cplList as $index => $cpl) {
             $cplItems .= ($index + 1) . ". " . $cpl . "\n";
+        }
+
+        $cplItemsIndo = ''; // <-- ganti nama variabel
+        foreach ($cplIndo as $index => $cpl) {
+            $cplItemsIndo .= ($index + 1) . ". " . $cpl . "\n";
         }
         return <<<EOT
 
@@ -38,9 +43,15 @@ class PromptCekCPLProvider extends ServiceProvider
 
             Berikut CPL yang perlu dianalisis:
 
+            Versi Indonesia
+            {$cplItemsIndo}
+
+            Versi Inggis
             {$cplItems}
 
-            Gunakan daftar kata kerja dari taksonomi Bloom untuk mengklasifikasikan *Behavior* ke dalam kategori proses kognitif (translate dulu ke bahasa inggris agar sesuai jangan langsung dibandingkan):  
+            Gunakan daftar kata kerja dari taksonomi Bloom untuk mengklasifikasikan *Behavior* ke dalam kategori proses kognitif : 
+            Catatan gunakan cpl versi inggris
+
             "{
                 "remember": "C1 (Remember)",
                 "identify": "C1 (Remember)",
@@ -111,8 +122,42 @@ class PromptCekCPLProvider extends ServiceProvider
                 "develop": "C6 (Create)"
             }"
 
-            **Instruksi Output**:  
-            Berikan hasil dalam format JSON dengan struktur sebagai berikut:
+            **Instruksi Proses Penalaran (Step-by-Step Reasoning Template):**
+
+            Untuk setiap CPL dalam daftar, ikuti langkah-langkah penalaran berikut secara berurutan:
+
+            1.  **Ekstraksi Komponen (Behavior, Subject Matters, Context):**
+                * Baca dan analisis CPL (Gunakan **versi Bahasa Indonesia** sebagai acuan utama untuk ekstraksi ini).
+                * Identifikasi dan ekstrak kata kerja utama yang merepresentasikan **Behavior**.
+                * Identifikasi dan ekstrak frasa atau kata kunci yang mewakili **Subject Matters**.
+                * Identifikasi dan ekstrak frasa yang menjelaskan **Context** (lingkup atau kondisi).
+
+            2.  **Klasifikasi Behavior (Menggunakan CPL Inggris & Taksonomi Bloom):**
+                * Ambil kata kerja (Behavior) yang telah Anda ekstrak dari CPL Bahasa Indonesia.
+                * Cari padanan kata kerja tersebut dalam CPL **versi Bahasa Inggris** (jika ada, atau gunakan terjemahan akurat jika tidak ada padanan langsung di CPL Inggris) dan gunakan versi Inggris tersebut untuk mengklasifikasikannya berdasarkan daftar Taksonomi Bloom yang disediakan.
+                * Catat kategori Taksonomi Bloom (C1-C6) yang sesuai.
+
+            3.  **Evaluasi Kualitas CPL (Cross-Check):**
+                * Periksa apakah ketiga komponen (Behavior, Subject Matters, Context) **hadir, jelas, spesifik, dan saling terkait** dalam CPL.
+                * Nilai apakah CPL tersebut secara keseluruhan memenuhi standar Anatomi Capaian Pembelajaran.
+                * **Kriteria "Issues":**
+                    * Komponen utama (Behavior, Subject Matters, Context) **hilang atau sangat implisit** sehingga sulit diidentifikasi.
+                    * **Ambiguitas tinggi:** Salah satu atau lebih komponen tidak jelas atau dapat diinterpretasikan secara berbeda.
+                    * **Ketidaksesuaian:** Behavior tidak relevan dengan Subject Matters atau Context, atau sebaliknya.
+                    * **Duplikasi atau redundansi yang tidak perlu.**
+                * **Kriteria "CPL sesuai dengan standar" atau "masalah masih bisa ditoleransi":**
+                    * Semua komponen hadir dan jelas.
+                    * Jika ada sedikit ketidakjelasan, tetapi inti CPL tetap dapat dipahami dan memenuhi tujuan. Contoh: "Behavior jelas tetapi Context sedikit umum namun masih relevan." (Sebutkan alasan spesifik toleransi).
+
+            4.  **Penyusunan Saran Perbaikan:**
+                * Jika ada "issues" yang ditemukan, berikan saran perbaikan yang **spesifik dan konstruktif**.
+                * Saran harus berupa kalimat CPL yang **direvisi** untuk mengatasi masalah yang teridentifikasi, mengikuti format Anatomi CP.
+                * Jika tidak ada masalah, tulis "tidak ada saran perbaikan".
+
+            **Instruksi Output:**
+
+            Berikan hasil evaluasi untuk setiap CPL dalam format array JSON. Pastikan setiap objek JSON dalam array mewakili satu CPL yang dievaluasi. Gunakan **CPL versi Bahasa Indonesia** untuk `cpl_text` dan detail `subject_matters`, `context`, `issues`, dan `saran_perbaikan`. Untuk `behavior.classification`, gunakan hasil klasifikasi dari **CPL versi Bahasa Inggris** yang telah Anda lakukan pada langkah 2.
+            catatan : gunakan cpl bahasa indonesia untuk cpl_text, output behavior, subject_matters, context, dan saran_perbaikan, gunakan cpl bahasa inggris untuk behavior
 
             ```json
             {

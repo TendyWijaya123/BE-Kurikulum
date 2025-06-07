@@ -81,22 +81,46 @@ class PromptProvider extends ServiceProvider
         $prodi = Prodi::find($prodiId);
         $prodiName = $prodi ? $prodi->nama : 'Prodi Tidak Diketahui';
 
-        $prompt = "**Tujuan** : Rancangan CPL \n **Dasar Analisis** : terdapat minimal empat konsiderans yang harus dianalisis secara komprehensif untuk menghasilkan rancangan CPL, yaitu konsiderans Siap Kerja atau Siap Usaha, Kajian Banding Kurikulum, perkembangan IPTEKS terkini, dan deskripsi jenjang KKNI, Data tersebut dibawah  ini \n";
+        // --- AWAL PENERAPAN PE2: DETAILED DESCRIPTION & CONTEXT SPECIFICATION ---
+// ...existing code...
+        $prompt = <<<EOT
+        Anda adalah seorang **Validator Kurikulum Ahli** dan **Perancang Capaian Pembelajaran Lulusan (CPL) yang Berpengalaman**. Tugas Anda adalah menganalisis data konsideran yang komprehensif dan menghasilkan rancangan CPL baru yang akurat, spesifik, dan sesuai dengan standar pendidikan tinggi, khususnya untuk program studi **{$prodiName}** jenjang D3. Fokus utama adalah mengintegrasikan seluruh konsideran yang diberikan ke dalam formulasi CPL yang koheren.
 
-        // Format hasil dalam bentuk markdown untuk prompt
-        $prompt .= "### Analisis Capaian Pembelajaran Lulusan ($prodiName)\n\n";
+        **Tujuan**: Merancang Capaian Pembelajaran Lulusan (CPL) untuk program studi D3 Teknik Komputer Informatika {$prodiName} berdasarkan analisis mendalam terhadap konsideran yang disediakan.
 
-        $prompt .= "**1. SKSU (Satuan Kredit Semester Universitas)**\n**Siap Kerja**\n profil lulusan, kualifikasi, kategori, kompetensi_kerja\n";
-        foreach ($siapKerja as $item) {
-            $prompt .= "- {$item->profil_lulusan}, {$item->kualifikasi}, {$item->kategori}, {$item->kompetensi_kerja}  \n";
+        **Dasar Analisis**: Anda harus menganalisis secara komprehensif empat kelompok konsideran utama yang disediakan di bawah ini untuk menghasilkan rancangan CPL. Konsideran ini mencakup:
+        1.  **SKSU (Siap Kerja atau Siap Usaha):** Profil lulusan, kualifikasi, kategori, dan kompetensi kerja yang relevan dengan kebutuhan dunia kerja dan wirausaha.
+        2.  **Kajian Banding Kurikulum:** CPL dan mata kuliah dari program studi pembanding untuk mengidentifikasi praktik terbaik dan celah kompetensi.
+        3.  **Perkembangan IPTEKS Terkini:** Pengetahuan, teknologi, dan seni terbaru yang relevan dengan bidang Teknik Komputer Informatika.
+        4.  **Deskripsi Jenjang KKNI:** Kata kunci pengetahuan dan kemampuan kerja sesuai level KKNI D3 untuk memastikan keselarasan dengan standar nasional.
+
+        **Definisi Struktur CPL (Anatomi Capaian Pembelajaran):**
+        Setiap CPL yang Anda hasilkan harus secara eksplisit memenuhi komponen-komponen berikut:
+        -   **Behavior (Tingkah Laku/Kemampuan):** Kata kerja yang mendeskripsikan tindakan atau proses kognitif yang dapat secara langsung didemonstrasikan atau diukur oleh mahasiswa pada akhir pembelajaran. Contoh: "Menganalisis", "Menerapkan", "Mendesain".
+        -   **Subject Matters (Materi Pokok/Bahan Kajian):** Pengetahuan disiplin ilmu, konsep, teori, atau keterampilan spesifik yang dipelajari dan dikuasai oleh mahasiswa, di mana behavior tersebut diaplikasikan. Contoh: "Algoritma machine learning", "Prinsip-prinsip jaringan komputer".
+        -   **Context (Konteks/Lingkup):** Kondisi, batasan, lingkungan, atau ruang lingkup spesifik di mana mahasiswa diharapkan mampu mendemonstrasikan behavior dengan subject matters tertentu. Contoh: "dalam pengembangan aplikasi berbasis web", "menggunakan perangkat lunak simulasi".
+        ---
+        EOT;
+// ...existing code... // Menutup bagian intro PE2
+
+        // --- DATA KONSIDERAN (Bagian yang sudah ada) ---
+        $prompt .= "### Data Konsideran untuk Program Studi {$prodiName}\n\n";
+
+        $prompt .= "**1. SKSU (Satuan Kredit Semester Universitas)**\n";
+        if (!$siapKerja->isEmpty()) {
+            $prompt .= "**Siap Kerja**\n Profil Lulusan, Kualifikasi, Kategori, Kompetensi Kerja\n";
+            foreach ($siapKerja as $item) {
+                $prompt .= "- {$item->profil_lulusan}, {$item->kualifikasi}, {$item->kategori}, {$item->kompetensi_kerja}\n";
+            }
         }
-
-        $prompt .= "**Siap Usaha**\n profil lulusan, kualifikasi, kategori, kompetensi_kerja\n";
-        foreach ($siapUsaha as $item) {
-            $prompt .= "- {$item->profil_lulusan}, {$item->kualifikasi}, {$item->kategori}, {$item->kompetensi_kerja}  \n";
+        if (!$siapUsaha->isEmpty()) {
+            $prompt .= "**Siap Usaha**\n Profil Lulusan, Kualifikasi, Kategori, Kompetensi Kerja\n";
+            foreach ($siapUsaha as $item) {
+                $prompt .= "- {$item->profil_lulusan}, {$item->kualifikasi}, {$item->kategori}, {$item->kompetensi_kerja}\n";
+            }
         }
         
-        $prompt .= "\n**2. Kurikulum Pembanding**\n program studi, kategori, cpl, ppm";
+        $prompt .= "\n**2. Kurikulum Pembanding**\n Program Studi, Kategori, CPL, PPM\n";
         foreach ($benchCurriculum as $item) {
             $prompt .= "- {$item->program_studi}, {$item->kategori}, {$item->cpl}, {$item->ppm}\n";
         }
@@ -118,30 +142,49 @@ class PromptProvider extends ServiceProvider
             $prompt .= "  - {$item->deskripsi}\n";
         }
 
-        $prompt .= "**4. Analisis Konsideran KKNI**\n **Kata Kunci Pengetahuan dalam KKNI** \n";
-
+        $prompt .= "\n**4. Analisis Konsideran KKNI**\n";
         $pengetahuanKkni = PengetahuanKKNI::where('id', $pengetahuanId)
         ->value('pengetahuan_kkni');
 
         $kemampuanKerjaKkni = KemampuanKerjaKKNI::where('id', $kemampuanKerjaId)
         ->value('kemampuan_kerja_kkni');
 
-        $prompt .= "{$pengetahuanKkni}\n\n";
-        $prompt .= "**Kata Kunci Kemampuan kerja dalam KKNI**\n{$kemampuanKerjaKkni}\n";
+        $prompt .= "**Kata Kunci Pengetahuan dalam KKNI:**\n{$pengetahuanKkni}\n\n";
+        $prompt .= "**Kata Kunci Kemampuan Kerja dalam KKNI:**\n{$kemampuanKerjaKkni}\n";
 
-        $prompt .= "**Format Hasil** : kode + Deskripsi  \n\n";
-        $prompt .= "**Deskripsi terdiri dari:**\n";
-        $prompt .= "- **Behavior**: Kemampuan yang dapat didemonstrasikan oleh mahasiswa, dinyatakan dalam bentuk kata kerja yang mendeskripsikan proses kognitif.\n";
-        $prompt .= "- **Subject Matters**: Bahan kajian yang berisi pengetahuan disiplin ilmu atau pengetahuan yang dipelajari mahasiswa dan dapat didemonstrasikan oleh mahasiswa.\n";
-        $prompt .= "- **Context**: Dalam konteks dan ruang lingkup apa kemampuan tersebut mampu didemonstrasikan oleh mahasiswa pada akhir pembelajaran.\n\n";
-        $prompt .= "**Format Hasil Akhir** : kode CPL, Deskripsi (Behavior + Subject Matters + Context) \n\n output harus singkat jangan panjang padat jelas dan berupa objek json : \n";
-        $prompt .= "[{
-            kode : CPL-1,
-            deskripsi : Behavior : teks + Subject Matters : teks + Context : teks
-        },
-            kode : CPL-2,
-            deskripsi : Behavior : teks + Subject Matters : teks + Context : teks
-        ]";
+        // --- AKHIR PENERAPAN PE2: STEP-BY-STEP REASONING TEMPLATE & STRUCTURED OUTPUT ---
+        $prompt .= "
+        ---
+        **Instruksi Proses Penalaran (Step-by-Step Reasoning Template):**
+
+        Ikuti langkah-langkah berikut untuk menghasilkan setiap CPL:
+
+        1.  **Integrasi Konsideran:** Gabungkan dan sintesis informasi dari semua konsideran (SKSU, Kurikulum Pembanding, IPTEKS, dan KKNI). Identifikasi benang merah, kebutuhan kompetensi yang berulang, serta tren terbaru.
+        2.  **Formulasi Ide CPL:** Berdasarkan integrasi konsideran, rumuskan ide-ide CPL awal yang mencerminkan kompetensi yang diharapkan.
+        3.  **Strukturisasi CPL dengan Anatomi CP:** Untuk setiap ide CPL, pecah dan formulasikan menjadi tiga komponen wajib:
+            * Identifikasi **Behavior** (kata kerja aksi kognitif) yang paling tepat dari kompetensi yang ingin dicapai.
+            * Identifikasi **Subject Matters** (materi inti atau bidang keilmuan) yang menjadi fokus behavior tersebut.
+            * Identifikasi **Context** (lingkup atau kondisi spesifik) di mana behavior dan subject matters diaplikasikan. Pastikan konteks ini relevan dengan jenjang { $prodi->jenjang $prodiName}
+        4.  **Penomoran CPL:** Berikan kode CPL secara berurutan dimulai dari CPL-1, CPL-2, dst.
+
+        **Format Hasil Akhir (Strict JSON Output):**
+
+        Output Anda harus berupa objek JSON yang valid dan ringkas, tidak ada teks tambahan di luar JSON. Setiap elemen dalam array JSON harus mewakili satu CPL yang dirancang.
+
+        ```json
+        [
+            {
+                \"kode\": \"CPL-1\",
+                \"deskripsi\": \"Behavior: [Teks Behavior] + Subject Matters: [Teks Subject Matters] + Context: [Teks Context]\"
+            },
+            {
+                \"kode\": \"CPL-2\",
+                \"deskripsi\": \"Behavior: [Teks Behavior] + Subject Matters: [Teks Subject Matters] + Context: [Teks Context]\"
+            }
+            // ... CPL-CPL selanjutnya ...
+        ]
+        ```
+        "; // Menutup bagian PE2
 
         return $prompt;
     }

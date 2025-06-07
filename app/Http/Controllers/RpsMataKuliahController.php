@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\UpsertRpsMatakuliah;
 
 class RpsMataKuliahController extends Controller
 {
@@ -65,7 +66,6 @@ class RpsMataKuliahController extends Controller
         ]);
     }
 
-
     public function store(Request $request)
     {
         DB::beginTransaction();
@@ -86,22 +86,9 @@ class RpsMataKuliahController extends Controller
                 'kemampuan_akhir' => 'nullable|string',
                 'hasil_belajar' => 'nullable|string',
                 
-                'instrumen_penilaian' => 'nullable|string',
-                'bobot_penilaian' => 'nullable|numeric',
-                
-                'cpl_id' => 'nullable|exists:cpls,id',
-                'tujuan_belajar_id' => 'nullable|exists:tujuan_belajar_rps,id',
             ]);
 
             $rps = RpsMatakuliah::create($validated);
-
-            if (!empty($validated['instrumen_penilaians'])) {
-                foreach ($validated['instrumen_penilaians'] as $instrumen) {
-                    $rps->instrumenPenilaians()->create($instrumen);
-                }
-                $totalBobot = collect($validated['instrumen_penilaians'])->sum('bobot_penilaian');
-                $rps->update(['bobot_penilaian' => $totalBobot]);
-            }
 
             DB::commit();
             return response()->json([
@@ -126,60 +113,47 @@ class RpsMataKuliahController extends Controller
         }
     }
 
-    public function bulkCreateOrUpdate(Request $request)
+    public function bulkCreateOrUpdate(UpsertRpsMatakuliah $request)
     {
         DB::beginTransaction();
         try {
-            $data = $request->all();
-
-            if (!is_array($data) || empty($data)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Data harus berupa array dan tidak boleh kosong',
-                ], 422);
-            }
-
+            $data = $request->validated();
             $results = [];
-            foreach ($data as $item) {
-                $validator = Validator::make($item, [
-                    'mata_kuliah_id' => 'required|exists:mata_kuliahs,id',
-                    'minggu' => 'required|integer',
-                    'pokok_bahasan' => 'nullable|string',
-                    'kategori' => 'required|string|in:ETS,EAS,Reguler',
-                    'modalitas_pembelajaran' => 'nullable|string',
-                    'media_pembelajaran' => 'nullable|string',
-                    'metode_pembelajaran' => 'nullable|string',
-                    'strategi_pembelajaran' => 'nullable|string',
-                    'bentuk_pembelajaran' => 'nullable|string',
-                    'instrumen_penilaian' => 'nullable|string',
-                    'hasil_belajar' => 'nullable|string',
-                    'tujuan_belajar_id' => 'nullable|exists:tujuan_belajar_rps,id',
-                    'cpl_id' => 'nullable|exists:cpls,id',
-                    'bobot_penilaian' => 'nullable|numeric',
-                    'kemampuan_akhir' => 'nullable|string',
-                    'sumber_belajar' => 'nullable|string',
-                ]);
 
-                if ($validator->fails()) {
-                    DB::rollBack();
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Validasi gagal pada data minggu ke-' . ($item['minggu'] ?? '-'),
-                        'errors' => $validator->errors()
-                    ], 422);
-                }
-
-                $validated = $validator->validated();
-
+            foreach ($data['items'] as $item) {
+                // Validasi per item jika perlu, atau asumsikan sudah tervalidasi oleh FormRequest
                 $rps = RpsMatakuliah::updateOrCreate(
                     [
-                        'mata_kuliah_id' => $validated['mata_kuliah_id'],
-                        'minggu' => $validated['minggu']
+                        'mata_kuliah_id' => $item['mata_kuliah_id'],
+                        'minggu' => $item['minggu']
                     ],
-                    $validated
+                    $item
                 );
 
-                $results[] = $rps;
+                // Handle instrumen_penilaians jika ada
+                if (isset($item['instrumen_penilaians']) && is_array($item['instrumen_penilaians'])) {
+                    // Hapus instrumen yang tidak ada di input
+                    $existingIds = $rps->instrumenPenilaians()->pluck('id')->toArray();
+                    $incomingIds = collect($item['instrumen_penilaians'])->pluck('id')->filter()->toArray();
+                    $toDelete = array_diff($existingIds, $incomingIds);
+                    if (!empty($toDelete)) {
+                        InstrumenPenilaianRps::whereIn('id', $toDelete)->delete();
+                    }
+
+                    foreach ($item['instrumen_penilaians'] as $instrumen) {
+                        $instrumen['rps_id'] = $rps->id;
+                        if (isset($instrumen['id'])) {
+                            $rps->instrumenPenilaians()->updateOrCreate(
+                                ['id' => $instrumen['id']],
+                                $instrumen
+                            );
+                        } else {
+                            $rps->instrumenPenilaians()->create($instrumen);
+                        }
+                    }
+                }
+
+                $results[] = $rps->load('instrumenPenilaians');
             }
 
             DB::commit();
@@ -201,85 +175,6 @@ class RpsMataKuliahController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat menyimpan data',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    public function update(Request $request, $id)
-    {
-        DB::beginTransaction();
-
-        try {
-            $rps = RpsMatakuliah::find($id);
-
-            if (!$rps) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Data tidak ditemukan'
-                ], 404);
-            }
-
-            $validated = $request->validate([
-                'kemampuan_akhir_id' => 'nullable|exists:kemampuan_akhirs,id',
-                'minggu' => 'required|integer|unique:rps_matakuliah,minggu,' . $id . ',id,mata_kuliah_id,' . $rps->mata_kuliah_id,
-                'pokok_bahasan' => 'nullable|string',
-                'kategori' => 'required|string|in:ETS,EAS,Reguler',
-                'modalitas_bentuk_strategi_metodepembelajaran' => 'nullable|string',
-                'instrumen_penilaians' => 'nullable|array',
-                'instrumen_penilaians.*.id' => 'nullable|exists:instrumen_penilaian_rps,id',
-                'instrumen_penilaians.*.jenis_evaluasi' => 'required|string|in:Quiz,Project,Case Study,Tugas',
-                'instrumen_penilaians.*.deskripsi' => 'required|string',
-                'instrumen_penilaians.*.bobot_penilaian' => 'required|numeric',
-                'hasil_belajar' => 'nullable|string',
-                'tujuan_belajar_id' => 'nullable|exists:tujuan_belajars,id',
-                'cpl_id' => 'nullable|exists:cpls,id',
-                'bobot_penilaian' => 'nullable|numeric',
-            ]);
-
-            $rps->update($validated);
-
-            if (isset($validated['instrumen_penilaians'])) {
-                $existingIds = $rps->instrumenPenilaians()->pluck('id')->toArray();
-                $incomingIds = collect($validated['instrumen_penilaians'])->pluck('id')->filter()->toArray();
-
-                $toDelete = array_diff($existingIds, $incomingIds);
-                if (!empty($toDelete)) {
-                    InstrumenPenilaianRps::whereIn('id', $toDelete)->delete();
-                }
-
-                foreach ($validated['instrumen_penilaians'] as $instrumen) {
-                    if (isset($instrumen['id'])) {
-                        $rps->instrumenPenilaians()->where('id', $instrumen['id'])->update([
-                            'jenis_evaluasi' => $instrumen['jenis_evaluasi'],
-                            'deskripsi' => $instrumen['deskripsi'],
-                            'bobot_penilaian' => $instrumen['bobot_penilaian'],
-                        ]);
-                    } else {
-                        $rps->instrumenPenilaians()->create($instrumen);
-                    }
-                }
-            }
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Data RPS Mata Kuliah berhasil diperbarui',
-                'data' => $rps->load('instrumenPenilaians'),
-            ]);
-        } catch (ValidationException $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'errors' => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat memperbarui data',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -338,54 +233,6 @@ class RpsMataKuliahController extends Controller
             'success' => true,
             'message' => 'Data RPS Mata Kuliah berhasil dihapus'
         ]);
-    }
-
-
-    public function generateRPSPDF(Request $request,  $mataKuliahId)
-    {
-        $mataKuliah = MataKuliah::with(['bukuReferensis', 'rpss', 'rpss.instrumenPenilaians', 'rpss.tujuanBelajarRps', 'rpss.cpl', 'kurikulum.prodi', 'materiPembelajarans', 'kurikulum.prodi.jurusan', 'cpls', 'tujuanBelajarRps', 'dosens'])->findOrFail($mataKuliahId);
-        // Log::info("Pretty JSON Mata Kuliah:\n" . json_encode($mataKuliah, JSON_PRETTY_PRINT));
-
-
-        $ringkasanInstrumen = [
-            'ETS' => 0,
-            'EAS' => 0,
-            'Quiz' => 0,
-            'Project' => 0,
-            'Case Study' => 0,
-            'Tugas' => 0
-        ];
-
-        foreach ($mataKuliah->rpss as $rps) {
-            $kategori = $rps->kategori ?? '';
-
-            if (in_array($kategori, ['ETS', 'EAS'])) {
-                $ringkasanInstrumen[$kategori] += floatval($rps->bobot_penilaian ?? 0);
-            } else {
-                foreach ($rps->instrumenPenilaians ?? [] as $instrumen) {
-                    $kategoriInstrumen = $instrumen->jenis_evaluasi ?? '';
-
-                    if (in_array($kategoriInstrumen, ['Quiz', 'Project', 'Case Study', 'Tugas'])) {
-                        $ringkasanInstrumen[$kategoriInstrumen] += floatval($instrumen->bobot_penilaian ?? 0);
-                        Log::info("Tambah bobot untuk instrumen {$kategoriInstrumen}: " . floatval($instrumen->bobot_penilaian ?? 0));
-                    }
-                }
-            }
-        }
-
-
-        $data = [
-            'mataKuliah' => $mataKuliah,
-            'ringkasanInstrumen' => $ringkasanInstrumen,
-
-            // 'kaKbk' => $request->input('ka_kbk'),
-            // 'koordProdi' => $request->input('koord_prodi'),
-            // 'kaJurusan' => $request->input('ka_jurusan'),
-            // 'wakilDirekturAkademik' => $request->input('wakil_direktur_akademik'),
-        ];
-        $pdf = Pdf::loadView('pdf.rps', $data)->setPaper('A4', 'landscape');
-
-        return $pdf->download("RPS-{$mataKuliah->nama}.pdf");
     }
 
     //--------------------------------------------------TUjuan belajar------------------------------------------//
@@ -457,5 +304,55 @@ class RpsMataKuliahController extends Controller
             'message' => 'Detail Mata Kuliah RPS berhasil diperbarui',
         ]);
     }
+
+
+    public function generateRPSPDF(Request $request,  $mataKuliahId)
+    {
+        $mataKuliah = MataKuliah::with(['bukuReferensis', 'rpss', 'rpss.instrumenPenilaians', 'kurikulum.prodi', 'materiPembelajarans', 'kurikulum.prodi.jurusan', 'cpls', 'tujuanBelajarRps', 'dosens'])->findOrFail($mataKuliahId);
+        // Log::info("Pretty JSON Mata Kuliah:\n" . json_encode($mataKuliah, JSON_PRETTY_PRINT));
+        
+
+        $ringkasanInstrumen = [
+            'ETS' => 0,
+            'EAS' => 0,
+            'Quiz' => 0,
+            'Project' => 0,
+            'Case Study' => 0,
+            'Tugas' => 0
+        ];
+
+        foreach ($mataKuliah->rpss as $rps) {
+            $kategori = $rps->kategori ?? '';
+
+            if (in_array($kategori, ['ETS', 'EAS'])) {
+                $ringkasanInstrumen[$kategori] += floatval($rps->bobot_penilaian ?? 0);
+            } else {
+                foreach ($rps->instrumenPenilaians ?? [] as $instrumen) {
+                    $kategoriInstrumen = $instrumen->kategori ?? '';
+
+                    if (in_array($kategoriInstrumen, ['Quiz', 'Project', 'Case Study', 'Tugas'])) {
+                        $ringkasanInstrumen[$kategoriInstrumen] += floatval($instrumen->bobot_penilaian ?? 0);
+                        Log::info("Tambah bobot untuk instrumen {$kategoriInstrumen}: " . floatval($instrumen->bobot_penilaian ?? 0));
+                    }
+                }
+            }
+        }
+
+
+        $data = [
+            'mataKuliah' => $mataKuliah,
+            'ringkasanInstrumen' => $ringkasanInstrumen,
+            'rpss' => $mataKuliah->rpss,
+            // 'kaKbk' => $request->input('ka_kbk'),
+            // 'koordProdi' => $request->input('koord_prodi'),
+            // 'kaJurusan' => $request->input('ka_jurusan'),
+            // 'wakilDirekturAkademik' => $request->input('wakil_direktur_akademik'),
+        ];
+        $pdf = Pdf::loadView('pdf.rps', $data)->setPaper('A4', 'landscape');
+
+        return $pdf->download("RPS-{$mataKuliah->nama}.pdf");
+    }
+
+    
 
 }

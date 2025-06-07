@@ -54,6 +54,7 @@ class DosenController extends Controller
                 'jurusan' => 'required|exists:jurusans,id',
                 'prodi' => 'required|array',
                 'prodi.*' => 'exists:prodis,id',
+                'username' => 'required|string'
             ]);
 
             $data = $validated;
@@ -64,6 +65,7 @@ class DosenController extends Controller
                 'nip' => $data['nip'],
                 'nama' => $data['nama'],
                 'email' => $data['email'],
+                'username' => $data['username'],
                 'password' => Hash::make($password),
                 'jenis_kelamin' => $data['jenisKelamin'],
                 'is_active' => true,
@@ -101,6 +103,7 @@ class DosenController extends Controller
                 'nip' => 'required|string|size:18|unique:dosens,nip,' . $request->id,
                 'nama' => 'required|string|max:50',
                 'email' => 'required|max:50|unique:dosens,email,' . $request->id,
+                'username' => 'required|string',
                 'jenisKelamin' => 'required|in:L,P',
                 'jurusan' => 'required|exists:jurusans,id',
                 'prodi' => 'nullable|array',
@@ -118,6 +121,7 @@ class DosenController extends Controller
                 'nip' => $validatedData['nip'],
                 'nama' => $validatedData['nama'],
                 'email' => $validatedData['email'],
+                'username' => $validatedData['username'],
                 'jenis_kelamin' => $validatedData['jenisKelamin'],
                 'jurusan_id' => $validatedData['jurusan'],
                 'is_active' => $validatedData['isActive'] ?? $dosen->is_active,

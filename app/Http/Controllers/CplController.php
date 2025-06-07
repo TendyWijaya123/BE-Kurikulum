@@ -11,6 +11,8 @@ use App\Providers\PromptCekCPLProvider;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Providers\PromptProvider;
+use Illuminate\Support\Facades\Http;
 
 class CplController extends Controller
 {
@@ -39,10 +41,6 @@ class CplController extends Controller
             $cpl = Cpl::where('kurikulum_id', $activeKurikulum->id)
                 ->orderByRaw("CAST(SUBSTRING(kode, 5) AS UNSIGNED) ASC")
                 ->get(['id', 'kode', 'keterangan']);
-
-            // $cplList = $cpl->pluck('keterangan')->toArray();
-            // $prompt = PromptCekCPLProvider::generatePrompt($cplList);
-            // dd($prompt);
 
             return response()->json([
                 'success' => true,

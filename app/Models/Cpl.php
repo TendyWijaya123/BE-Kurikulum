@@ -87,6 +87,11 @@ class Cpl extends Model
         return $this->hasMany(RpsMatakuliah::class, 'cpl_id');
     }
 
+    public function instrumenPenilaian()
+    {
+        return $this->hasMany(InstrumenPenilaianRps::class, 'cpl_id');
+    }
+
     public static function reindexKode(int $kurikulumId)
     {
         DB::beginTransaction();
