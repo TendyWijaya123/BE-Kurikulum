@@ -17,7 +17,7 @@
         @endphp
 
         <tr>
-            <td align="center" colspan={{ $colLength }} style="font-weight: bold; font-size:13px">LAMPIRAN 4-a</td>
+            <td align="center" colspan={{ $colLength }} style="font-weight: bold; font-size:13px">LAMPIRAN 7</td>
         </tr>
         <tr></tr>
 
@@ -25,7 +25,7 @@
             <tr>
                 <td colspan="{{ $leftColspan }}" rowspan="2" align="center"
                     style="border: 1px solid  black; font-weight:bold; font-size:13px">
-                    {{ 'Analisis Konsideran (Siap Kerja & Siap Usaha)' }}
+                    {{ 'Matriks PPM dengan CPL' }}
                 </td>
                 <td colspan="{{ $middleColspan }}" align="center" style="border: 1px  solid black;">KODE PRODI</td>
                 <td colspan="{{ $rightColspan }}" rowspan="3" align="center" style="border: 1px solid black;"></td>
@@ -59,22 +59,25 @@
                 <td></td>
                 <td>
                     {{-- KONTEN START --}}
-                    <table>
+                    <table style="border-collapse: collapse; border: 1px solid black; width: 100%;">
                         <thead>
                             <tr>
-                                <th>Profil Profesional Mandiri
-                                </th>
+                                <th style="background-color: gray; border: 1px solid black; padding: 5px;">Profil
+                                    Profesional Mandiri</th>
                                 @foreach ($cpls as $cpl)
-                                    <th>{{ $cpl->kode }}</th>
+                                    <th style="background-color: gray; border: 1px solid black; padding: 5px;">
+                                        {{ $cpl->kode }}</th>
                                 @endforeach
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($ppms as $ppm)
                                 <tr>
-                                    <td>{{ $ppm->kode }}</td>
+                                    <td style="border: 1px solid black; padding: 5px;">{{ $ppm->kode }}</td>
                                     @foreach ($cpls as $cpl)
-                                        <td>{{ $cpl->ppms->contains($ppm->id) ? '✔' : '' }}</td>
+                                        <td style="border: 1px solid black; text-align: center; padding: 5px;">
+                                            {{ $cpl->ppms->contains($ppm->id) ? '✔' : '' }}
+                                        </td>
                                     @endforeach
                                 </tr>
                             @endforeach

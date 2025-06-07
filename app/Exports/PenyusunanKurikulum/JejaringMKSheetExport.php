@@ -3,13 +3,14 @@
 namespace App\Exports\PenyusunanKurikulum;
 
 use App\Models\JejaringMkDiagram;
-use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithDrawings;
+use Illuminate\Contracts\View\View;
+use Maatwebsite\Excel\Concerns\FromView;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithTitle;
+use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
-class JejaringMKSheetExport implements FromCollection,  WithTitle, WithDrawings
+class JejaringMKSheetExport implements FromView, WithTitle, WithEvents
 {
     protected $kurikulumId;
 
@@ -18,9 +19,11 @@ class JejaringMKSheetExport implements FromCollection,  WithTitle, WithDrawings
         $this->kurikulumId = $kurikulumId;
     }
 
-    public function collection()
+    public function view(): View
     {
-        return collect([]);
+        return view('Export.JejaringMKViewExport', [
+            'kurikulumId' => $this->kurikulumId,
+        ]);
     }
 
     public function title(): string
@@ -28,21 +31,24 @@ class JejaringMKSheetExport implements FromCollection,  WithTitle, WithDrawings
         return '13B_JejaringMK';
     }
 
-    public function drawings()
+    public function registerEvents(): array
     {
-        $jejaringMK = JejaringMkDiagram::where('kurikulum_id', $this->kurikulumId)->first();
-        Log::info($jejaringMK);
-        if (!$jejaringMK || !$jejaringMK->gambar_url) {
-            return [];
-        }
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                $jejaringMK = JejaringMkDiagram::where('kurikulum_id', $this->kurikulumId)->first();
 
-        $drawing = new Drawing();
-        $drawing->setName('Jejaring Mata Kuliah');
-        $drawing->setDescription('Jejaring MataKuliah Image');
-        $drawing->setPath(storage_path('app/public/' . $jejaringMK->gambar_url));
-        $drawing->setHeight(500);
-        $drawing->setCoordinates('A1');
+                if (!$jejaringMK || !$jejaringMK->gambar_url) {
+                    return;
+                }
 
-        return [$drawing];
+                $drawing = new Drawing();
+                $drawing->setName('Jejaring Mata Kuliah');
+                $drawing->setDescription('Jejaring MataKuliah Image');
+                $drawing->setPath(storage_path('app/public/' . $jejaringMK->gambar_url));
+                $drawing->setHeight(500);
+                $drawing->setCoordinates('B8');
+                $drawing->setWorksheet($event->sheet->getDelegate());
+            },
+        ];
     }
 }

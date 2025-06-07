@@ -45,21 +45,16 @@ class PemilahanMataKuliahSheetExport implements FromView
                 ];
             })
             ->values();
-
-
-        Log::info("=== Mata Kuliah By Kategori ===");
-        Log::info(json_encode($this->mataKuliahByKategori, JSON_PRETTY_PRINT));
-
-        Log::info("=== Total Keseluruhan ===");
-        Log::info(json_encode($this->totalKeseluruhan, JSON_PRETTY_PRINT));
     }
 
     public function view(): View
     {
+        Log::info("Total keseluruhan (pretty JSON): " . json_encode($this->totalKeseluruhan, JSON_PRETTY_PRINT));
+        Log::info("mata kuliah by kategori : " . json_encode($this->mataKuliahByKategori, JSON_PRETTY_PRINT));
+
         return view('Export.PemilahanMataKuliahViewExport', [
             'mataKuliahByKategori' => $this->mataKuliahByKategori,
             'totalKeseluruhan' => $this->totalKeseluruhan,
-
         ]);
     }
 }
