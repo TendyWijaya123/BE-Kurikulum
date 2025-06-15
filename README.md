@@ -41,7 +41,7 @@ Backend ini dibangun menggunakan **Laravel 11** dan ditujukan untuk menangani se
 ### 📦 2. Clone & Install Dependency
 
 ```bash
-git clone https://github.com/nama-akun/kurikulum-backend.git
+git clone https://github.com/TendyWijaya123/BE-Kurikulum.git
 cd kurikulum-backend
 composer install
 ```
