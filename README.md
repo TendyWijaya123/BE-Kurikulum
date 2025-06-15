@@ -61,102 +61,54 @@ Edit `.env` sesuai konfigurasi lokal, termasuk:
 Salin konfigurasi `.env` sesuai kebutuhan. Contoh isi:
 
 ```env
+# Aplikasi
 APP_NAME=Laravel
 APP_ENV=local
 APP_KEY=
 APP_DEBUG=true
-APP_TIMEZONE=UTC
 APP_URL=http://localhost
 
-APP_LOCALE=en
-APP_FALLBACK_LOCALE=en
-APP_FAKER_LOCALE=en_US
-
-APP_MAINTENANCE_DRIVER=file
-# APP_MAINTENANCE_STORE=database
-
-PHP_CLI_SERVER_WORKERS=4
-BCRYPT_ROUNDS=12
-
-LOG_CHANNEL=stack
-LOG_STACK=single
-LOG_DEPRECATIONS_CHANNEL=null
-LOG_LEVEL=debug
-
+# Database
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=database
+DB_DATABASE=kurikulum
 DB_USERNAME=root
 DB_PASSWORD=
 
-SESSION_DRIVER=database
-SESSION_LIFETIME=120
-SESSION_ENCRYPT=false
-SESSION_PATH=/
-SESSION_DOMAIN=null
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=youremail@gmail.com
+MAIL_PASSWORD=your_app_password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=youremail@gmail.com
+MAIL_FROM_NAME="Kurikulum App"
 
-BROADCAST_CONNECTION=log
-FILESYSTEM_DISK=local
-QUEUE_CONNECTION=database
-
-CACHE_STORE=database
-CACHE_PREFIX=
-
-MEMCACHED_HOST=127.0.0.1
-
-REDIS_CLIENT=phpredis
-REDIS_HOST=127.0.0.1
-REDIS_PASSWORD=null
-REDIS_PORT=6379
-
-MAIL_MAILER=log
-MAIL_SCHEME=null
-MAIL_HOST=127.0.0.1
-MAIL_PORT=2525
-MAIL_USERNAME=null
-MAIL_PASSWORD=null
-MAIL_FROM_ADDRESS="hello@example.com"
-MAIL_FROM_NAME="${APP_NAME}"
-
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_DEFAULT_REGION=us-east-1
-AWS_BUCKET=
-AWS_USE_PATH_STYLE_ENDPOINT=false
-
-VITE_APP_NAME="${APP_NAME}"
-
-JWT_SECRET=
-
-GEMINI_API_KEY=
-
-FIREBASE_PROJECT_ID=
+# Firebase
+FIREBASE_PROJECT_ID=penyusunankurikulum-7787c
 FIREBASE_CREDENTIALS=app/firebase/firebase_credentials.json
 
-# Broadcasting Configuration
-BROADCAST_DRIVER=reverb
+# Gemini (Google Generative AI)
+GEMINI_API_KEY=your_api_key_here
 
-# Reverb Configuration
-REVERB_APP_ID=
-REVERB_APP_KEY=
-REVERB_APP_SECRET=
+# JWT Auth
+JWT_SECRET=
 
-# Server Configuration (untuk Reverb server)
-REVERB_SERVER_HOST=0.0.0.0
-REVERB_SERVER_PORT=6001
+# Queue & Schedule
+QUEUE_CONNECTION=database
 
-# Client Configuration (untuk frontend)
+# Session
+SESSION_DRIVER=database
+SESSION_DOMAIN=localhost
+
+# Reverb / Broadcasting (Opsional, jika digunakan)
 REVERB_HOST=localhost
 REVERB_PORT=6001
 REVERB_SCHEME=http
 
-# Session & Sanctum
+# Frontend Dev Server (Sanctum)
 SANCTUM_STATEFUL_DOMAINS=localhost:5173
-SESSION_DOMAIN=localhost
-
-# Queue Configuration
-QUEUE_CONNECTION=database
 
 ```
 
