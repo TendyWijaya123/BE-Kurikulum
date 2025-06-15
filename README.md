@@ -27,7 +27,7 @@ Backend ini dibangun menggunakan **Laravel 11** dan ditujukan untuk menangani se
 
 ---
 
-## 🛠️ Cara Menjalankan (Docker Recommended)
+## 🛠️ Cara Menjalankan
 
 ### 1. Clone Project & Setup `.env`
 
@@ -138,11 +138,6 @@ php artisan schedule:work
 php artisan serve
 ```
 
-**Dengan Octane:**
-```bash
-php artisan octane:start --server=frankenphp --host=127.0.0.1 --port=8000
-```
-
 ### 🌐 8. Akses Aplikasi
 
 Buka di browser:
@@ -152,7 +147,7 @@ http://127.0.0.1:8000/api
 ```
 
 
-## 🐳 Deployment via Docker
+## 🐳 Menjalankan via Docker (Recommendasi karena bisa menggunakan octane)
 
 ### 1. Dockerfile
 
