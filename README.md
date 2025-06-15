@@ -147,8 +147,22 @@ FIREBASE_CREDENTIALS=app/firebase/firebase_credentials.json
 ```env
 GEMINI_API_KEY=your_api_key_here
 ```
+## 🔐 Konfigurasi JWT (JSON Web Token)
 
----
+Autentikasi pengguna dilakukan dengan JWT agar komunikasi tetap aman dan tanpa sesi (stateless). Berikut langkah konfigurasi lengkap:
+
+### Generate Secret Key
+```bash
+php artisan jwt:secret
+```
+Perintah ini akan menulis nilai `JWT_SECRET` otomatis ke dalam file `.env`.
+
+### 4. Konfigurasi `.env`
+Pastikan variabel berikut ada dan telah diisi:
+```env
+JWT_SECRET=isi_dari_artisan_jwt:secret
+JWT_TTL=60
+```
 
 ### 🔐 4. Generate App Key
 
@@ -325,9 +339,8 @@ php artisan schedule:work
 ## 📂 Struktur Penting
 
 - `app/Jobs`: Tempat penyimpanan queue jobs
-- `app/Console/Kernel.php`: Penjadwalan otomatis (schedule)
+- `app/Mail`: Tempat penyimpanan queue Mail
 - `routes/api.php`: Seluruh endpoint REST API
-- `config/octane.php`: Konfigurasi Laravel Octane
 
 ---
 
