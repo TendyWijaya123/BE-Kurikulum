@@ -86,7 +86,7 @@ MAIL_FROM_ADDRESS=youremail@gmail.com
 MAIL_FROM_NAME="Kurikulum App"
 
 # Firebase
-FIREBASE_PROJECT_ID=penyusunankurikulum-7787c
+FIREBASE_PROJECT_ID=Nama_Project
 FIREBASE_CREDENTIALS=app/firebase/firebase_credentials.json
 
 # Gemini (Google Generative AI)
@@ -126,7 +126,7 @@ Pastikan variabel penting berikut telah disesuaikan:
 
 ### Langkah-langkah:
 1. Buka [Firebase Console](https://console.firebase.google.com/)
-2. Buat project: `penyusunankurikulum-7787c`
+2. Buat project: `Nama_Project`
 3. Masuk ke `Project Settings > Service Accounts`
 4. Klik `Generate new private key`
 5. Simpan file JSON ke: `app/firebase/firebase_credentials.json`
