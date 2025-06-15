@@ -1,72 +1,209 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🚀 Backend Aplikasi Penyusunan Kurikulum – Politeknik Negeri Bandung
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Backend ini dibangun menggunakan **Laravel 11** dan ditujukan untuk menangani seluruh proses logika bisnis serta API untuk frontend aplikasi penyusunan kurikulum di Politeknik Negeri Bandung. Backend ini terintegrasi dengan Firebase untuk fitur chatting dan Google Gemini API untuk AI support.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📌 Teknologi yang Digunakan
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Laravel 11
+- PHP >= 8.2
+- Laravel Octane (FrankenPHP)
+- Firebase SDK (Realtime Chat)
+- Google Gemini API
+- MySQL
+- Docker + Supervisor
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## ⚙️ Fitur Utama
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- Queue (Job)
+- Schedule (Penjadwalan)
+- API untuk frontend React.js
+- Chat real-time (Firebase)
+- Integrasi AI via Gemini API
+- Terintegrasi dengan sistem penyusunan kurikulum (konsideran → desain → konstruksi & pra-uji)
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🛠️ Cara Menjalankan (Docker Recommended)
 
-## Laravel Sponsors
+### 1. Clone Project & Setup `.env`
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Salin konfigurasi `.env` sesuai kebutuhan. Contoh isi:
 
-### Premium Partners
+```env
+[isi .env seperti yang sudah Anda berikan, potong untuk ringkas]
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+Pastikan variabel penting berikut telah disesuaikan:
 
-## Contributing
+- `DB_*`: Konfigurasi database
+- `FIREBASE_CREDENTIALS`: Path file kredensial Firebase
+- `GEMINI_API_KEY`: Kunci akses Gemini
+- `FLASK_URL`: URL endpoint NLP Flask (jika digunakan)
+- `QUEUE_CONNECTION`: Gunakan `database` untuk sistem antrian
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## 🔐 Konfigurasi Firebase
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Langkah-langkah:
+1. Buka [Firebase Console](https://console.firebase.google.com/)
+2. Buat project: `penyusunankurikulum-7787c`
+3. Masuk ke `Project Settings > Service Accounts`
+4. Klik `Generate new private key`
+5. Simpan file JSON ke: `app/firebase/firebase_credentials.json`
+6. Pastikan path ini sesuai dengan `.env` di bagian:
 
-## Security Vulnerabilities
+```env
+FIREBASE_CREDENTIALS=app/firebase/firebase_credentials.json
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## 🤖 Konfigurasi Gemini API
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+1. Masuk ke Google Cloud Console.
+2. Aktifkan Gemini API / Generative Language API.
+3. Dapatkan API key dan masukkan ke `.env`:
 
-## How to install
+```env
+GEMINI_API_KEY=your_api_key_here
+```
 
-clone
+---
+
+## 💻 Menjalankan Laravel Secara Lokal (Tanpa Docker)
+
+### ✅ 1. Pastikan Prasyarat Terinstal
+- PHP >= 8.2
+- Composer
+- MySQL / MariaDB
+- Ekstensi PHP: `pdo`, `mbstring`, `bcmath`, `zip`, `sockets`, `pcntl`
+- Node.js (opsional untuk pengembangan dengan Vite)
+
+### 📦 2. Clone & Install Dependency
+
+```bash
+git clone https://github.com/nama-akun/kurikulum-backend.git
+cd kurikulum-backend
 composer install
-php artisan jwt:secret
+```
+
+### ⚙️ 3. Setup File `.env`
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` sesuai konfigurasi lokal, termasuk:
+
+- Database (`DB_*`)
+- Firebase (`FIREBASE_CREDENTIALS`)
+- Gemini API (`GEMINI_API_KEY`)
+
+### 🔐 4. Generate App Key
+
+```bash
+php artisan key:generate
+```
+
+### 🧪 5. Migrasi Database
+
+```bash
+php artisan migrate
+# php artisan db:seed  # jika Anda memiliki seeder
+```
+
+### 🚀 6. Jalankan Queue dan Scheduler
+
+**Terminal 1** (Queue Worker):
+```bash
+php artisan queue:work
+```
+
+**Terminal 2** (Scheduler):
+```bash
+php artisan schedule:work
+```
+
+> Pastikan `QUEUE_CONNECTION=database` di file `.env`
+
+### ⚡ 7. Jalankan Server Laravel
+
+**Tanpa Octane:**
+```bash
+php artisan serve
+```
+
+**Dengan Octane:**
+```bash
+php artisan octane:start --server=frankenphp --host=127.0.0.1 --port=8000
+```
+
+### 🌐 8. Akses Aplikasi
+
+Buka di browser:
+
+```
+http://127.0.0.1:8000/api
+```
+
+
+## 🐳 Deployment via Docker
+
+### 1. Dockerfile
+
+```dockerfile
+[isi Dockerfile seperti yang Anda berikan, potong untuk ringkas]
+```
+
+### 2. Supervisor Config (`supervisord.conf`)
+
+```ini
+[isi supervisord.conf seperti yang Anda berikan]
+```
+
+### 3. Build dan Jalankan Container
+
+```bash
+docker build -t kurikulum-backend .
+docker run -d -p 8000:8000 --name kurikulum-backend kurikulum-backend
+```
+
+Akses API di: `http://localhost:8000/api`
+
+---
+
+## 🔄 Schedule dan Queue
+
+Pastikan tabel queue (`jobs`) dan `failed_jobs` telah dibuat dengan:
+
+```bash
+php artisan queue:table
+php artisan schedule:work
+```
+
+---
+
+## 📂 Struktur Penting
+
+- `app/Jobs`: Tempat penyimpanan queue jobs
+- `app/Console/Kernel.php`: Penjadwalan otomatis (schedule)
+- `routes/api.php`: Seluruh endpoint REST API
+- `config/octane.php`: Konfigurasi Laravel Octane
+
+---
+
+## ✅ Checklist Produksi
+
+- [ ] Ganti `APP_ENV=production`
+- [ ] Nonaktifkan `APP_DEBUG`
+- [ ] Tambahkan validasi & rate-limiting pada endpoint publik
+- [ ] Monitor logs dari Supervisor (`/var/log/supervisor/*.log`)
+
+---
+
+
