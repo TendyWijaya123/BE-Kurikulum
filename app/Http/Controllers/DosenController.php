@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\DosenCreatedMail;
 use Illuminate\Support\Facades\Auth;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class DosenController extends Controller
 {
@@ -26,17 +27,31 @@ class DosenController extends Controller
         $jurusan = Jurusan::where('id', $dosen->jurusan_id)->get(['id', 'nama']);
         $prodi = Prodi::where('jurusan_id', $dosen->jurusan_id)->get(['id', 'name', 'jurusan_id']);
 
-        $dosens = Dosen::with([
-            'prodi' => function ($query) {
-                $query->select('prodis.id', 'prodis.name');
-            }
-        ])->with('jurusan')->where('jurusan_id', $dosen->jurusan_id)->get();
+        $dosens = Dosen::with(['prodi:id,name', 'jurusan:id,nama', 'kaprodi:id,name,dosen_id'])
+        ->where('jurusan_id', $dosen->jurusan_id)
+        ->get();
+
 
         return response()->json([
             'prodis' => $prodi,
             'dosens' => $dosens,
             'jurusans' => $jurusan
         ]);
+    }
+
+    public function indexAll()
+    {
+        try {
+             $dosens = Dosen::with(['prodi:id,name', 'jurusan:id,nama', 'kaprodi:id,name,dosen_id'])->get();
+            return response()->json([
+                'dosens' => $dosens,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Terjadi kesalahan saat mengambil data dosen',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 
 
@@ -54,11 +69,14 @@ class DosenController extends Controller
                 'jurusan' => 'required|exists:jurusans,id',
                 'prodi' => 'required|array',
                 'prodi.*' => 'exists:prodis,id',
-                'username' => 'required|string'
+                'username' => 'required|string',
+                'kaprodi' => 'nullable|exists:prodis,id',
+
             ]);
 
             $data = $validated;
-            $password = Str::random(8);
+            $password = "password123";
+            // $password = Str::random(8);
 
             $dosen = Dosen::create([
                 'kode' => $data['kode'],
@@ -71,8 +89,17 @@ class DosenController extends Controller
                 'is_active' => true,
                 'jurusan_id' => $data['jurusan'],
             ]);
+            $dosen->assignRole('Dosen');
 
             $dosen->prodi()->syncWithoutDetaching($data['prodi']);
+            if (!empty($data['kaprodi'])) {
+                // Update kolom `dosen_id` di tabel `prodi` (one-to-one)
+                DB::table('prodi')
+                    ->where('id', $data['kaprodi'])
+                    ->update(['dosen_id' => $dosen->id]);
+                
+                $dosen->assignRole('Ketua Prodi');
+            }
 
             Mail::to($dosen->email)->send(new DosenCreatedMail($dosen, $password));
 
@@ -96,26 +123,25 @@ class DosenController extends Controller
         try {
             DB::beginTransaction();
 
-            // Validasi request
             $validatedData = $request->validate([
                 'id' => 'required|exists:dosens,id',
                 'kode' => 'required|string|size:6|unique:dosens,kode,' . $request->id,
                 'nip' => 'required|string|size:18|unique:dosens,nip,' . $request->id,
                 'nama' => 'required|string|max:50',
-                'email' => 'required|max:50|unique:dosens,email,' . $request->id,
+                'email' => 'required|email|max:50|unique:dosens,email,' . $request->id,
                 'username' => 'required|string',
                 'jenisKelamin' => 'required|in:L,P',
                 'jurusan' => 'required|exists:jurusans,id',
                 'prodi' => 'nullable|array',
                 'prodi.*' => 'exists:prodis,id',
+                'kaprodi' => 'nullable|exists:prodis,id',
                 'password' => 'nullable|string|min:8',
                 'isActive' => 'boolean'
             ]);
 
-            // Cari dosen berdasarkan ID
             $dosen = Dosen::findOrFail($validatedData['id']);
 
-            // Update data dosen
+            // Update atribut dasar dosen
             $dosen->update([
                 'kode' => $validatedData['kode'],
                 'nip' => $validatedData['nip'],
@@ -127,16 +153,38 @@ class DosenController extends Controller
                 'is_active' => $validatedData['isActive'] ?? $dosen->is_active,
             ]);
 
-            // Update password jika dikirim dalam request
+            // Update password jika dikirim
             if (!empty($validatedData['password'])) {
                 $dosen->update([
                     'password' => Hash::make($validatedData['password']),
                 ]);
             }
 
-            // Jika ada program studi yang dikirim, sinkronisasi
+            // Sinkronisasi prodi
             if (isset($validatedData['prodi'])) {
-                $dosen->prodi()->sync($validatedData['prodi']); // Hapus yang lama, tambahkan yang baru
+                $dosen->prodi()->sync($validatedData['prodi']);
+            }
+
+            // Reset semua prodi yang sebelumnya menunjuk ke dosen ini sebagai kaprodi
+            DB::table('prodis')
+                ->where('dosen_id', $dosen->id)
+                ->update(['dosen_id' => null]);
+
+            // Jika kaprodi dipilih
+            if (!empty($validatedData['kaprodi'])) {
+                DB::table('prodis')
+                    ->where('id', $validatedData['kaprodi'])
+                    ->update(['dosen_id' => $dosen->id]);
+
+                // Tambahkan role Kaprodi jika belum ada
+                if (!$dosen->hasRole('Ketua Prodi')) {
+                    $dosen->assignRole('Ketua Prodi');
+                }
+            } else {
+                // Hapus role Kaprodi jika tidak lagi menjabat
+                if ($dosen->hasRole('Ketua Prodi')) {
+                    $dosen->removeRole('Ketua Prodi');
+                }
             }
 
             DB::commit();
@@ -152,6 +200,7 @@ class DosenController extends Controller
             ], 500);
         }
     }
+
 
 
     public function destroy($id)

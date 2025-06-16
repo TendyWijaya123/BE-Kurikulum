@@ -145,7 +145,7 @@ class MataKuliah extends Model
 
     public function rpss()
     {
-        return $this->hasMany(RpsMatakuliah::class, 'mata_kuliah_id');
+        return $this->hasMany(RpsMataKuliah::class, 'mata_kuliah_id');
     }
 
     public function tujuanBelajarRps(){

@@ -170,6 +170,7 @@
                 <th style="border: 1px solid black;">Beban Belajar Mahasiswa</th>
                 <th style="border: 1px solid black;">Hasil Belajar</th>
                 <th style="border: 1px solid black;">Instrumen Penilaian</th>
+                <th style="border: 1px solid black;">Detail Instrumen</th>
                 <th style="border: 1px solid black;">TB</th>
                 <th style="border: 1px solid black;">CPL</th>
                 <th style="border: 1px solid black;">Bobot Penilaian (%)</th>
@@ -184,6 +185,7 @@
                 <th style="border: 1px solid black;"><i>Criteria and Forms of Assessment</i></th>
                 <th style="border: 1px solid black;"><i>Learning Outcomes</i></th>
                 <th style="border: 1px solid black;"><i>Assessment Instruments</i></th>
+                <th style="border: 1px solid black;"><i>Detile Assessment Instrumens</i></th>
                 <th style="border: 1px solid black;"><i>Program Learning Outcomes</i></th>
                 <th style="border: 1px solid black;"><i>Assessment Weighted Factor (%)</i></th>
                 <th style="border: 1px solid black;"><i>Total Weight</i></th>
@@ -192,7 +194,7 @@
                 @if (in_array($rps['kategori'], ['EAS', 'ETS']))
                     <tr>
                         <td style="border: 1px solid black;">{{ $rps['minggu'] }}</td>
-                        <td colspan="10" style="border: 1px solid black; text-align: center;">
+                        <td colspan="11" style="border: 1px solid black; text-align: center;">
                             {{ $rps['kategori'] }}
                         </td>
                     </tr>
@@ -225,6 +227,11 @@
                             <td style="border: 1px solid black; padding: 5px; text-align: center;">
                                 @foreach ($rps->instrumenPenilaians as $instrumen)
                                     {{ $instrumen->kategori ?? '-' }}<br>
+                                @endforeach
+                            </td>
+                            <td style="border: 1px solid black; padding: 5px; text-align: center;">
+                                @foreach ($rps->instrumenPenilaians as $instrumen)
+                                    {{ $instrumen->sub_kategori ?? '-' }}<br>
                                 @endforeach
                             </td>
                             <td style="border: 1px solid black; text-align: center;">

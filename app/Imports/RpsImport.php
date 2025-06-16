@@ -4,7 +4,7 @@ namespace App\Imports;
 
 use App\Models\Cpl;
 use App\Models\KemampuanAkhir;
-use App\Models\RpsMatakuliah;
+use App\Models\RpsMataKuliah;
 use App\Models\TujuanBelajar;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -72,7 +72,7 @@ class RpsSheetImport implements ToCollection, WithHeadingRow
 
 
 
-                    $rps = RpsMatakuliah::updateOrCreate(
+                    $rps = RpsMataKuliah::updateOrCreate(
                         [
                             'mata_kuliah_id' => $this->mataKuliahId,
                             'minggu' => $row['minggu'], // Kunci unik untuk update

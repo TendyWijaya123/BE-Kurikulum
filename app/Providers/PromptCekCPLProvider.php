@@ -161,7 +161,7 @@ class PromptCekCPLProvider extends ServiceProvider
 
             ```json
             {
-            "cpl_text": "CPL yang diberikan, dengan menandai secara eksplisit bagian behavior, subject matters, dan context menggunakan format: (Behavior: [kata kerja]) (Subject Matters: [bahan kajian]) (Context: [konteks])",
+            "cpl_text": "Cpl yang diberikan ada kalimat CPL itu sendiri",
             "behavior": {
                 "verbs": [list of verbs],
                 "classification": [

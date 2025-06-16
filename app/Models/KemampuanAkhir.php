@@ -26,7 +26,7 @@ class KemampuanAkhir extends Model
 
     public function rpss()
     {
-        return $this->hasMany(RpsMatakuliah::class, 'kemampuan_akhir_id');
+        return $this->hasMany(RpsMataKuliah::class, 'kemampuan_akhir_id');
 
     }
 

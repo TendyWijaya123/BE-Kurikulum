@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
-class RpsMatakuliah extends Model
+class RpsMataKuliah extends Model
 {
     use HasFactory;
 

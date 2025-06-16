@@ -108,16 +108,34 @@ class ProdiController extends Controller
     }
 
 
-    public function getProdiDropdownByJurusanDosen()
+    public function getProdiDropdownByJurusanDosen(Request $request)
     {
-        $dosen = Auth::guard('dosen')->user();
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+            if ($user->hasRole('P2MPP')) {
+                // Jika user adalah P2MPP
+                if ($request->has('jurusanId')) {
+                    $jurusanId = $request->input('jurusanId');
+                    $prodis = empty($jurusanId)
+                        ? Prodi::get(['id', 'name'])
+                        : Prodi::where('jurusan_id', $jurusanId)->get(['id', 'name']);
+                } else {
+                    $prodis = Prodi::get(['id', 'name']);
+                }
+            } else {
+                // Jika user bukan P2MPP, diasumsikan dosen
+                $dosen = Auth::guard('dosen')->user() ?? $user;
 
-        if (!$dosen) {
-            return response()->json(['message' => 'Dosen tidak ditemukan'], 404);
+                if (!$dosen || !isset($dosen->jurusan_id)) {
+                    return response()->json(['message' => 'Dosen tidak ditemukan'], 404);
+                }
+                $jurusanId = $dosen->jurusan_id;
+                $prodis = Prodi::where('jurusan_id', $jurusanId)->get(['id', 'name']);
+            }
+
+            return response()->json($prodis);
+        } catch (\Throwable $e) {
+            return response()->json(['message' => 'Terjadi kesalahan.'], 500);
         }
-
-        $prodis = Prodi::where('jurusan_id', $dosen->jurusan_id)->get(['id', 'name']);
-
-        return response()->json($prodis);
     }
 }

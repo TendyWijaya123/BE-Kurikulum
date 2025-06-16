@@ -124,13 +124,25 @@ class ProcessProdiJob implements ShouldQueue
             }
 
             foreach ($cpls as $index => $cpl) {
-                $issues = $structuredCPLs[$index]['issues'] ?? [];
-                $cpl->issues = is_array($issues) ? implode(', ', $issues) : $issues;
-                $keterangans = $structuredCPLs[$index]['keterangan'] ?? [];
-                $cpl->keterangan = is_array($keterangans) ? implode(', ', $keterangans) : $keterangans;
-                $saran_perbaikans = $structuredCPLs[$index]['saran_perbaikan'] ?? [];
-                $cpl->saran_perbaikan = is_array($saran_perbaikans) ? implode(', ', $saran_perbaikans) : $saran_perbaikans;
+                if (!isset($structuredCPLs[$index])) {
+                    Log::warning("Data structuredCPLs tidak tersedia untuk index $index.");
+                    continue;
+                }
+
+                $data = $structuredCPLs[$index];
+
+                $cpl->keterangan = $data['keterangan'] ?? '';
+                $cpl->issues = is_array($data['issues']) ? implode(', ', $data['issues']) : (string) $data['issues'];
+                $cpl->saran_perbaikan = is_array($data['saran_perbaikan']) ? implode(', ', $data['saran_perbaikan']) : (string) $data['saran_perbaikan'];
+
+                // Ambil hanya verb dari behavior
+                $verbs = $data['behavior']['verbs'] ?? [];
+                $cpl->behavior = is_array($verbs) ? implode(', ', $verbs) : (string) $verbs;
+
+                $cpl->subject_matters = is_array($data['subject_matters']) ? implode(', ', $data['subject_matters']) : (string) $data['subject_matters'];
+                $cpl->context = is_array($data['context']) ? implode(', ', $data['context']) : (string) $data['context'];
             }
+
 
             $ppms = Ppm::where('kurikulum_id', $kurikulum->id)
                 ->select('id', 'kode', 'deskripsi')
@@ -145,7 +157,6 @@ class ProcessProdiJob implements ShouldQueue
                     ],
                     'cpls' => $cpls,
                     'ppms' => $ppms,
-                    'prompt' => $prompt
                 ]
             ];
 

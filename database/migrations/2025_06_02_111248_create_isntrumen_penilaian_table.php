@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('isntrumen_penilaian', function (Blueprint $table) {
             $table->id();
-            $table->string('kode')->unique();
+            $table->string('sub_kategori');
             $table->enum('kategori', ["Project","Quiz", "Case Study",  "Tugas", "ETS", "EAS"]);
             $table->foreignId('tujuan_belajar_id')->nullable()->constrained('tujuan_belajar_rps')->onDelete('set null');
             $table->foreignId('cpl_id')->nullable()->constrained('cpls')->onDelete('set null');

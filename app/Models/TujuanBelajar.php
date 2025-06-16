@@ -48,7 +48,7 @@ class TujuanBelajar extends Model
 
     public function rpss()
     {
-        return $this->hasMany(RpsMatakuliah::class, 'tujuan_belajar_id');
+        return $this->hasMany(RpsMataKuliah::class, 'tujuan_belajar_id');
     }
 
     /**

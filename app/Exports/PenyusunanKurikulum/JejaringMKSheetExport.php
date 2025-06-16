@@ -2,7 +2,7 @@
 
 namespace App\Exports\PenyusunanKurikulum;
 
-use App\Models\JejaringMkDiagram;
+use App\Models\JejaringMKDiagram;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\WithEvents;
@@ -35,7 +35,7 @@ class JejaringMKSheetExport implements FromView, WithTitle, WithEvents
     {
         return [
             AfterSheet::class => function (AfterSheet $event) {
-                $jejaringMK = JejaringMkDiagram::where('kurikulum_id', $this->kurikulumId)->first();
+                $jejaringMK = JejaringMKDiagram::where('kurikulum_id', $this->kurikulumId)->first();
 
                 if (!$jejaringMK || !$jejaringMK->gambar_url) {
                     return;

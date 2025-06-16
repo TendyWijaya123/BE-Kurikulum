@@ -7,12 +7,9 @@ use App\Http\Requests\UpsertCPLRequest;
 use App\Imports\CplImport;
 use App\Models\Cpl;
 use App\Models\Prodi;
-use App\Providers\PromptCekCPLProvider;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Tymon\JWTAuth\Facades\JWTAuth;
-use App\Providers\PromptProvider;
-use Illuminate\Support\Facades\Http;
 
 class CplController extends Controller
 {

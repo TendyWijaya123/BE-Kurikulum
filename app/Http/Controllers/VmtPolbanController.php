@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UpdateVmtPolbanRequest;
+use App\Http\Requests\updateVmtPolbanRequest;
 use App\Models\Prodi;
 use App\Models\VmtPolban;
 use Illuminate\Http\Request;
@@ -47,7 +47,7 @@ class VmtPolbanController extends Controller
         }
     }
 
-    public function update(UpdateVmtPolbanRequest $request, $id)
+    public function update(updateVmtPolbanRequest $request, $id)
     {
         try {
             $vmtPolban = VmtPolban::find($id);

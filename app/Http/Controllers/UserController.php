@@ -21,8 +21,13 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::query()
-            ->paginate(10);
+        $users = User::query()->paginate(10);
+
+        // Tambahkan role ke setiap user tanpa eager loading relasi
+        $users->getCollection()->transform(function ($user) {
+            $user->role = $user->getRoleNames()->first();
+            return $user;
+        });
 
         return response()->json($users);
     }

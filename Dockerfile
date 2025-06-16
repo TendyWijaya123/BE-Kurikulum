@@ -28,9 +28,15 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Copy semua file project
 COPY . .
 
-# RUN composer install --no-dev --optimize-autoloader
+# Install Laravel Octane
+RUN composer require laravel/octane --no-interaction
 
-# RUN php artisan key:generate
+# Install Octane dengan FrankenPHP server
+RUN php artisan octane:install --server=frankenphp --no-interaction
+
+RUN composer install --no-dev --optimize-autoloader
+
+RUN php artisan key:generate
 
 RUN php artisan storage:link
 

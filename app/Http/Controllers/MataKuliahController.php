@@ -118,39 +118,90 @@ class MataKuliahController extends Controller
 
     public function showMataKuliahByDosenPengampu(Request $request)
     {
-        $dosen = Auth::guard('dosen')->user();
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+            if ($user->hasRole('P2MPP')) {
+                $query = MataKuliah::with([
+                    'materiPembelajarans',
+                    'kurikulum.prodi'
+                ])
+                    ->whereRelation('kurikulum', 'is_active', true)
+                    ->whereRelation('kurikulum.prodi', 'is_active', true);
 
-        if (!$dosen) {
-            return response()->json(['message' => 'Dosen tidak ditemukan'], 404);
+                if ($request->filled('jurusanId')) {
+                    $query->whereRelation('kurikulum.prodi.jurusan', 'id', $request->input('jurusanId'));
+                }
+            } else {
+                $dosen = Auth::guard('dosen')->user();
+                
+                if (!$dosen) {
+                    return response()->json(['message' => 'Dosen tidak ditemukan'], 404);
+                }
+
+                if ($dosen->roles->pluck('name')->contains('Ketua Prodi')) {
+                    $query = MataKuliah::with([
+                        'materiPembelajarans',
+                        'kurikulum.prodi'
+                    ])
+                        ->whereRelation('kurikulum', 'is_active', true)
+                        ->whereRelation('kurikulum.prodi', function ($q) use ($dosen) {
+                            $q->where('is_active', true)
+                              ->where('jurusan_id', $dosen->jurusan_id);
+                        });
+                } else {
+                    $query = MataKuliah::with([
+                        'materiPembelajarans',
+                        'kurikulum.prodi'
+                    ])
+                        ->whereRelation('kurikulum', 'is_active', true)
+                        ->whereRelation('kurikulum.prodi', function ($q) use ($dosen) {
+                            $q->where('is_active', true)
+                              ->where('jurusan_id', $dosen->jurusan_id);
+                        })
+                        ->whereHas('dosens', function ($q) use ($dosen) {
+                            $q->where('dosen_id', $dosen->id);
+                        });
+                }
+
+            }
+
+            if ($request->filled('nama')) {
+                $query->where('nama', 'like', '%' . $request->nama . '%');
+            }
+
+            if ($request->filled('kode')) {
+                $query->where('kode', 'like', '%' . $request->kode . '%');
+            }
+
+            if ($request->filled('prodi_id')) {
+                $query->whereRelation('kurikulum.prodi', 'id', $request->prodi_id);
+            }
+
+            $mataKuliahs = $query
+                ->select(
+                    'id',
+                    'kurikulum_id',
+                    'kode',
+                    'nama',
+                    'nama_inggris',
+                    'deskripsi_singkat',
+                    'deskripsi_singkat_inggris',
+                    'materi_pembelajaran',
+                    'materi_pembelajaran_inggris'
+                )
+                ->paginate(10);
+
+            return response()->json([
+                'success' => true,
+                'data' => $mataKuliahs
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching Mata Kuliah by Dosen Pengampu: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil data: ' . $e->getMessage(),
+            ], 500);
         }
-
-        $query = MataKuliah::with([
-            'materiPembelajarans',
-            'kurikulum.prodi'
-        ])
-            ->whereRelation('kurikulum', 'is_active', true)
-            ->whereRelation('kurikulum.prodi', 'is_active', true)
-            ->whereRelation('kurikulum.prodi.jurusan', 'id', $dosen->jurusan_id);
-
-        if ($request->filled('nama')) {
-            $query->where('nama', 'like', '%' . $request->nama . '%');
-        }
-
-        if ($request->filled('kode')) {
-            $query->where('kode', 'like', '%' . $request->kode . '%');
-        }
-
-        if ($request->filled('prodi_id')) {
-            $query->whereRelation('kurikulum.prodi', 'id', $request->prodi_id);
-        }
-
-        $mataKuliahs = $query
-            ->select('id', 'kurikulum_id', 'kode', 'nama', 'nama_inggris', 'deskripsi_singkat', 'deskripsi_singkat_inggris','materi_pembelajaran', 'materi_pembelajaran_inggris')
-            ->paginate(10);
-
-
-
-        return response()->json($mataKuliahs);
     }
 
 

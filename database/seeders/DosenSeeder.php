@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use App\Models\Dosen;
 
 class DosenSeeder extends Seeder
 {
@@ -13,7 +14,7 @@ class DosenSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('dosens')->insert([
+        $dosens = [
             [
                 'nip' => '123456789',
                 'nama' => 'Dr. Ahmad Fauzy',
@@ -23,7 +24,7 @@ class DosenSeeder extends Seeder
                 'jenis_kelamin' => 'L',
                 'is_active' => true,
                 'jurusan_id' => 2,
-                'kode' => 'DF001A', // 6 karakter
+                'kode' => 'DF001A',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -36,7 +37,7 @@ class DosenSeeder extends Seeder
                 'jenis_kelamin' => 'L',
                 'is_active' => false,
                 'jurusan_id' => 1,
-                'kode' => 'DF002B', // 6 karakter
+                'kode' => 'DF002B',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -49,10 +50,15 @@ class DosenSeeder extends Seeder
                 'jenis_kelamin' => 'P',
                 'is_active' => true,
                 'jurusan_id' => 6,
-                'kode' => 'DF003C', // 6 karakter
+                'kode' => 'DF003C',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
-        ]);
+        ];
+
+        foreach ($dosens as $dosenData) {
+            $dosen = Dosen::create($dosenData);
+            $dosen->assignRole('Dosen'); // Ganti 'dosen' sesuai nama role yang ada
+        }
     }
 }

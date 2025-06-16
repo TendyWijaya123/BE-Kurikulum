@@ -84,7 +84,7 @@ class Cpl extends Model
 
     public function rpss()
     {
-        return $this->hasMany(RpsMatakuliah::class, 'cpl_id');
+        return $this->hasMany(RpsMataKuliah::class, 'cpl_id');
     }
 
     public function instrumenPenilaian()

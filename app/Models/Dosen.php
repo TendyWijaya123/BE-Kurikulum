@@ -35,6 +35,7 @@ class Dosen extends Authenticatable implements JWTSubject
             'id' => $this->id,
             'name' => $this->nama,
             'prodi' => $this->prodi()->select('prodi_id')->get()->toArray(),
+            'roles' => $this->getRoleNames()->toArray(),
         ];
     }
 
@@ -45,7 +46,7 @@ class Dosen extends Authenticatable implements JWTSubject
 
     public function kaprodi()
     {
-        return $this->hasOne(Prodi::class);
+        return $this->hasOne(Prodi::class, 'dosen_id', 'id');
     }
 
     public function matkul()

@@ -7,7 +7,7 @@ use App\Imports\RpsImport;
 use App\Models\DetailMataKuliahRPS;
 use App\Models\InstrumenPenilaianRps;
 use App\Models\MataKuliah;
-use App\Models\RpsMatakuliah;
+use App\Models\RpsMataKuliah;
 use App\Models\TujuanBelajarRPS;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -51,7 +51,7 @@ class RpsMataKuliahController extends Controller
             }
         });
 
-        $rps = RpsMatakuliah::with(['instrumenPenilaians'])->where('mata_kuliah_id', $id)
+        $rps = RpsMataKuliah::with(['instrumenPenilaians'])->where('mata_kuliah_id', $id)
             ->with(['tujuanBelajar', 'cpl'])
             ->get();
 
@@ -88,7 +88,7 @@ class RpsMataKuliahController extends Controller
                 
             ]);
 
-            $rps = RpsMatakuliah::create($validated);
+            $rps = RpsMataKuliah::create($validated);
 
             DB::commit();
             return response()->json([
@@ -122,7 +122,7 @@ class RpsMataKuliahController extends Controller
 
             foreach ($data['items'] as $item) {
                 // Validasi per item jika perlu, atau asumsikan sudah tervalidasi oleh FormRequest
-                $rps = RpsMatakuliah::updateOrCreate(
+                $rps = RpsMataKuliah::updateOrCreate(
                     [
                         'mata_kuliah_id' => $item['mata_kuliah_id'],
                         'minggu' => $item['minggu']
@@ -155,6 +155,8 @@ class RpsMataKuliahController extends Controller
 
                 $results[] = $rps->load('instrumenPenilaians');
             }
+
+            InstrumenPenilaianRps::reindexByMataKuliah($data['items'][0]['mata_kuliah_id']);
 
             DB::commit();
             return response()->json([
@@ -218,7 +220,7 @@ class RpsMataKuliahController extends Controller
      */
     public function destroy($id)
     {
-        $rps = RpsMatakuliah::find($id);
+        $rps = RpsMataKuliah::find($id);
 
         if (!$rps) {
             return response()->json([

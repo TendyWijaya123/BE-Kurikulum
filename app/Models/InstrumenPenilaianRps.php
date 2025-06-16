@@ -28,17 +28,41 @@ class InstrumenPenilaianRps extends Model
 
         static::creating(function ($model) {
             $kategori = strtolower($model->kategori);
-            $count = self::where('rps_id', $model->rps_id)
-                        ->where('kategori', $model->kategori)
-                        ->count();
 
-            $model->kode = $kategori . '-' . ($count + 1);
+            // Ambil RPS beserta mata_kuliah_id-nya
+            $rps = $model->rps ?? RpsMataKuliah::find($model->rps_id);
+            if (!$rps) return;
+
+            $mataKuliahId = $rps->mata_kuliah_id;
+
+            // Ambil semua sub_kategori yang sudah digunakan di mata kuliah dan kategori tersebut
+            $existingSubKategoris = self::whereHas('rps', function ($query) use ($mataKuliahId) {
+                    $query->where('mata_kuliah_id', $mataKuliahId);
+                })
+                ->where('kategori', $model->kategori)
+                ->pluck('sub_kategori')
+                ->map(function ($subKategori) use ($kategori) {
+                    if (preg_match('/' . preg_quote($kategori, '/') . '-(\d+)/', $subKategori, $matches)) {
+                        return (int) $matches[1];
+                    }
+                    return 0;
+                })
+                ->toArray();
+
+            // Cari angka yang belum digunakan
+            $nextNumber = 1;
+            while (in_array($nextNumber, $existingSubKategoris)) {
+                $nextNumber++;
+            }
+
+            // Set nilai sub_kategori
+            $model->sub_kategori = $kategori . '-' . $nextNumber;
         });
     }
 
     public function rps()
     {
-        return $this->belongsTo(RpsMatakuliah::class, 'rps_id');
+        return $this->belongsTo(RpsMataKuliah::class, 'rps_id');
     }
 
     public function tujuanBelajar()
@@ -51,34 +75,44 @@ class InstrumenPenilaianRps extends Model
         return $this->belongsTo(Cpl::class, 'cpl_id');
     }
 
-    public static function reindexKode(int $Id)
+    public static function reindexByMataKuliah(int $mataKuliahId)
     {
         DB::beginTransaction();
+
         try {
-            // Ambil semua instrumen penilaian untuk rps_id, urutkan berdasarkan kategori dan id
-            $isntrumentPenilaians = self::where('rps_id', $Id)
-                ->select('id', 'kode', 'kategori')
-                ->orderBy('kategori', 'asc')
-                ->orderBy('id', 'asc')
+            // Ambil semua RPS berdasarkan mata_kuliah_id, urutkan berdasarkan minggu ASC
+            $rpsList = RpsMataKuliah::where('mata_kuliah_id', $mataKuliahId)
+                ->orderBy('minggu', 'asc')
                 ->get();
 
             $kategoriCounters = [];
 
-            foreach ($isntrumentPenilaians as $instrumen) {
-                $kategori = strtolower($instrumen->kategori);
-                if (!isset($kategoriCounters[$kategori])) {
-                    $kategoriCounters[$kategori] = 1;
-                } else {
-                    $kategoriCounters[$kategori]++;
+            foreach ($rpsList as $rps) {
+                // Ambil instrumen dari RPS ini, urutkan berdasarkan kategori ASC dan ID ASC
+                $instrumens = InstrumenPenilaianRps::where('rps_id', $rps->id)
+                    ->orderBy('kategori', 'asc')
+                    ->orderBy('id', 'asc')
+                    ->get();
+
+                foreach ($instrumens as $instrumen) {
+                    $kategori = strtolower($instrumen->kategori);
+
+                    // Jika belum ada kategori ini dalam counter, inisialisasi ke 1
+                    if (!isset($kategoriCounters[$kategori])) {
+                        $kategoriCounters[$kategori] = 1;
+                    } else {
+                        $kategoriCounters[$kategori]++;
+                    }
+
+                    $instrumen->sub_kategori = $kategori . '-' . $kategoriCounters[$kategori];
+                    $instrumen->save();
                 }
-                $instrumen->kode = $kategori . '-' . $kategoriCounters[$kategori];
-                $instrumen->save();
             }
 
             DB::commit();
         } catch (\Exception $e) {
-            DB::rollback();
-            Log::error('Error saat reindex kode InstrumenPenilaian: ' . $e->getMessage());
+            DB::rollBack();
+            Log::error('Gagal reindex sub_kategori: ' . $e->getMessage());
             throw $e;
         }
     }

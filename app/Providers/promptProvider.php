@@ -175,11 +175,11 @@ class PromptProvider extends ServiceProvider
         [
             {
                 \"kode\": \"CPL-1\",
-                \"deskripsi\": \"Behavior: [Teks Behavior] + Subject Matters: [Teks Subject Matters] + Context: [Teks Context]\"
+                \"deskripsi\": \"Teks Behavior + Teks Subject Matters + Teks Context\"
             },
             {
                 \"kode\": \"CPL-2\",
-                \"deskripsi\": \"Behavior: [Teks Behavior] + Subject Matters: [Teks Subject Matters] + Context: [Teks Context]\"
+                \"deskripsi\": \"Teks Behavior + Teks Subject Matters + Teks Context\"
             }
             // ... CPL-CPL selanjutnya ...
         ]

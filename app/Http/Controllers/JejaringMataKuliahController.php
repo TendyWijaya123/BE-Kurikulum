@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\JejaringMkDiagram;
+use App\Models\JejaringMKDiagram;
 use App\Models\MataKuliah;
 use App\Models\PrasyaratMatakuliah;
 use App\Models\Prodi;
@@ -150,25 +150,25 @@ class JejaringMataKuliahController extends Controller
         ]);
 
         try {
-            $jejaringMKDiagram = JejaringMkDiagram::where('kurikulum_id', $activeKurikulum->id)->first();
+            $JejaringMKDiagram = JejaringMKDiagram::where('kurikulum_id', $activeKurikulum->id)->first();
 
             $gambarPath = $request->file('gambar')->store('jejaring-mk-diagram', 'public');
             $storagePath = $gambarPath;
 
             Log::info('File stored at: ' . $gambarPath);
 
-            if ($jejaringMKDiagram) {
-                if ($jejaringMKDiagram->gambar_url) {
-                    $oldPath = 'public/' . $jejaringMKDiagram->gambar_url;
+            if ($JejaringMKDiagram) {
+                if ($JejaringMKDiagram->gambar_url) {
+                    $oldPath = 'public/' . $JejaringMKDiagram->gambar_url;
                     if (Storage::exists($oldPath)) {
                         Storage::delete($oldPath);
                     }
                 }
 
-                $jejaringMKDiagram->gambar_url = $storagePath;
-                $jejaringMKDiagram->save();
+                $JejaringMKDiagram->gambar_url = $storagePath;
+                $JejaringMKDiagram->save();
             } else {
-                $jejaringMKDiagram = JejaringMkDiagram::create([
+                $JejaringMKDiagram = JejaringMKDiagram::create([
                     'kurikulum_id' => $activeKurikulum->id,
                     'gambar_url' => $storagePath
                 ]);
@@ -176,7 +176,7 @@ class JejaringMataKuliahController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $jejaringMKDiagram,
+                'data' => $JejaringMKDiagram,
                 'message' => 'Gambar Berhasil Diupload.',
             ]);
         } catch (\Exception $e) {

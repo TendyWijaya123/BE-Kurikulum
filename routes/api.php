@@ -57,6 +57,64 @@ Route::get('rps/template/{mataKuliahId}', [RpsMataKuliahController::class, 'expo
 Route::post('rps/import/{mataKuliahId}', [RpsMataKuliahController::class, 'import']);
 Route::get('penyusunan-kurikulum/export/{kurikulumId}', [PenyusunanKurikulumController::class, 'export']);
 
+Route::middleware(['auth:api,dosen'])->group(function () {
+    /* ---------------------------------------Dosen API ------------------------------------------------*/
+
+    Route::get('dosen', [DosenController::class, 'index']);
+    Route::delete('dosen/{id}', [DosenController::class, 'destroy']);
+    Route::delete('dosen', [DosenController::class, 'destroyDosens']);
+
+    Route::get('rps/prodi-dropdown/jurusan-dosen', [ProdiController::class, 'getProdiDropdownByJurusanDosen']);
+    Route::get('rps/prodi-dropdown/{id}', [ProdiController::class, 'show']);
+
+    /*--------------------------------------prodi & jurusan dropdown----------------------------------*/
+    Route::get('prodi/dropdown', [ProdiController::class, 'getProdiDropdown']);
+    Route::get('jurusans/dropdown', [JurusanController::class, 'dropdown']);
+
+    /* --------------------------------------- Buku referensi(Dosen) API ------------------------------------------------*/
+    Route::prefix('buku-referensi')->group(function () {
+        Route::get('/', [BukuReferensiController::class, 'index']);
+        Route::post('/', [BukuReferensiController::class, 'store']);
+        Route::get('/dropdown-by-jurusan', [BukuReferensiController::class, 'dropdownBuku']);
+        Route::get('/template', [BukuReferensiController::class, 'downloadTemplate']);
+        Route::post('/import', [BukuReferensiController::class, 'import']);
+        Route::get('/{id}', [BukuReferensiController::class, 'show']);
+        Route::put('/{id}', [BukuReferensiController::class, 'update']);
+        Route::delete('/{id}', [BukuReferensiController::class, 'destroy']);
+    });
+
+    /* --------------------------------------- MataKuliah(Dosen) API ------------------------------------------------*/
+
+    Route::prefix('mata-kuliah')->group(function () {
+        Route::get('/pengampu', [MataKuliahController::class, 'showMataKuliahByDosenPengampu']);
+        Route::put('/pengampu/{id}', [MataKuliahController::class, 'updateDeskripsiSingkat']);
+        Route::get('/show-jurusan', [MataKuliahController::class, 'showMataKuliahByJurusan']);
+        Route::post('/assign-referensi', [MataKuliahController::class, 'assignReferensiKeMataKuliah']);
+    });
+
+    Route::prefix('rps')->group(function () {
+        Route::get('/{id}', [RpsMataKuliahController::class, 'showRpsMataKuliah']);
+        Route::post('', [RpsMataKuliahController::class, 'store']);
+        Route::post('/bulk-update', [RpsMataKuliahController::class, 'bulkCreateOrUpdate']);
+        Route::put('/{id}', [RpsMataKuliahController::class, 'update']);
+        Route::delete('/{id}', [RpsMataKuliahController::class, 'destroy']);
+        Route::post('/detail-mk', [RpsMataKuliahController::class, 'storeDetailMatakuliahRps']);
+        Route::post('/tujuan-belajar', [RpsMataKuliahController::class, 'storeTujuanBelajar']);
+        Route::delete('/remove-tujuan-belajar/{id}', [RpsMataKuliahController::class, 'removeTujuanBelajar']);
+    });
+
+    Route::get('rps-pdf/{matakuliahId}', [RpsMataKuliahController::class, 'generateRPSPDF']);
+
+    Route::get('dosen-has-matkul', [DosenHasMatkulController::class, 'index']);
+    Route::put('dosen-has-matkul', [DosenHasMatkulController::class, 'update']);
+    Route::post('dosen-has-matkul', [DosenHasMatkulController::class, 'store']);
+});
+
+/* --------------------------------------- Profile API ------------------------------------------------*/
+Route::group(['middleware' => ['auth:api,dosen']], function () {
+    Route::get('profile', [ProfileController::class, 'getProfile']);
+    Route::post('profile/update-password', [ProfileController::class, 'updatePassword']);
+});
 
 
 Route::middleware(['auth:api'])->group(function () {
@@ -86,11 +144,9 @@ Route::middleware(['auth:api'])->group(function () {
     Route::put('prodis/{id}', [ProdiController::class, 'update'])->middleware('role:P2MPP');
     Route::delete('prodis/{id}', [ProdiController::class, 'destroy'])->middleware('role:P2MPP');
     Route::get('prodi/dropdown-prodi-kurikulum', [ProdiController::class, 'getProdiWithKurikulumDropdown']);
-    Route::get('prodi/dropdown', [ProdiController::class, 'getProdiDropdown']);
 
 
     /* --------------------------------------Jurusan API--------------------------------------------------- */
-    Route::get('jurusans/dropdown', [JurusanController::class, 'dropdown']);
     Route::get('jurusans', [JurusanController::class, 'index'])->middleware('role:P2MPP');
     Route::post('jurusans', [JurusanController::class, 'store'])->middleware('role:P2MPP');
     Route::get('jurusans/{id}', [JurusanController::class, 'show'])->middleware('role:P2MPP');
@@ -215,9 +271,6 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('mata-kuliah/import', [MataKuliahController::class, 'import'])->middleware('role:Penyusun Kurikulum');
     Route::delete('/mata-kuliah/{id}', [MataKuliahController::class, 'destroy'])->middleware('role:Penyusun Kurikulum');
 
-
-
-
     /* -------------------------------------Jejaring Mata Kuliah API -------------------------------------------------- */
     Route::get('/jejaring-matakuliah', [JejaringMataKuliahController::class, 'index'])->middleware('role:P2MPP|Penyusun Kurikulum');
     Route::get('/jejaring-matakuliah/jejaring-prasyarat', [JejaringMataKuliahController::class, 'getJejaringData'])->middleware('role:P2MPP|Penyusun Kurikulum');
@@ -306,63 +359,11 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/peta-kompetensi', [PetaKompetensiController::class, 'getByProdi']);
     Route::post('/peta-kompetensi', [PetaKompetensiController::class, 'uploadGambar']);
     Route::delete('/peta-kompetensi/{id}', [PetaKompetensiController::class, 'deleteGambar']);
-});
 
-Route::middleware(['auth:dosen'])->group(function () {
-    /* ---------------------------------------Dosen API ------------------------------------------------*/
-
-    Route::get('dosen', [DosenController::class, 'index']);
+    /*-----------------------------------------Dosen----------------------------------------------------------------*/
+    Route::get('dosenAll', [DosenController::class, 'indexAll']);
     Route::post('dosen', [DosenController::class, 'store']);
     Route::put('dosen', [DosenController::class, 'edit']);
-    Route::delete('dosen/{id}', [DosenController::class, 'destroy']);
-    Route::delete('dosen', [DosenController::class, 'destroyDosens']);
-
-    Route::get('rps/prodi-dropdown/jurusan-dosen', [ProdiController::class, 'getProdiDropdownByJurusanDosen']);
-    Route::get('rps/prodi-dropdown/{id}', [ProdiController::class, 'show']);
-
-    /* --------------------------------------- Buku referensi(Dosen) API ------------------------------------------------*/
-    Route::prefix('buku-referensi')->group(function () {
-        Route::get('/', [BukuReferensiController::class, 'index']);
-        Route::post('/', [BukuReferensiController::class, 'store']);
-        Route::get('/dropdown-by-jurusan', [BukuReferensiController::class, 'dropdownBuku']);
-        Route::get('/template', [BukuReferensiController::class, 'downloadTemplate']);
-        Route::post('/import', [BukuReferensiController::class, 'import']);
-        Route::get('/{id}', [BukuReferensiController::class, 'show']);
-        Route::put('/{id}', [BukuReferensiController::class, 'update']);
-        Route::delete('/{id}', [BukuReferensiController::class, 'destroy']);
-    });
-
-    /* --------------------------------------- MataKuliah(Dosen) API ------------------------------------------------*/
-
-    Route::prefix('mata-kuliah')->group(function () {
-        Route::get('/pengampu', [MataKuliahController::class, 'showMataKuliahByDosenPengampu']);
-        Route::put('/pengampu/{id}', [MataKuliahController::class, 'updateDeskripsiSingkat']);
-        Route::get('/show-jurusan', [MataKuliahController::class, 'showMataKuliahByJurusan']);
-        Route::post('/assign-referensi', [MataKuliahController::class, 'assignReferensiKeMataKuliah']);
-    });
-
-    Route::prefix('rps')->group(function () {
-        Route::get('/{id}', [RpsMataKuliahController::class, 'showRpsMataKuliah']);
-        Route::post('', [RpsMataKuliahController::class, 'store']);
-        Route::post('/bulk-update', [RpsMataKuliahController::class, 'bulkCreateOrUpdate']);
-        Route::put('/{id}', [RpsMataKuliahController::class, 'update']);
-        Route::delete('/{id}', [RpsMataKuliahController::class, 'destroy']);
-        Route::post('/detail-mk', [RpsMataKuliahController::class, 'storeDetailMatakuliahRps']);
-        Route::post('/tujuan-belajar', [RpsMataKuliahController::class, 'storeTujuanBelajar']);
-        Route::delete('/remove-tujuan-belajar/{id}', [RpsMataKuliahController::class, 'removeTujuanBelajar']);
-    });
-
-    Route::get('rps-pdf/{matakuliahId}', [RpsMataKuliahController::class, 'generateRPSPDF']);
-
-
-
-
-    Route::get('dosen-has-matkul', [DosenHasMatkulController::class, 'index']);
-    Route::post('dosen-has-matkul', [DosenHasMatkulController::class, 'store']);
 });
 
-/* --------------------------------------- Profile API ------------------------------------------------*/
-Route::group(['middleware' => ['auth:api,dosen']], function () {
-    Route::get('profile', [ProfileController::class, 'getProfile']);
-    Route::post('profile/update-password', [ProfileController::class, 'updatePassword']);
-});
+
