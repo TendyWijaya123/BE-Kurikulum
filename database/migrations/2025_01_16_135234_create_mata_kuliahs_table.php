@@ -1,5 +1,8 @@
 <?php
 
+use App\Enums\KategoriMataKuliahEnum;
+use App\Enums\KategoriMataKuliahPolbanEnum;
+use App\Enums\KategoriMataKuliahProdiEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,7 +19,13 @@ return new class extends Migration
             $table->string('kode');
             $table->string('nama');
             $table->string('nama_inggris')->nullable();
-            $table->enum('kategori', ["Institusi", "Prodi", "Nasional"])->nullable();
+            $table->enum('kategori', KategoriMataKuliahEnum::values())->nullable();
+            $table->enum('kategori_mata_kuliah_prodi', KategoriMataKuliahProdiEnum::values())
+                ->nullable()
+                ->default(KategoriMataKuliahProdiEnum::WAJIB->value);
+            $table->enum('kategori_mata_kuliah_polban', KategoriMataKuliahPolbanEnum::values())
+                ->nullable()
+                ->default(KategoriMataKuliahPolbanEnum::POLBAN->value);
             $table->text('deskripsi_singkat')->nullable();
             $table->text('deskripsi_singkat_inggris')->nullable();
             $table->text('materi_pembelajaran_inggris')->nullable();

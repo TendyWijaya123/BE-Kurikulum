@@ -77,7 +77,7 @@ class JejaringMataKuliahController extends Controller
 
             $mataKuliahBySemester = MataKuliah::where('kurikulum_id', $activeKurikulum->id)
                 ->orderBy('semester')
-                ->select('id', 'nama', 'sks', 'kategori', 'semester')
+                ->select('id', 'nama', 'sks', 'kategori', 'semester', 'kategori_mata_kuliah_polban', 'kategori_mata_kuliah_prodi')
                 ->get()
                 ->groupBy('semester');
 
@@ -90,6 +90,7 @@ class JejaringMataKuliahController extends Controller
             $data = [
                 'matakuliah' => $mataKuliahBySemester,
                 'jejaring' => $jejaringPrasyarat,
+                'prodi' => $activeKurikulum->prodi,
             ];
 
             return response()->json([

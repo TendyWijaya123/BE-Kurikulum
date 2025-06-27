@@ -2,7 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\KategoriMataKuliahEnum;
+use App\Enums\KategoriMataKuliahPolbanEnum;
+use App\Enums\KategoriMataKuliahProdiEnum;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateMataKuliahRequest extends FormRequest
 {
@@ -22,9 +26,23 @@ class UpdateMataKuliahRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'kode' => 'required|string|unique:mata_kuliahs,kode,' . $this->route('id'),
+            'kode' => 'required|string|size:9|unique:mata_kuliahs,kode,' . $this->route('id'),
             'nama' => 'required|string',
-            'kategori' => 'required|string|in:Institusi,Prodi,Nasional',
+            'kategori' => [
+                'nullable',
+                'string',
+                Rule::in(KategoriMataKuliahEnum::values()),
+            ],
+            'kategori_mata_kuliah_prodi' => [
+                'nullable',
+                'string',
+                Rule::in(KategoriMataKuliahProdiEnum::values()),
+            ],
+            'kategori_mata_kuliah_polban' => [
+                'nullable',
+                'string',
+                Rule::in(KategoriMataKuliahPolbanEnum::values()),
+            ],
             'tujuan' => 'required|string',
             'semester' => 'nullable|integer|min:1',
             'teori_bt' => 'nullable|integer|min:0',
@@ -50,6 +68,7 @@ class UpdateMataKuliahRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'kode.size' => 'Kode mata kuliah harus terdiri dari 9 karakter.',
             'kode.required' => 'Kode mata kuliah harus diisi.',
             'kode.string' => 'Kode mata kuliah harus berupa teks.',
             'kode.unique' => 'Kode mata kuliah sudah digunakan.',
