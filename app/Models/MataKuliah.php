@@ -17,6 +17,8 @@ class MataKuliah extends Model
         'nama',
         'nama_inggris',
         'kategori',
+        'kategori_mata_kuliah_prodi',
+        'kategori_mata_kuliah_polban',
         'deskripsi_singkat',
         'deskripsi_singkat_inggris',
         'materi_pembelajaran_inggris',

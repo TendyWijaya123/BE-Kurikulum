@@ -2,7 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\KategoriMataKuliahEnum;
+use App\Enums\KategoriMataKuliahPolbanEnum;
+use App\Enums\KategoriMataKuliahProdiEnum;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreMataKuliahRequest extends FormRequest
 {
@@ -14,10 +18,24 @@ class StoreMataKuliahRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'kode' => 'required|string|unique:mata_kuliahs,kode,' . $this->id,
+            'kode' => 'required|string|size:9|unique:mata_kuliahs,kode,' . $this->id,
             'nama' => 'required|string',
             'tujuan' => 'nullable|string',
-            'kategori' => 'nullable|string|in:Institusi,Prodi,Nasional',
+            'kategori' => [
+                'nullable',
+                'string',
+                Rule::in(KategoriMataKuliahEnum::values()),
+            ],
+            'kategori_mata_kuliah_prodi' => [
+                'nullable',
+                'string',
+                Rule::in(KategoriMataKuliahProdiEnum::values()),
+            ],
+            'kategori_mata_kuliah_polban' => [
+                'nullable',
+                'string',
+                Rule::in(KategoriMataKuliahPolbanEnum::values()),
+            ],
             'semester' => 'nullable|integer|min:1',
             'teori_bt' => 'nullable|integer|min:0',
             'teori_pt' => 'nullable|integer|min:0',
@@ -39,6 +57,7 @@ class StoreMataKuliahRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'kode.size' => 'Kode mata kuliah harus terdiri dari 9 karakter.',
             'kode.required' => 'Kode mata kuliah wajib diisi.',
             'kode.string' => 'Kode mata kuliah harus berupa teks.',
             'kode.unique' => 'Kode mata kuliah sudah digunakan.',
