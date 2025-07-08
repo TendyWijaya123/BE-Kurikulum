@@ -33,19 +33,35 @@ class JejaringMataKuliahController extends Controller
                 return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
             }
 
-            $data = MataKuliah::where('kurikulum_id', $activeKurikulum->id)
-                ->with(['prasyaratFrom:id'])->orderBy('semester', 'asc')
-                ->get()
-                ->map(function ($mataKuliah) {
-                    return [
-                        'id' => $mataKuliah->id,
-                        'nama' => $mataKuliah->nama,
-                        'kode' => $mataKuliah->kode,
-                        'kategori' => $mataKuliah->kategori,
-                        'semester' => $mataKuliah->semester,
-                        'prasyaratIds' => $mataKuliah->prasyaratFrom->pluck('id')->toArray(),
-                    ];
+            $query = MataKuliah::where('kurikulum_id', $activeKurikulum->id)
+                ->with(['prasyaratFrom:id']);
+
+            if ($request->filled('semester')) {
+                $query->where('semester', $request->semester);
+            }
+
+            if ($request->filled('nama')) {
+                $query->where('nama', 'like', '%' . $request->nama . '%');
+            }
+
+            if ($request->filled('kategori')) {
+                $query->where(function ($q) use ($request) {
+                    $q->where('kategori', $request->kategori)
+                        ->orWhere('kategori_mata_kuliah_polban', $request->kategori)
+                        ->orWhere('kategori_mata_kuliah_prodi', $request->kategori);
                 });
+            }
+
+            $data = $query->orderBy('semester', 'asc')->get()->map(function ($mataKuliah) {
+                return [
+                    'id' => $mataKuliah->id,
+                    'nama' => $mataKuliah->nama,
+                    'kode' => $mataKuliah->kode,
+                    'kategori' => $mataKuliah->kategori,
+                    'semester' => $mataKuliah->semester,
+                    'prasyaratIds' => $mataKuliah->prasyaratFrom->pluck('id')->toArray(),
+                ];
+            });
 
             return response()->json([
                 'success' => true,
@@ -55,6 +71,7 @@ class JejaringMataKuliahController extends Controller
             return response()->json(['message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
         }
     }
+
 
     public function getJejaringData(Request $request)
     {
@@ -75,16 +92,35 @@ class JejaringMataKuliahController extends Controller
                 return response()->json(['error' => 'Kurikulum aktif tidak ditemukan'], 404);
             }
 
-            $mataKuliahBySemester = MataKuliah::where('kurikulum_id', $activeKurikulum->id)
+            $mataKuliahQuery = MataKuliah::where('kurikulum_id', $activeKurikulum->id);
+
+            if ($request->filled('semester')) {
+                $mataKuliahQuery->where('semester', $request->semester);
+            }
+
+            if ($request->filled('nama')) {
+                $mataKuliahQuery->where('nama', 'like', '%' . $request->nama . '%');
+            }
+
+            if ($request->filled('kategori')) {
+                $mataKuliahQuery->where(function ($query) use ($request) {
+                    $query->where('kategori', $request->kategori)
+                        ->orWhere('kategori_mata_kuliah_polban', $request->kategori)
+                        ->orWhere('kategori_mata_kuliah_prodi', $request->kategori);
+                });
+            }
+
+            $mataKuliah = $mataKuliahQuery
                 ->orderBy('semester')
                 ->select('id', 'nama', 'sks', 'kategori', 'semester', 'kategori_mata_kuliah_polban', 'kategori_mata_kuliah_prodi')
-                ->get()
-                ->groupBy('semester');
+                ->get();
 
-            $mataKuliahIds = $mataKuliahBySemester->flatten()->pluck('id');
+            $mataKuliahBySemester = $mataKuliah->groupBy('semester');
+            $mataKuliahIds = $mataKuliah->pluck('id');
 
             $jejaringPrasyarat = PrasyaratMatakuliah::whereIn('from_id', $mataKuliahIds)
-                ->orWhereIn('to_id', $mataKuliahIds)->orderBy('to_id')
+                ->orWhereIn('to_id', $mataKuliahIds)
+                ->orderBy('to_id')
                 ->get(['to_id', 'from_id']);
 
             $data = [
@@ -101,6 +137,7 @@ class JejaringMataKuliahController extends Controller
             return response()->json(['message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
         }
     }
+
 
     public function updateJejaringMataKuliah(Request $request, $id)
     {
